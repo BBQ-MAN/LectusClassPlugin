@@ -73,9 +73,7 @@ class Lectus_Class_System {
         }
         
         // Frontend actions
-        if (!is_admin()) {
-            add_action('wp_enqueue_scripts', array($this, 'frontend_enqueue_scripts'));
-        }
+        add_action('wp_enqueue_scripts', array($this, 'frontend_enqueue_scripts'));
     }
     
     private function load_dependencies() {
@@ -107,6 +105,9 @@ class Lectus_Class_System {
         // Bulk upload system
         require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-bulk-upload.php';
         
+        // Materials system
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-materials.php';
+        
         // Admin files
         if (is_admin()) {
             require_once LECTUS_PLUGIN_DIR . 'admin/class-lectus-admin.php';
@@ -114,10 +115,7 @@ class Lectus_Class_System {
             require_once LECTUS_PLUGIN_DIR . 'admin/class-lectus-admin-settings.php';
             require_once LECTUS_PLUGIN_DIR . 'admin/class-lectus-admin-reports.php';
             
-            // Include test data generator
-            // Always include for testing purposes
-            require_once LECTUS_PLUGIN_DIR . 'admin/lectus-test-data.php';
-            require_once LECTUS_PLUGIN_DIR . 'templates/test-pages.php';
+            // Test functionality is now integrated into settings page
         }
     }
     
@@ -164,6 +162,9 @@ class Lectus_Class_System {
         
         // Initialize bulk upload system
         Lectus_Bulk_Upload::init();
+        
+        // Initialize materials system
+        Lectus_Materials::init();
     }
     
     public function plugins_loaded() {
@@ -255,24 +256,79 @@ class Lectus_Class_System {
             array('Lectus_Admin_Settings', 'render_settings_page')
         );
         
-        // Add test data menu for development
+        // Hidden page for logs (accessible through settings)
         add_submenu_page(
-            'lectus-class-system',
-            __('테스트 데이터', 'lectus-class-system'),
-            __('테스트 데이터', 'lectus-class-system'),
-            'manage_options',
-            'lectus-test-data',
-            'lectus_test_data_page'
-        );
-        
-        add_submenu_page(
-            'lectus-class-system',
+            null, // Hidden from menu
             __('로그 보기', 'lectus-class-system'),
             __('로그 보기', 'lectus-class-system'),
             'manage_options',
             'lectus-logs',
             array(__CLASS__, 'render_logs_page')
         );
+        
+        // Hidden page for test functionality (accessible through settings)
+        add_submenu_page(
+            null, // Hidden from menu
+            __('테스트', 'lectus-class-system'),
+            __('테스트', 'lectus-class-system'),
+            'manage_options',
+            'lectus-test',
+            array(__CLASS__, 'render_test_page')
+        );
+    }
+    
+    public static function render_test_page() {
+        $test = isset($_GET['test']) ? sanitize_text_field($_GET['test']) : '';
+        
+        echo '<div class="wrap">';
+        echo '<h1>' . __('테스트 페이지', 'lectus-class-system') . '</h1>';
+        
+        switch ($test) {
+            case 'enrollment':
+                echo '<h2>' . __('수강 등록 테스트', 'lectus-class-system') . '</h2>';
+                // Include enrollment test functionality
+                if (file_exists(LECTUS_PLUGIN_DIR . 'templates/test-enrollment.php')) {
+                    include LECTUS_PLUGIN_DIR . 'templates/test-enrollment.php';
+                }
+                break;
+                
+            case 'certificate':
+                echo '<h2>' . __('수료증 생성 테스트', 'lectus-class-system') . '</h2>';
+                // Include certificate test functionality
+                if (file_exists(LECTUS_PLUGIN_DIR . 'templates/test-certificate.php')) {
+                    include LECTUS_PLUGIN_DIR . 'templates/test-certificate.php';
+                }
+                break;
+                
+            case 'qa':
+                echo '<h2>' . __('Q&A 시스템 테스트', 'lectus-class-system') . '</h2>';
+                // Include Q&A test functionality
+                if (file_exists(LECTUS_PLUGIN_DIR . 'templates/test-qa.php')) {
+                    include LECTUS_PLUGIN_DIR . 'templates/test-qa.php';
+                }
+                break;
+                
+            case 'email':
+                echo '<h2>' . __('이메일 알림 테스트', 'lectus-class-system') . '</h2>';
+                // Include email test functionality
+                if (file_exists(LECTUS_PLUGIN_DIR . 'templates/test-email.php')) {
+                    include LECTUS_PLUGIN_DIR . 'templates/test-email.php';
+                }
+                break;
+                
+            default:
+                echo '<p>' . __('테스트 유형을 선택하세요.', 'lectus-class-system') . '</p>';
+                echo '<ul>';
+                echo '<li><a href="?page=lectus-test&test=enrollment">' . __('수강 등록 테스트', 'lectus-class-system') . '</a></li>';
+                echo '<li><a href="?page=lectus-test&test=certificate">' . __('수료증 생성 테스트', 'lectus-class-system') . '</a></li>';
+                echo '<li><a href="?page=lectus-test&test=qa">' . __('Q&A 시스템 테스트', 'lectus-class-system') . '</a></li>';
+                echo '<li><a href="?page=lectus-test&test=email">' . __('이메일 알림 테스트', 'lectus-class-system') . '</a></li>';
+                echo '</ul>';
+                break;
+        }
+        
+        echo '<p><a href="' . admin_url('admin.php?page=lectus-settings#development') . '" class="button">' . __('설정으로 돌아가기', 'lectus-class-system') . '</a></p>';
+        echo '</div>';
     }
     
     public function admin_enqueue_scripts($hook) {
@@ -426,6 +482,9 @@ class Lectus_Class_System {
         
         // Create Q&A tables
         Lectus_QA::create_table();
+        
+        // Create Materials tables
+        Lectus_Materials::create_table();
         Lectus_QA::create_votes_table();
     }
     

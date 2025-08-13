@@ -19,6 +19,12 @@ class Lectus_Ajax {
         add_action('wp_ajax_lectus_generate_certificate', array(__CLASS__, 'generate_certificate'));
         add_action('wp_ajax_lectus_bulk_upload_lessons', array(__CLASS__, 'bulk_upload_lessons'));
         
+        // Settings AJAX handlers
+        add_action('wp_ajax_lectus_generate_test_data', array(__CLASS__, 'generate_test_data'));
+        add_action('wp_ajax_lectus_clear_logs', array(__CLASS__, 'clear_logs'));
+        add_action('wp_ajax_lectus_optimize_tables', array(__CLASS__, 'optimize_tables'));
+        add_action('wp_ajax_lectus_create_test_pages', array(__CLASS__, 'create_test_pages'));
+        
         // Frontend AJAX handlers
         add_action('wp_ajax_nopriv_lectus_update_lesson_progress', array(__CLASS__, 'update_lesson_progress'));
         add_action('wp_ajax_nopriv_lectus_complete_lesson', array(__CLASS__, 'complete_lesson'));
@@ -416,6 +422,212 @@ class Lectus_Ajax {
             wp_send_json_success($response);
         } else {
             wp_send_json_error(array('message' => __('레슨 생성에 실패했습니다.', 'lectus-class-system')));
+        }
+    }
+    
+    /**
+     * Generate test data
+     */
+    public static function generate_test_data() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-test-data')) {
+            wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')));
+        }
+        
+        // Check permission
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('권한이 없습니다.', 'lectus-class-system')));
+        }
+        
+        $type = isset($_POST['type']) ? sanitize_text_field($_POST['type']) : '';
+        $created = 0;
+        
+        switch ($type) {
+            case 'package':
+                // Create test package courses
+                for ($i = 1; $i <= 5; $i++) {
+                    $post_id = wp_insert_post(array(
+                        'post_title' => sprintf(__('테스트 패키지 강의 %d', 'lectus-class-system'), $i),
+                        'post_content' => __('이것은 테스트 패키지 강의입니다.', 'lectus-class-system'),
+                        'post_type' => 'coursepackage',
+                        'post_status' => 'publish'
+                    ));
+                    if ($post_id) $created++;
+                }
+                break;
+                
+            case 'single':
+                // Create test single courses
+                for ($i = 1; $i <= 10; $i++) {
+                    $post_id = wp_insert_post(array(
+                        'post_title' => sprintf(__('테스트 단과 강의 %d', 'lectus-class-system'), $i),
+                        'post_content' => __('이것은 테스트 단과 강의입니다.', 'lectus-class-system'),
+                        'post_type' => 'coursesingle',
+                        'post_status' => 'publish'
+                    ));
+                    if ($post_id) {
+                        update_post_meta($post_id, '_course_duration', rand(30, 180));
+                        update_post_meta($post_id, '_course_level', array_rand(array('beginner', 'intermediate', 'advanced')));
+                        $created++;
+                    }
+                }
+                break;
+                
+            case 'lessons':
+                // Create test lessons
+                $courses = get_posts(array(
+                    'post_type' => 'coursesingle',
+                    'posts_per_page' => 5,
+                    'post_status' => 'publish'
+                ));
+                
+                foreach ($courses as $course) {
+                    for ($i = 1; $i <= 10; $i++) {
+                        $post_id = wp_insert_post(array(
+                            'post_title' => sprintf(__('레슨 %d - %s', 'lectus-class-system'), $i, $course->post_title),
+                            'post_content' => __('이것은 테스트 레슨입니다.', 'lectus-class-system'),
+                            'post_type' => 'lesson',
+                            'post_status' => 'publish',
+                            'menu_order' => $i
+                        ));
+                        if ($post_id) {
+                            update_post_meta($post_id, '_course_id', $course->ID);
+                            update_post_meta($post_id, '_lesson_duration', rand(10, 60));
+                            $created++;
+                        }
+                    }
+                }
+                break;
+                
+            case 'students':
+                // Create test students
+                for ($i = 1; $i <= 20; $i++) {
+                    $username = 'test_student_' . $i;
+                    $email = $username . '@example.com';
+                    
+                    if (!username_exists($username)) {
+                        $user_id = wp_create_user($username, wp_generate_password(), $email);
+                        if ($user_id) {
+                            $user = new WP_User($user_id);
+                            $user->add_role('student');
+                            $created++;
+                        }
+                    }
+                }
+                break;
+        }
+        
+        if ($created > 0) {
+            wp_send_json_success(array(
+                'message' => sprintf(__('%d개의 테스트 데이터가 생성되었습니다.', 'lectus-class-system'), $created)
+            ));
+        } else {
+            wp_send_json_error(array('message' => __('테스트 데이터 생성에 실패했습니다.', 'lectus-class-system')));
+        }
+    }
+    
+    /**
+     * Clear logs
+     */
+    public static function clear_logs() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-clear-logs')) {
+            wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')));
+        }
+        
+        // Check permission
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('권한이 없습니다.', 'lectus-class-system')));
+        }
+        
+        global $wpdb;
+        $table = $wpdb->prefix . 'lectus_logs';
+        $result = $wpdb->query("TRUNCATE TABLE $table");
+        
+        if ($result !== false) {
+            wp_send_json_success(array('message' => __('로그가 삭제되었습니다.', 'lectus-class-system')));
+        } else {
+            wp_send_json_error(array('message' => __('로그 삭제에 실패했습니다.', 'lectus-class-system')));
+        }
+    }
+    
+    /**
+     * Optimize database tables
+     */
+    public static function optimize_tables() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-optimize')) {
+            wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')));
+        }
+        
+        // Check permission
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('권한이 없습니다.', 'lectus-class-system')));
+        }
+        
+        global $wpdb;
+        $tables = array(
+            'lectus_progress',
+            'lectus_enrollment',
+            'lectus_certificates',
+            'lectus_qa_questions',
+            'lectus_qa_answers',
+            'lectus_materials',
+            'lectus_logs',
+            'lectus_rate_limits'
+        );
+        
+        $optimized = 0;
+        foreach ($tables as $table) {
+            $full_table = $wpdb->prefix . $table;
+            if ($wpdb->get_var("SHOW TABLES LIKE '$full_table'") == $full_table) {
+                $result = $wpdb->query("OPTIMIZE TABLE $full_table");
+                if ($result !== false) {
+                    $optimized++;
+                }
+            }
+        }
+        
+        wp_send_json_success(array(
+            'message' => sprintf(__('%d개의 테이블이 최적화되었습니다.', 'lectus-class-system'), $optimized)
+        ));
+    }
+    
+    /**
+     * Create test pages
+     */
+    public static function create_test_pages() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-test-pages')) {
+            wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')));
+        }
+        
+        // Check permission
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('권한이 없습니다.', 'lectus-class-system')));
+        }
+        
+        // Include the test pages file
+        if (file_exists(LECTUS_PLUGIN_DIR . 'templates/test-pages.php')) {
+            require_once LECTUS_PLUGIN_DIR . 'templates/test-pages.php';
+            
+            // Call the function to create pages
+            $created_pages = lectus_create_test_pages();
+            
+            if (!empty($created_pages)) {
+                $message = __('테스트 페이지가 성공적으로 생성되었습니다:', 'lectus-class-system') . '<br>';
+                foreach ($created_pages as $page) {
+                    $message .= sprintf('✓ <a href="%s" target="_blank">%s</a><br>', 
+                        esc_url($page['url']), 
+                        esc_html($page['title'])
+                    );
+                }
+                wp_send_json_success(array('message' => $message));
+            } else {
+                wp_send_json_success(array('message' => __('모든 테스트 페이지가 이미 존재합니다.', 'lectus-class-system')));
+            }
+        } else {
+            wp_send_json_error(array('message' => __('테스트 페이지 파일을 찾을 수 없습니다.', 'lectus-class-system')));
         }
     }
 }

@@ -5,19 +5,8 @@
  * This file creates an admin page for generating test data
  */
 
-// Hook to add menu
-add_action('admin_menu', 'lectus_add_test_data_menu');
-
-function lectus_add_test_data_menu() {
-    add_submenu_page(
-        'lectus-class-system',
-        __('테스트 데이터 생성', 'lectus-class-system'),
-        __('테스트 데이터', 'lectus-class-system'),
-        'manage_options',
-        'lectus-test-data',
-        'lectus_test_data_page'
-    );
-}
+// Menu is now integrated into settings page
+// This file is kept for the test data generation function only
 
 function lectus_test_data_page() {
     if (isset($_POST['generate_test_data']) && wp_verify_nonce($_POST['test_data_nonce'], 'generate_test_data')) {

@@ -82,20 +82,9 @@ function lectus_create_test_pages() {
 }
 
 /**
- * Create admin menu for test pages
+ * NOTE: Menu registration removed - this functionality is now integrated into settings page
+ * The functions below are called from the settings page only
  */
-add_action('admin_menu', 'lectus_add_test_pages_menu');
-
-function lectus_add_test_pages_menu() {
-    add_submenu_page(
-        'lectus-class-system',
-        __('테스트 페이지 생성', 'lectus-class-system'),
-        __('테스트 페이지', 'lectus-class-system'),
-        'manage_options',
-        'lectus-test-pages',
-        'lectus_test_pages_admin_page'
-    );
-}
 
 function lectus_test_pages_admin_page() {
     if (isset($_POST['create_test_pages']) && wp_verify_nonce($_POST['test_pages_nonce'], 'create_test_pages')) {
