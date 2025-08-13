@@ -1,0 +1,253 @@
+/* Admin styles for Lectus Class System */
+
+/* Dashboard styles */
+.lectus-dashboard {
+    margin-top: 20px;
+}
+
+.lectus-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.lectus-stat-box {
+    background: white;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+    transition: box-shadow 0.3s;
+}
+
+.lectus-stat-box:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lectus-stat-box h3 {
+    margin: 0 0 10px 0;
+    color: #23282d;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.lectus-stat-box .stat-number {
+    font-size: 32px;
+    font-weight: 300;
+    color: #0073aa;
+    margin: 10px 0;
+}
+
+.lectus-stat-box .stat-description {
+    color: #666;
+    font-size: 13px;
+}
+
+/* Activity box */
+.lectus-activity-box {
+    background: white;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.lectus-activity-box h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.activity-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-time {
+    color: #999;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Quick actions */
+.quick-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.quick-actions .button {
+    flex: 0 0 auto;
+}
+
+/* Status badges */
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.status-active {
+    background: #4CAF50;
+    color: white;
+}
+
+.status-paused {
+    background: #FF9800;
+    color: white;
+}
+
+.status-expired {
+    background: #9E9E9E;
+    color: white;
+}
+
+.status-cancelled {
+    background: #f44336;
+    color: white;
+}
+
+.status-completed {
+    background: #2196F3;
+    color: white;
+}
+
+/* Progress bars */
+.progress-bar {
+    background: #f0f0f0;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    display: inline-block;
+    min-width: 100px;
+}
+
+.progress-bar .progress-fill {
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.progress-bar span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    font-weight: bold;
+    color: #333;
+}
+
+.progress-bar.large {
+    height: 30px;
+    width: 100%;
+}
+
+/* Lessons manager */
+.lectus-lessons-manager {
+    margin-top: 20px;
+}
+
+.lectus-courses-selector {
+    margin-top: 10px;
+}
+
+/* Settings tabs */
+.nav-tab-wrapper {
+    border-bottom: 1px solid #ccc;
+}
+
+.nav-tab {
+    background: white;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    color: #555;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 14px;
+    line-height: 1.71428571;
+    margin-left: 0.5em;
+    padding: 5px 10px;
+    text-decoration: none;
+}
+
+.nav-tab:first-child {
+    margin-left: 0;
+}
+
+.nav-tab-active,
+.nav-tab:hover {
+    background: #f1f1f1;
+    color: #000;
+}
+
+.nav-tab-active {
+    background: white;
+    border-bottom: 1px solid white;
+    margin-bottom: -1px;
+}
+
+.tab-content {
+    padding: 20px 0;
+}
+
+/* Meta boxes */
+.lectus_course_options {
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+/* Tooltips */
+.lectus-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.lectus-tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #555;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+
+.lectus-tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+    .lectus-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .quick-actions .button {
+        width: 100%;
+    }
+}

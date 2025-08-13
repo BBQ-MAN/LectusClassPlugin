@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 'your_strong_password' # MySQL root 비밀번호
+      MYSQL_DATABASE: 'wordpress'
+      MYSQL_USER: 'wordpress'
+      MYSQL_PASSWORD: 'your_password'             # 워드프레스 DB 유저 비밀번호
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: 'wordpress'
+      WORDPRESS_DB_PASSWORD: 'your_password'
+      WORDPRESS_DB_NAME: 'wordpress'
+    volumes:
+      - ./lectus-class-system:/var/www/html/wp-content/plugins/lectus-class-system
+      - wordpress_data:/var/www/html
+
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+
+volumes:
+  db_data:
+  wordpress_data:
