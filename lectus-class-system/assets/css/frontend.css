@@ -881,3 +881,186 @@
         transition: none;
     }
 }
+
+/* Course Materials Styles */
+.lectus-course-materials {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.lectus-course-materials h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0073aa;
+    color: #333;
+}
+
+.lectus-materials-list {
+    margin: 20px 0;
+}
+
+.lectus-materials-list h3 {
+    color: #333;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+}
+
+.lectus-materials-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.lectus-materials-table th,
+.lectus-materials-table td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #e0e0e0;
+}
+
+.lectus-materials-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.lectus-materials-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.lectus-materials-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.lectus-materials-table td strong {
+    color: #333;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.lectus-materials-table td small {
+    color: #666;
+    font-size: 12px;
+}
+
+.lectus-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #007cba;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s ease, transform 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.lectus-download-btn:hover {
+    background: #005a87;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,124,186,0.3);
+}
+
+.lectus-download-btn:active {
+    transform: translateY(0);
+}
+
+.lectus-download-btn .download-count {
+    opacity: 0.8;
+    font-size: 12px;
+    background: rgba(255,255,255,0.2);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.lectus-download-btn::before {
+    content: "⬇";
+    font-size: 16px;
+}
+
+/* No materials message */
+.lectus-materials-list > p {
+    padding: 30px;
+    text-align: center;
+    color: #666;
+    background: #f9f9f9;
+    border-radius: 4px;
+    margin: 20px 0;
+}
+
+/* Material access badges */
+.material-access-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+
+.material-access-badge.enrolled {
+    background: #d4edda;
+    color: #155724;
+}
+
+.material-access-badge.all {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.material-access-badge.instructor {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Responsive design for materials */
+@media (max-width: 768px) {
+    .lectus-materials-table {
+        font-size: 14px;
+    }
+    
+    .lectus-materials-table th,
+    .lectus-materials-table td {
+        padding: 8px;
+    }
+    
+    .lectus-materials-table th:nth-child(2),
+    .lectus-materials-table td:nth-child(2) {
+        display: none; /* Hide description column on mobile */
+    }
+    
+    .lectus-download-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+    
+    .lectus-download-btn .download-count {
+        display: none; /* Hide download count on mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .lectus-materials-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .lectus-course-materials {
+        padding: 15px;
+    }
+}

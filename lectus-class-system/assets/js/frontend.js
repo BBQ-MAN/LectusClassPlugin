@@ -2,8 +2,26 @@
  * Frontend JavaScript for Lectus Class System
  */
 
-jQuery(document).ready(function($) {
-    'use strict';
+// Track if script has already been initialized
+if (window.lectusScriptInitialized) {
+    console.warn('Lectus frontend script already initialized, skipping duplicate initialization');
+} else {
+    window.lectusScriptInitialized = true;
+    console.log('Initializing Lectus frontend script');
+
+    // Ensure lectus_ajax object exists
+    if (typeof lectus_ajax === 'undefined') {
+        console.error('Lectus AJAX object not found. Creating fallback.');
+        window.lectus_ajax = {
+            ajaxurl: '/wp-admin/admin-ajax.php',
+            nonce: ''
+        };
+    }
+
+    jQuery(document).ready(function($) {
+        'use strict';
+        
+        console.log('Lectus frontend ready');
     
     // Handle lesson completion
     $('.lectus-complete-lesson').on('click', function() {
@@ -299,12 +317,19 @@ jQuery(document).ready(function($) {
     
     // Q&A System Functions
     // Handle Q&A form submission
-    $('#lectus-qa-form').on('submit', function(e) {
+    // Use .off() to remove any existing handlers before adding new one
+    $('#lectus-qa-form').off('submit').on('submit', function(e) {
         e.preventDefault();
         
         var form = $(this);
         var submitBtn = form.find('[type="submit"]');
         var status = $('#form-status');
+        
+        // Check if already submitting (prevent double submission)
+        if (submitBtn.prop('disabled')) {
+            console.log('Already submitting, ignoring duplicate request');
+            return false;
+        }
         
         // Validate form
         var title = $('#qa-title').val().trim();
@@ -312,17 +337,37 @@ jQuery(document).ready(function($) {
         
         if (title.length < 5 || title.length > 255) {
             showFormStatus('error', '제목은 5자 이상 255자 이하로 입력해주세요.');
-            return;
+            return false;
         }
         
         if (content.length < 10 || content.length > 10000) {
             showFormStatus('error', '내용은 10자 이상 10,000자 이하로 입력해주세요.');
-            return;
+            return false;
         }
         
+        // Immediately disable button to prevent double click
         submitBtn.prop('disabled', true).text('등록 중...');
         
-        $.ajax({
+        // Add timestamp to prevent duplicate submissions
+        var submissionId = Date.now();
+        
+        // Log the request for debugging
+        console.log('Submitting Q&A (ID: ' + submissionId + '):', {
+            url: lectus_ajax.ajaxurl,
+            nonce: lectus_ajax.nonce,
+            title: title,
+            content: content.substring(0, 50) + '...',
+            course_id: form.find('[name="course_id"]').val(),
+            lesson_id: form.find('[name="lesson_id"]').val()
+        });
+        
+        // Store the current request to prevent duplicates
+        if (window.lectusQARequest) {
+            console.log('Aborting previous request');
+            window.lectusQARequest.abort();
+        }
+        
+        window.lectusQARequest = $.ajax({
             url: lectus_ajax.ajaxurl,
             type: 'POST',
             data: {
@@ -334,6 +379,11 @@ jQuery(document).ready(function($) {
                 lesson_id: form.find('[name="lesson_id"]').val()
             },
             success: function(response) {
+                console.log('Q&A submission response:', response);
+                if (response.data) {
+                    console.log('Response message:', response.data.message);
+                    console.log('Response details:', response.data);
+                }
                 if (response.success) {
                     showFormStatus('success', response.data.message);
                     form[0].reset();
@@ -343,18 +393,41 @@ jQuery(document).ready(function($) {
                         location.reload();
                     }, 2000);
                 } else {
-                    showFormStatus('error', response.data.message);
+                    console.error('Q&A submission failed:', response.data);
+                    showFormStatus('error', response.data.message || '질문 등록에 실패했습니다.');
                 }
             },
-            error: function(xhr) {
-                var message = '오류가 발생했습니다. 다시 시도해주세요.';
-                if (xhr.status === 429) {
+            error: function(xhr, textStatus, errorThrown) {
+                console.error('Q&A submission error:', {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText,
+                    textStatus: textStatus,
+                    errorThrown: errorThrown
+                });
+                
+                var message = '네트워크 오류가 발생했습니다. 다시 시도해주세요.';
+                if (xhr.status === 0) {
+                    message = 'AJAX URL에 접근할 수 없습니다. 설정을 확인해주세요.';
+                } else if (xhr.status === 403) {
+                    message = '보안 검증에 실패했습니다. 페이지를 새로고침 후 다시 시도해주세요.';
+                } else if (xhr.status === 404) {
+                    message = 'AJAX 엔드포인트를 찾을 수 없습니다.';
+                } else if (xhr.status === 429) {
                     message = '너무 자주 요청하고 있습니다. 잠시 후 다시 시도해주세요.';
+                } else if (xhr.status === 500) {
+                    message = '서버 오류가 발생했습니다.';
                 }
                 showFormStatus('error', message);
             },
             complete: function() {
-                submitBtn.prop('disabled', false).text('질문 등록');
+                // Clear the request object
+                window.lectusQARequest = null;
+                
+                // Re-enable button after a short delay to prevent rapid resubmission
+                setTimeout(function() {
+                    submitBtn.prop('disabled', false).text('질문 등록');
+                }, 1000);
             }
         });
     });
@@ -543,3 +616,6 @@ function submitAnswer(event, questionId) {
     `;
     document.head.appendChild(style);
 })();
+
+    }); // End of jQuery(document).ready
+} // End of lectusScriptInitialized check

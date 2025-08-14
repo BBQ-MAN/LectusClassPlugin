@@ -502,13 +502,10 @@ class Lectus_Materials {
      */
     public static function ajax_upload_material() {
         // Debug log all POST data
-        error_log('========== AJAX UPLOAD MATERIAL START ==========');
-        error_log('POST data received: ' . print_r($_POST, true));
-        error_log('FILES data received: ' . print_r($_FILES, true));
+        // Debug logging removed for production
         
         // Check nonce
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-materials-nonce')) {
-            error_log('ERROR: Nonce verification failed');
             wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')));
         }
         
@@ -595,9 +592,9 @@ class Lectus_Materials {
             }
         } else {
             // Handle external link
-            error_log('Processing external link...');
+            // Processing external link
             $external_url = isset($_POST['external_url']) ? esc_url_raw($_POST['external_url']) : '';
-            error_log('External URL from POST: ' . $external_url);
+            // External URL from POST
             
             if (empty($external_url)) {
                 error_log('ERROR: External URL is empty');

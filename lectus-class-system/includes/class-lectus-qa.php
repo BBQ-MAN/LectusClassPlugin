@@ -10,6 +10,9 @@ if (!defined('ABSPATH')) {
 class Lectus_QA {
     
     public static function init() {
+        // Ensure table exists
+        self::maybe_create_table();
+        
         // AJAX handlers for Q&A
         add_action('wp_ajax_lectus_submit_question', array(__CLASS__, 'ajax_submit_question'));
         add_action('wp_ajax_lectus_submit_answer', array(__CLASS__, 'ajax_submit_answer'));
@@ -23,6 +26,18 @@ class Lectus_QA {
         
         // Shortcode
         add_shortcode('lectus_qa', array(__CLASS__, 'qa_shortcode'));
+    }
+    
+    /**
+     * Check and create table if needed
+     */
+    private static function maybe_create_table() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'lectus_qa';
+        
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table'") != $table) {
+            self::create_table();
+        }
     }
     
     /**
@@ -65,18 +80,24 @@ class Lectus_QA {
      * Check rate limiting for user actions
      */
     private static function check_rate_limit($user_id, $action_type) {
+        // Admins bypass rate limiting
+        if (current_user_can('manage_options')) {
+            return true;
+        }
+        
         $transient_key = 'lectus_qa_rate_limit_' . $user_id . '_' . $action_type;
         $attempts = get_transient($transient_key);
         
-        // Allow 5 questions or 10 answers per hour
-        $limit = ($action_type === 'question') ? 5 : 10;
+        // More generous limits: 30 questions or 50 answers per hour
+        // For development/testing, you can increase these values
+        $limit = ($action_type === 'question') ? 30 : 50;
         
         if ($attempts >= $limit) {
             return false;
         }
         
-        // Increment counter
-        set_transient($transient_key, ($attempts ? $attempts + 1 : 1), HOUR_IN_SECONDS);
+        // Increment counter - reduced time window to 10 minutes for testing
+        set_transient($transient_key, ($attempts ? $attempts + 1 : 1), 10 * MINUTE_IN_SECONDS);
         return true;
     }
     
@@ -89,16 +110,31 @@ class Lectus_QA {
         $table = $wpdb->prefix . 'lectus_qa';
         $similar_hash = md5($title . $content);
         
-        $existing = $wpdb->get_var($wpdb->prepare(
+        // Check for exact duplicate within last 10 seconds (to prevent double submission)
+        $recent_duplicate = $wpdb->get_var($wpdb->prepare(
             "SELECT COUNT(*) FROM $table 
              WHERE user_id = %d 
                AND MD5(CONCAT(COALESCE(title, ''), content)) = %s 
-               AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)",
+               AND created_at > DATE_SUB(NOW(), INTERVAL 10 SECOND)",
             $user_id,
             $similar_hash
         ));
         
-        return $existing > 0;
+        if ($recent_duplicate > 0) {
+            return true;
+        }
+        
+        // Check for similar content within last hour (spam prevention)
+        $similar_content = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table 
+             WHERE user_id = %d 
+               AND title = %s 
+               AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)",
+            $user_id,
+            $title
+        ));
+        
+        return $similar_content > 0;
     }
     
     /**
@@ -108,8 +144,10 @@ class Lectus_QA {
         // Remove potentially harmful content
         $content = wp_kses_post($content);
         
-        // Remove excessive whitespace
-        $content = preg_replace('/\s+/', ' ', $content);
+        // Remove excessive whitespace while preserving line breaks
+        // Only remove multiple spaces, not all whitespace
+        $content = preg_replace('/[^\S\r\n]+/', ' ', $content); // Multiple spaces to single space
+        $content = preg_replace('/\n{3,}/', "\n\n", $content); // Limit consecutive line breaks to 2
         $content = trim($content);
         
         // Basic profanity filter (implement as needed)
@@ -172,11 +210,22 @@ class Lectus_QA {
         
         // Additional validation
         if (empty($title) || empty($content)) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Lectus Q&A: Empty title or content after sanitization');
+            }
             return false;
         }
         
         global $wpdb;
         $table = $wpdb->prefix . 'lectus_qa';
+        
+        // Check if table exists
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table'") != $table) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Lectus Q&A: Table does not exist, creating it now');
+            }
+            self::create_table();
+        }
         
         // Use prepared statement with proper data types
         $result = $wpdb->insert(
@@ -196,13 +245,16 @@ class Lectus_QA {
         
         if ($result === false) {
             error_log('Lectus Q&A: Failed to insert question - ' . $wpdb->last_error);
+            error_log('Lectus Q&A: Insert data - course_id: ' . $course_id . ', user_id: ' . $user_id . ', title: ' . $title);
             return false;
         }
         
         $question_id = $wpdb->insert_id;
         
-        // Log successful submission
-        error_log(sprintf('Lectus Q&A: Question %d submitted by user %d for course %d', $question_id, $user_id, $course_id));
+        // Log successful submission only in debug mode
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log(sprintf('Lectus Q&A: Question %d submitted successfully by user %d for course %d', $question_id, $user_id, $course_id));
+        }
         
         // Clear related cache
         self::clear_qa_cache($course_id, $lesson_id);
@@ -471,8 +523,17 @@ class Lectus_QA {
      * AJAX handler for submitting questions
      */
     public static function ajax_submit_question() {
+        // Debug logging
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Lectus Q&A: ajax_submit_question called');
+            error_log('POST data: ' . print_r($_POST, true));
+        }
+        
         // Enhanced security verification
         if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-ajax-nonce')) {
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Lectus Q&A: Nonce verification failed');
+            }
             wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')), 403);
             return;
         }
@@ -529,6 +590,14 @@ class Lectus_QA {
             return;
         }
         
+        // Additional check: Prevent rapid duplicate submissions (within 5 seconds)
+        $submission_key = 'lectus_qa_submission_' . $user_id . '_' . md5($title . $content);
+        if (get_transient($submission_key)) {
+            wp_send_json_error(array('message' => __('이미 처리 중인 요청입니다. 잠시 후 다시 시도해주세요.', 'lectus-class-system')), 429);
+            return;
+        }
+        set_transient($submission_key, true, 5); // Block duplicate for 5 seconds
+        
         // Submit the question
         $question_id = self::submit_question($course_id, $lesson_id, $user_id, $title, $content);
         
@@ -539,7 +608,16 @@ class Lectus_QA {
                 'redirect' => get_permalink($course_id) . '#qa-' . $question_id
             ));
         } else {
-            wp_send_json_error(array('message' => __('질문 등록에 실패했습니다.', 'lectus-class-system')));
+            // Log the error for debugging
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                global $wpdb;
+                error_log('Lectus Q&A: Database error - ' . $wpdb->last_error);
+                error_log('Lectus Q&A: Last query - ' . $wpdb->last_query);
+            }
+            wp_send_json_error(array(
+                'message' => __('질문 등록에 실패했습니다. 데이터베이스 오류가 발생했습니다.', 'lectus-class-system'),
+                'debug' => defined('WP_DEBUG') && WP_DEBUG ? $wpdb->last_error : null
+            ));
         }
     }
     

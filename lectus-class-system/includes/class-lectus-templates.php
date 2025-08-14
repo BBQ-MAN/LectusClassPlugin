@@ -189,6 +189,12 @@ class Lectus_Templates {
         
         echo '</div>';
         
+        // Course Materials Section
+        echo '<div class="lectus-course-materials">';
+        echo '<h2>' . __('강의 자료', 'lectus-class-system') . '</h2>';
+        echo do_shortcode('[lectus_course_materials course_id="' . $course_id . '"]');
+        echo '</div>';
+        
         return ob_get_clean();
     }
     

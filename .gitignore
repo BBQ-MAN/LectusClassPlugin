@@ -1,1 +1,83 @@
-SuperClaude_Framework/\nmcp-servers/\n*.log\n.env\nnode_modules/\n.vscode/\n.idea/
+# WordPress Core
+/wp-admin/
+/wp-includes/
+/wp-content/uploads/
+/wp-content/upgrade/
+/wp-content/backup-db/
+/wp-content/backups/
+/wp-content/blogs.dir/
+/wp-content/cache/
+
+# Configuration
+wp-config.php
+wp-config-local.php
+.htaccess
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+error_log
+access_log
+
+# Debug and test files
+debug*.php
+test-*.php
+*-test.php
+quick-fix.php
+fix-*.php
+emergency-*.php
+enable-*.php
+*.bat
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.sublime-project
+*.sublime-workspace
+
+# Package managers
+node_modules/
+vendor/
+composer.lock
+package-lock.json
+yarn.lock
+
+# Build files
+/build/
+/dist/
+*.min.js
+*.min.css
+*.map
+
+# Backup files
+*.bak
+*.backup
+*.old
+backup/
+backups/
+cleanup-backup/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Testing
+/tests/coverage/
+/tests/reports/
+/tests/screenshots/
+
+# Custom directories to ignore
+SuperClaude_Framework/
+mcp-servers/
+cleanup-backup/
+
+# Claude specific
+.claude/settings.local.json

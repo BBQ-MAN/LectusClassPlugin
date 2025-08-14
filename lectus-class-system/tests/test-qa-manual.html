@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q&A 시스템 수동 테스트</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #007cba;
+        }
+        .test-section h2 {
+            margin-top: 0;
+            color: #007cba;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .console {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .console .log { color: #d4d4d4; }
+        .console .error { color: #f48771; }
+        .console .success { color: #89d185; }
+        .console .warning { color: #d7ba7d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Lectus Q&A 시스템 수동 테스트</h1>
+        
+        <div class="status info">
+            <strong>사용 방법:</strong> 각 테스트 버튼을 클릭하여 Q&A 시스템의 각 부분을 테스트하세요.
+            브라우저 개발자 도구의 콘솔을 열어 자세한 로그를 확인할 수 있습니다.
+        </div>
+
+        <div class="test-section">
+            <h2>1. JavaScript 및 AJAX 설정 확인</h2>
+            <p>프론트엔드 스크립트와 AJAX 설정이 올바르게 로드되었는지 확인합니다.</p>
+            <button onclick="checkAjaxSetup()">AJAX 설정 확인</button>
+            <div id="ajax-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Nonce 검증 테스트</h2>
+            <p>보안 nonce가 올바르게 생성되고 검증되는지 테스트합니다.</p>
+            <button onclick="testNonce()">Nonce 테스트</button>
+            <div id="nonce-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Q&A 제출 테스트</h2>
+            <p>실제 Q&A 제출 프로세스를 테스트합니다.</p>
+            <form id="test-qa-form">
+                <div style="margin: 10px 0;">
+                    <label>Course ID: <input type="number" id="test-course-id" value="1" /></label>
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>제목: <input type="text" id="test-title" value="테스트 질문" style="width: 300px;" /></label>
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>내용:<br>
+                    <textarea id="test-content" style="width: 100%; height: 100px;">이것은 테스트 질문의 내용입니다. 최소 10자 이상이어야 합니다.</textarea>
+                    </label>
+                </div>
+                <button type="button" onclick="submitTestQuestion()">질문 제출 테스트</button>
+            </form>
+            <div id="submit-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. 콘솔 로그</h2>
+            <div class="console" id="console-log">
+                <div class="log">콘솔 로그가 여기에 표시됩니다...</div>
+            </div>
+            <button onclick="clearConsole()">로그 지우기</button>
+        </div>
+
+        <div class="test-section">
+            <h2>5. 문제 해결 가이드</h2>
+            <div class="status warning">
+                <strong>일반적인 문제와 해결 방법:</strong>
+                <ul>
+                    <li><strong>AJAX URL을 찾을 수 없음:</strong> WordPress가 올바르게 설치되었는지 확인</li>
+                    <li><strong>Nonce 검증 실패:</strong> 페이지를 새로고침하고 다시 시도</li>
+                    <li><strong>네트워크 오류:</strong> 브라우저 콘솔에서 자세한 오류 확인</li>
+                    <li><strong>403 오류:</strong> 로그인 상태 확인</li>
+                    <li><strong>500 오류:</strong> PHP 오류 로그 확인</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Console log helper
+        function addLog(message, type = 'log') {
+            const consoleDiv = document.getElementById('console-log');
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            consoleDiv.appendChild(logEntry);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+            
+            // Also log to browser console
+            if (type === 'error') {
+                console.error(message);
+            } else if (type === 'warning') {
+                console.warn(message);
+            } else if (type === 'success') {
+                console.log('%c' + message, 'color: green');
+            } else {
+                console.log(message);
+            }
+        }
+
+        function clearConsole() {
+            document.getElementById('console-log').innerHTML = '<div class="log">콘솔이 지워졌습니다.</div>';
+        }
+
+        // Test 1: Check AJAX Setup
+        function checkAjaxSetup() {
+            const resultDiv = document.getElementById('ajax-result');
+            resultDiv.innerHTML = '';
+            
+            addLog('AJAX 설정 확인 시작...', 'log');
+            
+            // Check if jQuery is loaded
+            if (typeof jQuery === 'undefined') {
+                resultDiv.innerHTML = '<div class="status error">❌ jQuery가 로드되지 않았습니다.</div>';
+                addLog('jQuery가 로드되지 않았습니다.', 'error');
+                return;
+            }
+            
+            addLog('✓ jQuery 로드됨', 'success');
+            
+            // Check if lectus_ajax object exists
+            if (typeof lectus_ajax === 'undefined') {
+                resultDiv.innerHTML = '<div class="status error">❌ lectus_ajax 객체를 찾을 수 없습니다.</div>';
+                addLog('lectus_ajax 객체를 찾을 수 없습니다.', 'error');
+                
+                // Try to create it manually
+                addLog('수동으로 lectus_ajax 객체 생성 시도...', 'warning');
+                window.lectus_ajax = {
+                    ajaxurl: '/wp-admin/admin-ajax.php',
+                    nonce: ''
+                };
+                addLog('lectus_ajax 객체가 수동으로 생성되었습니다.', 'warning');
+            } else {
+                resultDiv.innerHTML = '<div class="status success">✅ AJAX 설정이 올바르게 로드되었습니다.</div>';
+                addLog('✓ lectus_ajax 객체 발견', 'success');
+                addLog('AJAX URL: ' + lectus_ajax.ajaxurl, 'log');
+                addLog('Nonce: ' + (lectus_ajax.nonce ? '설정됨' : '비어있음'), 'log');
+            }
+        }
+
+        // Test 2: Test Nonce
+        function testNonce() {
+            const resultDiv = document.getElementById('nonce-result');
+            resultDiv.innerHTML = '<div class="status info">Nonce 테스트 중...</div>';
+            
+            addLog('Nonce 검증 테스트 시작...', 'log');
+            
+            if (typeof lectus_ajax === 'undefined' || !lectus_ajax.nonce) {
+                resultDiv.innerHTML = '<div class="status error">❌ Nonce가 설정되지 않았습니다.</div>';
+                addLog('Nonce가 설정되지 않았습니다.', 'error');
+                return;
+            }
+            
+            // Make a test AJAX call
+            jQuery.ajax({
+                url: lectus_ajax.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'lectus_test_nonce',
+                    nonce: lectus_ajax.nonce
+                },
+                success: function(response) {
+                    resultDiv.innerHTML = '<div class="status success">✅ Nonce 검증 성공</div>';
+                    addLog('Nonce 검증 성공', 'success');
+                },
+                error: function(xhr) {
+                    resultDiv.innerHTML = '<div class="status warning">⚠️ Nonce 테스트 엔드포인트가 없지만 nonce는 설정되어 있습니다.</div>';
+                    addLog('Nonce는 설정되어 있지만 테스트 엔드포인트가 없습니다.', 'warning');
+                }
+            });
+        }
+
+        // Test 3: Submit Test Question
+        function submitTestQuestion() {
+            const resultDiv = document.getElementById('submit-result');
+            const courseId = document.getElementById('test-course-id').value;
+            const title = document.getElementById('test-title').value;
+            const content = document.getElementById('test-content').value;
+            
+            resultDiv.innerHTML = '<div class="status info">질문 제출 중...</div>';
+            addLog('Q&A 제출 테스트 시작...', 'log');
+            
+            if (typeof jQuery === 'undefined') {
+                resultDiv.innerHTML = '<div class="status error">❌ jQuery가 필요합니다.</div>';
+                addLog('jQuery가 로드되지 않아 테스트할 수 없습니다.', 'error');
+                return;
+            }
+            
+            if (typeof lectus_ajax === 'undefined') {
+                resultDiv.innerHTML = '<div class="status error">❌ lectus_ajax 객체가 필요합니다.</div>';
+                addLog('lectus_ajax 객체를 찾을 수 없습니다.', 'error');
+                return;
+            }
+            
+            const requestData = {
+                action: 'lectus_submit_question',
+                nonce: lectus_ajax.nonce,
+                course_id: courseId,
+                lesson_id: '',
+                title: title,
+                content: content
+            };
+            
+            addLog('요청 데이터: ' + JSON.stringify(requestData), 'log');
+            
+            jQuery.ajax({
+                url: lectus_ajax.ajaxurl,
+                type: 'POST',
+                data: requestData,
+                success: function(response) {
+                    addLog('응답 받음: ' + JSON.stringify(response), 'success');
+                    
+                    if (response.success) {
+                        resultDiv.innerHTML = '<div class="status success">✅ ' + response.data.message + '</div>';
+                        addLog('질문이 성공적으로 제출되었습니다!', 'success');
+                        if (response.data.question_id) {
+                            addLog('생성된 질문 ID: ' + response.data.question_id, 'success');
+                        }
+                    } else {
+                        resultDiv.innerHTML = '<div class="status error">❌ ' + (response.data.message || '질문 제출 실패') + '</div>';
+                        addLog('질문 제출 실패: ' + response.data.message, 'error');
+                    }
+                },
+                error: function(xhr, textStatus, errorThrown) {
+                    const errorInfo = {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        textStatus: textStatus,
+                        errorThrown: errorThrown,
+                        responseText: xhr.responseText
+                    };
+                    
+                    addLog('AJAX 오류: ' + JSON.stringify(errorInfo), 'error');
+                    
+                    let message = '네트워크 오류가 발생했습니다.';
+                    if (xhr.status === 0) {
+                        message = 'AJAX URL에 접근할 수 없습니다. (' + lectus_ajax.ajaxurl + ')';
+                    } else if (xhr.status === 403) {
+                        message = '보안 검증 실패 (403)';
+                    } else if (xhr.status === 404) {
+                        message = 'AJAX 엔드포인트를 찾을 수 없습니다 (404)';
+                    } else if (xhr.status === 500) {
+                        message = '서버 오류 (500)';
+                    }
+                    
+                    resultDiv.innerHTML = '<div class="status error">❌ ' + message + '</div>';
+                }
+            });
+        }
+
+        // Auto-check on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            addLog('페이지 로드 완료', 'log');
+            setTimeout(checkAjaxSetup, 500);
+        });
+    </script>
+</body>
+</html>
