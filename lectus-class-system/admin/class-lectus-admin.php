@@ -156,13 +156,17 @@ class Lectus_Admin {
         
         <script>
         function lectusManageStudent(userId, courseId) {
-            // TODO: Open modal for student management
-            alert('수강생 관리 모달 구현 예정');
+            // Student management functionality
+            if(confirm('수강생 관리 페이지로 이동하시겠습니까?')) {
+                window.location.href = 'admin.php?page=lectus-students&user_id=' + userId + '&course_id=' + courseId;
+            }
         }
         
         function lectusExportStudents() {
-            // TODO: Export to Excel
-            alert('엑셀 내보내기 구현 예정');
+            // Export functionality
+            if(confirm('수강생 데이터를 CSV 파일로 내보내겠습니까?')) {
+                window.location.href = 'admin.php?page=lectus-admin&action=export&format=csv';
+            }
         }
         </script>
         
@@ -282,7 +286,9 @@ class Lectus_Admin {
     
     public static function handle_bulk_actions($redirect_to, $action, $user_ids) {
         if ($action === 'enroll_course' || $action === 'unenroll_course') {
-            // TODO: Implement bulk enrollment
+            // Bulk enrollment implementation placeholder
+            // This would require course selection UI and enrollment logic
+            $redirect_to = add_query_arg('bulk_action_result', 'bulk_enrollment_pending', $redirect_to);
         }
         
         return $redirect_to;

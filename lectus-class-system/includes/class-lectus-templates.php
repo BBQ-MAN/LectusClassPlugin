@@ -203,6 +203,11 @@ class Lectus_Templates {
             return $content;
         }
         
+        // Check if theme has custom lesson template - if so, don't modify content
+        if (self::theme_has_lesson_template()) {
+            return $content;
+        }
+        
         $lesson_id = get_the_ID();
         $course_id = get_post_meta($lesson_id, '_course_id', true);
         $user_id = get_current_user_id();
@@ -285,5 +290,25 @@ class Lectus_Templates {
         echo '</div>';
         
         return ob_get_clean();
+    }
+    
+    /**
+     * Check if the current theme has a custom lesson template
+     * This prevents duplicate content when themes provide their own lesson layouts
+     */
+    private static function theme_has_lesson_template() {
+        // Check if theme has single-lesson.php template
+        $theme_template = get_stylesheet_directory() . '/single-lesson.php';
+        if (file_exists($theme_template)) {
+            return true;
+        }
+        
+        // Check if theme has lectus-class-system/single-lesson.php template
+        $lectus_theme_template = get_stylesheet_directory() . '/lectus-class-system/single-lesson.php';
+        if (file_exists($lectus_theme_template)) {
+            return true;
+        }
+        
+        return false;
     }
 }

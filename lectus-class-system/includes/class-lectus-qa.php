@@ -828,14 +828,14 @@ class Lectus_QA {
         
         <script>
         function viewQuestion(questionId) {
-            // TODO: Implement question viewing modal
-            alert('질문 ID ' + questionId + ' 보기 기능 구현 예정');
+            // Question viewing functionality
+            window.location.href = 'admin.php?page=lectus-qa&action=view&question_id=' + questionId;
         }
         
         function deleteQuestion(questionId) {
             if (confirm('정말로 이 질문을 삭제하시겠습니까?')) {
-                // TODO: Implement deletion via AJAX
-                alert('질문 삭제 기능 구현 예정');
+                // Question deletion functionality
+                window.location.href = 'admin.php?page=lectus-qa&action=delete&question_id=' + questionId;
             }
         }
         </script>
@@ -1366,8 +1366,16 @@ class Lectus_QA {
         
         function markBestAnswer(answerId) {
             if (confirm('이 답변을 채택하시겠습니까?')) {
-                // TODO: Implement best answer marking
-                alert('채택 기능 구현 예정');
+                // Best answer marking functionality
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', ajaxurl);
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        location.reload();
+                    }
+                };
+                xhr.send('action=lectus_mark_best_answer&answer_id=' + answerId + '&nonce=' + lectusAjax.nonce);
             }
         }
         </script>

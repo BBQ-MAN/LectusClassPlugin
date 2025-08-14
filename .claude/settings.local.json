@@ -34,9 +34,29 @@
       "Bash(dir:*)",
       "mcp__sequential-thinking__sequentialthinking",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)",
+      "Bash(wp eval-file:*)",
+      "Bash(where wp)",
+      "Bash(findstr:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(docker-compose:*)",
+      "Bash(mv:*)",
+      "Bash(ren:*)",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(copy style.css style-backup.css)",
+      "Bash(copy style-new.css style.css)",
+      "Bash(cmd /c:*)",
+      "Bash(copy:*)",
+      "Bash(copy front-page-new.php front-page.php /Y)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "defaultMode": "acceptEdits"
   }
 }

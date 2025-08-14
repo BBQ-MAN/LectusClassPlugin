@@ -1,509 +1,579 @@
-# Lectus Class System - WordPress LMS Plugin
+# Lectus Class System - WordPress LMS 플러그인
 
-A comprehensive Learning Management System (LMS) plugin for WordPress with WooCommerce integration, designed for online education platforms.
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![WordPress](https://img.shields.io/badge/WordPress-5.0+-green.svg)
+![PHP](https://img.shields.io/badge/PHP-8.0+-purple.svg)
+![WooCommerce](https://img.shields.io/badge/WooCommerce-6.0+-orange.svg)
+![License](https://img.shields.io/badge/license-GPL--2.0+-red.svg)
 
-## 📋 Table of Contents
+WordPress용 전문 온라인 교육 관리 시스템(LMS) 플러그인입니다. 패키지강의 관리, WooCommerce 연동, 수강생 관리, Q&A 시스템, 수료증 발급 등 완전한 온라인 교육 솔루션을 제공합니다.
 
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [API Reference](#api-reference)
-- [Development](#development)
-- [Testing](#testing)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
+## 📋 목차
 
-## ✨ Features
+- [핵심 기능](#-핵심-기능)
+- [설치 방법](#-설치-방법)
+- [시스템 요구사항](#-시스템-요구사항)
+- [사용 가이드](#-사용-가이드)
+- [디렉토리 구조](#-디렉토리-구조)
+- [개발 가이드](#-개발-가이드)
+- [향후 개발 계획](#-향후-개발-계획)
+- [라이선스](#-라이선스)
 
-### Core LMS Features
-- **Course Management**: Create and manage package courses and single courses
-- **Lesson System**: Organize content with sequential or free access modes
-- **Student Enrollment**: Automated enrollment with progress tracking
-- **Certificate Generation**: Customizable completion certificates
-- **Progress Tracking**: Real-time student progress monitoring
+## 🎯 핵심 기능
 
-### WooCommerce Integration
-- **Product Auto-Creation**: Convert courses to WooCommerce products
-- **Payment Processing**: Secure payment through WooCommerce
-- **Auto-Enrollment**: Automatic course access upon purchase
-- **HPOS Compatibility**: Full support for High-Performance Order Storage
+### 📚 강의 관리 시스템
+- **3단계 계층 구조**: 패키지강의 → 단과강의 → 레슨
+- **유연한 콘텐츠 타입**: 텍스트, 동영상, 퀴즈, 과제
+- **벌크 업로드**: CSV 파일로 레슨 일괄 생성
+- **강의자료 관리**: 파일 업로드 및 외부 링크 지원
+- **순차적/자유 학습 모드**: 강의별 진행 방식 설정
 
-### Interactive Learning
-- **Q&A System**: Course-specific questions and answers
-- **Voting System**: Community-driven content quality
-- **Instructor Replies**: Direct instructor engagement
-- **Best Answer Selection**: Highlight valuable contributions
+### 💳 WooCommerce 완전 통합
+- **자동 수강 등록**: 결제 완료 시 즉시 접근 권한 부여
+- **수강 기간 관리**: 상품별 개별 수강 기간 설정
+- **환불 처리**: 환불 시 자동 접근 권한 제거
+- **결제 게이트웨이**: 모든 WooCommerce 결제 방법 지원
+- **HPOS 호환**: High-Performance Order Storage 완벽 지원
 
-### Administrative Tools
-- **Bulk Upload**: CSV import for lessons
-- **Student Management**: Comprehensive student administration
-- **Reporting Dashboard**: Analytics and insights
-- **Activity Logging**: Detailed system activity tracking
+### 👥 수강생 관리
+- **실시간 진도 추적**: 레슨별 상세 진도율 확인
+- **수강 상태 관리**: 활성/만료/일시정지 상태 제어
+- **개별 기간 연장**: 수강생별 맞춤 기간 조정
+- **진도 초기화**: 필요시 진도 리셋 기능
+- **대량 작업**: 다중 선택으로 일괄 처리
 
-## 📦 Requirements
+### 💬 Q&A 시스템
+- **계층형 질문답변**: 강의/레슨별 구조화된 질문
+- **강사 답변 표시**: 공식 답변 하이라이트
+- **투표 시스템**: 유용한 질문/답변 추천
+- **베스트 답변**: 최고의 답변 선정 기능
+- **Rate Limiting**: 스팸 방지 기능
 
-- WordPress 5.0 or higher
-- PHP 8.0 or higher
-- MySQL 5.7 or higher
-- WooCommerce 6.0 or higher (for payment features)
+### 🏆 수료증 시스템
+- **자동 발급**: 수료 기준 달성 시 자동 생성
+- **PDF 다운로드**: 개인화된 PDF 수료증
+- **검증 시스템**: 수료증 번호로 진위 확인
+- **커스터마이징**: 템플릿 디자인 수정 가능
+- **QR 코드**: 온라인 검증용 QR 코드 포함
 
-## 🚀 Installation
+### 📊 관리자 대시보드
+- **통계 대시보드**: 수강생, 매출, 완료율 현황
+- **진도 리포트**: 강의별 수강 현황 분석
+- **수익 분석**: WooCommerce 연동 매출 리포트
+- **활동 로그**: 상세한 시스템 활동 추적
+- **Excel 내보내기**: 상세 데이터 다운로드
 
-### Method 1: WordPress Admin Upload
+## 💻 설치 방법
 
-1. Download the plugin ZIP file
-2. Navigate to **WordPress Admin > Plugins > Add New**
-3. Click **Upload Plugin** and select the ZIP file
-4. Click **Install Now** and then **Activate**
+### 자동 설치 (권장)
+```
+1. WordPress 관리자 → 플러그인 → 새로 추가
+2. "Lectus Class System" 검색
+3. 설치 후 활성화
+```
 
-### Method 2: FTP Upload
-
-1. Extract the plugin ZIP file
-2. Upload the `lectus-class-system` folder to `/wp-content/plugins/`
-3. Navigate to **WordPress Admin > Plugins**
-4. Find "Lectus Class System" and click **Activate**
-
-### Method 3: Development Installation
-
+### 수동 설치
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/lectus-class-system.git
+# 1. 플러그인 다운로드
+wget https://github.com/BBQ-MAN/LectusClassSystem/releases/latest/download/lectus-class-system.zip
 
-# Navigate to WordPress plugins directory
+# 2. 압축 해제 및 업로드
+unzip lectus-class-system.zip
+mv lectus-class-system/ /path/to/wordpress/wp-content/plugins/
+
+# 3. WordPress 관리자에서 활성화
+```
+
+### 개발 환경 설치
+```bash
+# 저장소 클론
+git clone https://github.com/BBQ-MAN/LectusClassSystem.git
+
+# WordPress 플러그인 디렉토리로 이동
 cd /path/to/wordpress/wp-content/plugins/
 
-# Create symbolic link
-ln -s /path/to/lectus-class-system lectus-class-system
+# 심볼릭 링크 생성
+ln -s /path/to/LectusClassSystem/lectus-class-system lectus-class-system
 
-# Activate via WP-CLI
+# WP-CLI로 활성화
 wp plugin activate lectus-class-system
 ```
 
-## ⚙️ Configuration
+## ⚙️ 시스템 요구사항
 
-### Initial Setup
+### 최소 요구사항
+- WordPress 5.0+
+- PHP 8.0+
+- MySQL 5.7+ / MariaDB 10.0+
+- WooCommerce 6.0+ (유료 강의 판매 시)
 
-1. **Activate the Plugin**
-   - Navigate to **Plugins** menu
-   - Activate "Lectus Class System"
+### 권장 사양
+- WordPress 6.0+
+- PHP 8.2+
+- MySQL 8.0+ / MariaDB 10.5+
+- SSL 인증서 (결제 처리용)
+- 최소 256MB PHP 메모리
 
-2. **Configure Basic Settings**
-   - Go to **Lectus Class > Settings**
-   - Configure email notifications
-   - Set default access duration
-   - Enable/disable features
+## 📖 사용 가이드
 
-3. **WooCommerce Integration**
-   - Ensure WooCommerce is installed and activated
-   - Configure payment gateways
-   - Set up tax and shipping (if applicable)
+### 초기 설정
 
-### User Roles
-
-The plugin creates and uses the following roles:
-
-- **Administrator**: Full system access
-- **Instructor**: Course creation and management
-- **Student**: Course enrollment and participation
-
-## 📖 Usage
-
-### Creating Courses
-
-#### Package Course
-```php
-// Navigate to: Lectus Class > Package Courses > Add New
-// Fill in:
-- Title: Course package name
-- Description: Package details
-- Featured Image: Course thumbnail
-- Package Courses: Select included single courses
-- Price: Set package price
+#### 1. 플러그인 활성화
+```
+플러그인 → Lectus Class System → 활성화
 ```
 
-#### Single Course
-```php
-// Navigate to: Lectus Class > Single Courses > Add New
-// Fill in:
-- Title: Course name
-- Content: Course description
-- Duration: Access period in days
-- Access Mode: Sequential or Free
-- Price: Course price (0 for free)
+#### 2. 기본 설정
+```
+Lectus Class System → 설정
+├── 일반 설정
+│   ├── 기본 수강 기간: 365일
+│   ├── 수료 기준: 80%
+│   └── 시간대: Asia/Seoul
+├── 이메일 설정
+│   ├── 알림 활성화
+│   └── 템플릿 커스터마이징
+└── 개발 도구
+    └── 테스트 데이터 생성
 ```
 
-#### Lessons
-```php
-// Navigate to: Lectus Class > Lessons > Add New
-// Fill in:
-- Title: Lesson name
-- Content: Lesson material
-- Course: Parent course
-- Type: Text, Video, Quiz, or Assignment
-- Duration: Estimated time in minutes
+#### 3. 역할 및 권한
+플러그인 활성화 시 자동 생성:
+- `lectus_instructor`: 강사 역할
+- `lectus_student`: 수강생 역할
+
+### 강의 생성 워크플로우
+
+#### 단계 1: 패키지강의 생성
+```
+Lectus Class System → 패키지강의 → 새로 추가
+├── 제목 및 설명
+├── 썸네일 이미지
+├── 최대 수강생 수
+├── 접근 레벨 설정
+└── 포함될 단과강의 선택
 ```
 
-### Managing Students
-
-```php
-// Navigate to: Lectus Class > Student Management
-// Actions available:
-- View enrollments
-- Track progress
-- Reset progress
-- Generate certificates
-- Export data (CSV)
+#### 단계 2: 단과강의 생성
+```
+Lectus Class System → 단과강의 → 새로 추가
+├── 강의 정보
+├── 수강 기간 설정 (일 단위)
+├── 패키지강의 연결
+├── 접근 모드 (순차적/자유)
+└── WooCommerce 상품 매핑
 ```
 
-### Using Shortcodes
+#### 단계 3: 레슨 추가
+```
+Lectus Class System → 레슨 → 새로 추가
+├── 레슨 콘텐츠
+├── 타입 선택 (텍스트/동영상/퀴즈/과제)
+├── 소속 단과강의 선택
+├── 예상 소요 시간
+└── 강의자료 업로드
+```
 
-#### Display Course List
+### 숏코드 사용법
+
+#### 강의 목록 표시
 ```php
 [lectus_courses type="coursesingle" columns="3" limit="12"]
 ```
 
-#### Show Enrollment Button
+#### 수강 신청 버튼
 ```php
-[lectus_enroll_button course_id="123" text="Enroll Now"]
+[lectus_enroll_button course_id="123" text="지금 수강하기"]
 ```
 
-#### Display Student Dashboard
+#### 학생 대시보드
 ```php
 [lectus_my_courses]
 ```
 
-#### Show Certificates
+#### 수료증 목록
 ```php
 [lectus_certificates]
 ```
 
-#### Q&A Section
+#### Q&A 섹션
 ```php
 [lectus_qa course_id="123" show_form="yes"]
 ```
 
-## 🔌 API Reference
+## 📁 디렉토리 구조
 
-### Hooks
-
-#### Actions
-```php
-// After student enrollment
-do_action('lectus_student_enrolled', $user_id, $course_id, $order_id);
-
-// After lesson completion
-do_action('lectus_lesson_completed', $user_id, $course_id, $lesson_id);
-
-// After certificate generation
-do_action('lectus_certificate_generated', $user_id, $course_id, $certificate_id);
-
-// After question submission
-do_action('lectus_question_submitted', $question_id, $course_id, $user_id);
-```
-
-#### Filters
-```php
-// Modify enrollment duration
-apply_filters('lectus_enrollment_duration', $days, $course_id, $user_id);
-
-// Customize certificate data
-apply_filters('lectus_certificate_data', $data, $user_id, $course_id);
-
-// Filter Q&A content
-apply_filters('lectus_qa_content_filter', $content);
-```
-
-### PHP Functions
-
-#### Enrollment Management
-```php
-// Check enrollment status
-Lectus_Enrollment::is_enrolled($user_id, $course_id);
-
-// Enroll a student
-Lectus_Enrollment::enroll($user_id, $course_id, $order_id, $duration);
-
-// Unenroll a student
-Lectus_Enrollment::unenroll($user_id, $course_id);
-
-// Extend enrollment
-Lectus_Enrollment::extend_enrollment($user_id, $course_id, $days);
-```
-
-#### Progress Tracking
-```php
-// Get course progress
-Lectus_Progress::get_course_progress($user_id, $course_id);
-
-// Mark lesson complete
-Lectus_Progress::mark_lesson_complete($user_id, $course_id, $lesson_id);
-
-// Reset progress
-Lectus_Progress::reset_course_progress($user_id, $course_id);
-```
-
-#### Certificate Generation
-```php
-// Generate certificate
-Lectus_Certificate::generate($user_id, $course_id);
-
-// Get certificate URL
-Lectus_Certificate::get_certificate_url($certificate_id);
-
-// Verify certificate
-Lectus_Certificate::verify($certificate_number);
-```
-
-#### WooCommerce Integration
-```php
-// Check if course has product
-Lectus_WooCommerce::course_has_product($course_id);
-
-// Get product URL
-Lectus_WooCommerce::get_course_product_url($course_id);
-```
-
-### AJAX Endpoints
-
-```javascript
-// Submit question
-action: 'lectus_submit_question'
-data: {
-    nonce: lectus_ajax.nonce,
-    course_id: 123,
-    title: 'Question title',
-    content: 'Question content'
-}
-
-// Submit answer
-action: 'lectus_submit_answer'
-data: {
-    nonce: lectus_ajax.nonce,
-    question_id: 456,
-    content: 'Answer content'
-}
-
-// Complete lesson
-action: 'lectus_complete_lesson'
-data: {
-    nonce: lectus_ajax.nonce,
-    lesson_id: 789
-}
-
-// Create WooCommerce product
-action: 'lectus_create_product'
-data: {
-    nonce: lectus_ajax.nonce,
-    course_id: 123,
-    course_type: 'coursesingle'
-}
-```
-
-## 🛠️ Development
-
-### Project Structure
 ```
 lectus-class-system/
-├── admin/                  # Admin functionality
+├── admin/                    # 관리자 기능
 │   ├── class-lectus-admin.php
 │   ├── class-lectus-admin-dashboard.php
 │   ├── class-lectus-admin-reports.php
 │   └── class-lectus-admin-settings.php
-├── assets/                 # CSS and JavaScript
-│   ├── css/
-│   │   ├── admin.css
-│   │   └── frontend.css
-│   └── js/
-│       ├── admin.js
-│       └── frontend.js
-├── includes/              # Core functionality
+├── includes/                 # 핵심 클래스
 │   ├── class-lectus-ajax.php
 │   ├── class-lectus-enrollment.php
+│   ├── class-lectus-materials.php
+│   ├── class-lectus-post-types.php
 │   ├── class-lectus-progress.php
-│   ├── class-lectus-certificate.php
 │   ├── class-lectus-qa.php
-│   ├── class-lectus-woocommerce.php
-│   └── ...
-├── templates/             # Template files
+│   ├── class-lectus-shortcodes.php
+│   ├── class-lectus-student.php
+│   ├── class-lectus-templates.php
+│   └── class-lectus-woocommerce.php
+├── assets/                   # 정적 리소스
+│   ├── css/
+│   └── js/
+├── templates/                # 템플릿 파일
+│   ├── certificate-default.php
 │   └── student-dashboard.php
-├── tests/                 # Test files
+├── languages/                # 번역 파일
+├── tests/                    # 테스트 파일
 │   ├── playwright/
 │   └── phpunit/
-└── lectus-class-system.php  # Main plugin file
+└── lectus-class-system.php   # 메인 플러그인 파일
 ```
 
-### Coding Standards
+## 🔧 개발 가이드
 
-This plugin follows WordPress Coding Standards:
+### 액션 훅
 
-- PHP: [WordPress PHP Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/)
-- JavaScript: [WordPress JavaScript Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/javascript/)
-- CSS: [WordPress CSS Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/css/)
+```php
+// 수강 등록 시
+do_action('lectus_student_enrolled', $user_id, $course_id, $order_id);
 
-### Building Assets
+// 레슨 완료 시
+do_action('lectus_lesson_completed', $user_id, $course_id, $lesson_id);
 
-```bash
-# Install dependencies
-npm install
+// 수료증 발급 시
+do_action('lectus_certificate_generated', $user_id, $course_id, $certificate_id);
 
-# Development build
-npm run dev
-
-# Production build
-npm run build
-
-# Watch for changes
-npm run watch
+// 질문 제출 시
+do_action('lectus_question_submitted', $question_id, $course_id, $user_id);
 ```
 
-## 🧪 Testing
+### 필터 훅
 
-### PHP Unit Tests
+```php
+// 수강 기간 수정
+apply_filters('lectus_enrollment_duration', $days, $course_id, $user_id);
 
+// 수료증 데이터 커스터마이징
+apply_filters('lectus_certificate_data', $data, $user_id, $course_id);
+
+// Q&A 콘텐츠 필터링
+apply_filters('lectus_qa_content_filter', $content);
+```
+
+### PHP 함수
+
+#### 수강 관리
+```php
+// 수강 상태 확인
+Lectus_Enrollment::is_enrolled($user_id, $course_id);
+
+// 수강생 등록
+Lectus_Enrollment::enroll($user_id, $course_id, $order_id, $duration);
+
+// 수강 취소
+Lectus_Enrollment::unenroll($user_id, $course_id);
+
+// 수강 기간 연장
+Lectus_Enrollment::extend_enrollment($user_id, $course_id, $days);
+```
+
+#### 진도 추적
+```php
+// 강의 진도 조회
+Lectus_Progress::get_course_progress($user_id, $course_id);
+
+// 레슨 완료 처리
+Lectus_Progress::mark_lesson_complete($user_id, $course_id, $lesson_id);
+
+// 진도 초기화
+Lectus_Progress::reset_course_progress($user_id, $course_id);
+```
+
+#### 수료증 발급
+```php
+// 수료증 생성
+Lectus_Certificate::generate($user_id, $course_id);
+
+// 수료증 URL 조회
+Lectus_Certificate::get_certificate_url($certificate_id);
+
+// 수료증 검증
+Lectus_Certificate::verify($certificate_number);
+```
+
+### AJAX 엔드포인트
+
+```javascript
+// 질문 제출
+jQuery.ajax({
+    url: lectus_ajax.ajax_url,
+    type: 'POST',
+    data: {
+        action: 'lectus_submit_question',
+        nonce: lectus_ajax.nonce,
+        course_id: 123,
+        title: '질문 제목',
+        content: '질문 내용'
+    }
+});
+
+// 답변 제출
+jQuery.ajax({
+    url: lectus_ajax.ajax_url,
+    type: 'POST',
+    data: {
+        action: 'lectus_submit_answer',
+        nonce: lectus_ajax.nonce,
+        question_id: 456,
+        content: '답변 내용'
+    }
+});
+
+// 레슨 완료
+jQuery.ajax({
+    url: lectus_ajax.ajax_url,
+    type: 'POST',
+    data: {
+        action: 'lectus_complete_lesson',
+        nonce: lectus_ajax.nonce,
+        lesson_id: 789
+    }
+});
+```
+
+### 코딩 표준
+
+WordPress 코딩 표준을 따릅니다:
+- [WordPress PHP 코딩 표준](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/)
+- [WordPress JavaScript 코딩 표준](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/javascript/)
+- [WordPress CSS 코딩 표준](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/css/)
+
+## 🧪 테스트
+
+### PHP 단위 테스트
 ```bash
-# Install PHPUnit
+# PHPUnit 설치
 composer install
 
-# Run tests
+# 테스트 실행
 ./vendor/bin/phpunit
 
-# Run specific test
+# 특정 테스트 실행
 ./vendor/bin/phpunit tests/test-enrollment.php
 ```
 
-### Playwright E2E Tests
-
+### Playwright E2E 테스트
 ```bash
-# Navigate to tests directory
+# 테스트 디렉토리로 이동
 cd tests
 
-# Install dependencies
+# 의존성 설치
 npm install
 npm run install-browsers
 
-# Set up environment
+# 환경 설정
 cp .env.example .env
-# Edit .env with your WordPress credentials
+# .env 파일에 WordPress 인증 정보 입력
 
-# Run tests
+# 테스트 실행
 npm test
 
-# Run specific test
+# 특정 테스트 실행
 npm test woocommerce-integration.spec.js
 
-# Run in headed mode
+# 헤드리스 모드로 실행
 npm run test:headed
 
-# Generate report
+# 리포트 생성
 npm run report
 ```
 
-### Manual Testing
-
+### 수동 테스트
 ```bash
-# Run test data generator
+# 테스트 데이터 생성
 wp eval-file admin/lectus-test-data.php
 
-# Run Q&A debugging
+# Q&A 디버깅
 wp eval-file tests/test-qa-debug.php
 
-# Run instructor test
+# 강사 테스트
 wp eval-file tests/test-instructor-qa.php
 ```
 
-## 🔧 Troubleshooting
+## 🚀 향후 개발 계획
 
-### Common Issues
+### v1.1.0 (2025 Q1)
+- [ ] 🎥 **라이브 스트리밍 연동**
+  - Zoom/YouTube Live 통합
+  - 실시간 채팅 기능
+  - 자동 녹화 및 업로드
+- [ ] 📱 **모바일 앱 지원**
+  - React Native 앱 개발
+  - 오프라인 학습 지원
+  - 푸시 알림 기능
+- [ ] 🌍 **다국어 지원 확대**
+  - 영어, 일본어, 중국어 번역
+  - 자동 번역 API 통합
+  - 언어별 콘텐츠 관리
+- [ ] 📊 **고급 분석 대시보드**
+  - 학습 패턴 분석
+  - 이탈율 추적
+  - 예측 분석 기능
 
-#### Plugin Activation Fails
-```php
-// Check PHP version
-php -v  # Should be 8.0+
+### v1.2.0 (2025 Q2)
+- [ ] 🤖 **AI 기반 학습 추천**
+  - 개인화된 학습 경로
+  - 자동 콘텐츠 추천
+  - ChatGPT 통합 튜터
+- [ ] 💬 **실시간 채팅 시스템**
+  - WebSocket 기반 채팅
+  - 그룹 스터디 룸
+  - 1:1 멘토링 채팅
+- [ ] 🎮 **게이미피케이션 요소**
+  - 포인트/배지 시스템
+  - 리더보드
+  - 성취도 보상
+- [ ] 📧 **마케팅 자동화 통합**
+  - Mailchimp 연동
+  - 자동 이메일 캠페인
+  - 세그먼트별 타겟팅
 
-// Check WordPress version
-wp core version  # Should be 5.0+
+### v2.0.0 (2025 Q3)
+- [ ] 🔗 **블록체인 수료증**
+  - NFT 수료증 발급
+  - 블록체인 검증
+  - 디지털 자격증 지갑
+- [ ] 👥 **소셜 러닝 기능**
+  - 스터디 그룹 형성
+  - 피어 리뷰 시스템
+  - 협업 프로젝트
+- [ ] 📚 **콘텐츠 마켓플레이스**
+  - 강사 콘텐츠 판매
+  - 수익 분배 시스템
+  - 콘텐츠 큐레이션
+- [ ] 🎯 **개인화된 학습 경로**
+  - AI 기반 커리큘럼
+  - 적응형 학습 속도
+  - 개인별 목표 설정
 
-// Check error logs
+### 장기 로드맵 (2026+)
+- [ ] 🌐 **SaaS 버전 출시**
+  - 멀티테넌트 아키텍처
+  - 클라우드 호스팅
+  - 구독 모델
+- [ ] 🏢 **기업용 LMS 패키지**
+  - SCORM 지원
+  - SSO 통합
+  - 기업 관리 도구
+- [ ] 🔌 **주요 LMS 플랫폼 연동**
+  - Moodle 통합
+  - Canvas 연동
+  - Blackboard 호환
+- [ ] 📱 **PWA 지원**
+  - 오프라인 우선 설계
+  - 앱 스토어 배포
+  - 네이티브 기능 지원
+
+## 🤝 기여하기
+
+프로젝트에 기여하고 싶으신가요? 환영합니다!
+
+1. 프로젝트 포크 (Fork)
+2. 기능 브랜치 생성 (`git checkout -b feature/AmazingFeature`)
+3. 변경사항 커밋 (`git commit -m 'Add some AmazingFeature'`)
+4. 브랜치에 푸시 (`git push origin feature/AmazingFeature`)
+5. Pull Request 생성
+
+자세한 내용은 [CONTRIBUTING.md](../CONTRIBUTING.md)를 참조하세요.
+
+## 📞 지원
+
+- **문서**: [개발자 가이드](DEVELOPER.md) | [관리자 가이드](docs/ADMIN-GUIDE.md) | [API 레퍼런스](docs/API-REFERENCE.md)
+- **이슈**: [GitHub Issues](https://github.com/BBQ-MAN/LectusClassSystem/issues)
+- **토론**: [GitHub Discussions](https://github.com/BBQ-MAN/LectusClassSystem/discussions)
+- **이메일**: support@lectus-lms.com
+
+## 🔧 문제 해결
+
+### 일반적인 문제
+
+#### 플러그인 활성화 실패
+```bash
+# PHP 버전 확인
+php -v  # 8.0 이상이어야 함
+
+# WordPress 버전 확인
+wp core version  # 5.0 이상이어야 함
+
+# 오류 로그 확인
 tail -f wp-content/debug.log
 ```
 
-#### WooCommerce Integration Not Working
-```php
-// Verify WooCommerce is active
+#### WooCommerce 통합 문제
+```bash
+# WooCommerce 활성화 확인
 wp plugin list --status=active
 
-// Check HPOS compatibility
-// Go to: WooCommerce > Settings > Advanced > Features
-// Enable: High-Performance Order Storage
+# HPOS 호환성 확인
+# WooCommerce → 설정 → 고급 → 기능
+# High-Performance Order Storage 활성화
 ```
 
-#### Q&A System Issues
+#### Q&A 시스템 오류
 ```php
-// Rebuild database tables
+// 데이터베이스 테이블 재생성
 wp eval "Lectus_QA::create_table();"
 
-// Check AJAX endpoints
+// AJAX 엔드포인트 확인
 wp eval "print_r(has_action('wp_ajax_lectus_submit_question'));"
 ```
 
-#### Certificate Generation Fails
-```php
-// Check write permissions
+#### 수료증 생성 실패
+```bash
+# 쓰기 권한 확인
 chmod 755 wp-content/uploads/lectus-certificates/
 
-// Verify GD library
+# GD 라이브러리 확인
 php -m | grep gd
 ```
 
-### Debug Mode
-
-Enable WordPress debug mode for detailed error information:
-
+### 디버그 모드
 ```php
-// In wp-config.php
+// wp-config.php에 추가
 define('WP_DEBUG', true);
 define('WP_DEBUG_LOG', true);
 define('WP_DEBUG_DISPLAY', false);
 define('SCRIPT_DEBUG', true);
 ```
 
-### Support
+## 📄 라이선스
 
-For support and bug reports:
+이 프로젝트는 GPL v2.0 이상의 라이선스로 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
-1. Check the [documentation](https://example.com/docs)
-2. Search [existing issues](https://github.com/yourusername/lectus-class-system/issues)
-3. Create a [new issue](https://github.com/yourusername/lectus-class-system/issues/new)
+## 👥 크레딧
 
-## 📄 License
+- Lectus Team이 개발
+- WordPress와 WooCommerce 기반
+- Dashicons 아이콘 사용
+- Playwright로 테스트
 
-GPL-2.0+ License. See [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting PRs.
-
-## 👥 Credits
-
-- Developed by Lectus Team
-- Built with WordPress and WooCommerce
-- Icons from Dashicons
-- Tested with Playwright
-
-## 📈 Changelog
+## 📈 변경 로그
 
 ### Version 1.0.0 (2024)
-- Initial release
-- Core LMS functionality
-- WooCommerce integration
-- Q&A system
-- Certificate generation
-- Student management
-- Bulk upload system
-- Comprehensive testing suite
+- 초기 릴리스
+- 핵심 LMS 기능
+- WooCommerce 통합
+- Q&A 시스템
+- 수료증 생성
+- 수강생 관리
+- 벌크 업로드 시스템
+- 종합 테스트 스위트
 
 ---
 
-Made with ❤️ for educators and learners worldwide.
+**전 세계 교육자와 학습자를 위해 ❤️로 만들었습니다.**

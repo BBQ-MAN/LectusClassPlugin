@@ -13,7 +13,7 @@ class Lectus_Certificate {
         // Certificate generation hooks
         add_action('lectus_course_completed', array(__CLASS__, 'auto_generate_certificate'), 10, 2);
         
-        // Certificate viewing endpoint
+        // Certificate viewing endpoint for individual certificates only
         add_action('init', array(__CLASS__, 'add_rewrite_rules'));
         add_filter('query_vars', array(__CLASS__, 'add_query_vars'));
         add_action('template_redirect', array(__CLASS__, 'handle_certificate_view'));
@@ -153,6 +153,7 @@ class Lectus_Certificate {
     }
     
     public static function add_rewrite_rules() {
+        // Individual certificate view only - list view uses WordPress pages with shortcodes
         add_rewrite_rule(
             '^certificate/([0-9]+)/?$',
             'index.php?lectus_certificate=$1',
@@ -166,6 +167,7 @@ class Lectus_Certificate {
     }
     
     public static function handle_certificate_view() {
+        // Handle individual certificate view only
         $certificate_id = get_query_var('lectus_certificate');
         if (!$certificate_id) {
             return;
@@ -212,177 +214,101 @@ class Lectus_Certificate {
         include $template_file;
     }
     
-    private static function create_default_certificate_template($file) {
-        $content = '<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php _e("수료증", "lectus-class-system"); ?></title>
-    <style>
-        @page { size: A4 landscape; margin: 0; }
-        body {
-            font-family: "Noto Sans KR", sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .certificate {
-            width: 1024px;
-            background: white;
-            padding: 60px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            position: relative;
-            border: 10px solid #gold;
-        }
-        .certificate::before {
-            content: "";
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            bottom: 20px;
-            border: 2px solid #ddd;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .logo {
-            width: 120px;
-            margin-bottom: 20px;
-        }
-        h1 {
-            font-size: 48px;
-            color: #333;
-            margin: 0;
-            font-weight: 300;
-            letter-spacing: 5px;
-        }
-        .content {
-            text-align: center;
-            margin: 40px 0;
-        }
-        .recipient {
-            font-size: 36px;
-            color: #667eea;
-            margin: 20px 0;
-            font-weight: bold;
-        }
-        .course-title {
-            font-size: 28px;
-            color: #555;
-            margin: 20px 0;
-        }
-        .description {
-            font-size: 18px;
-            color: #666;
-            line-height: 1.6;
-            margin: 30px auto;
-            max-width: 600px;
-        }
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 1px solid #eee;
-        }
-        .signature {
-            text-align: center;
-            flex: 1;
-        }
-        .signature-line {
-            width: 200px;
-            border-bottom: 1px solid #333;
-            margin: 0 auto 10px;
-            height: 40px;
-        }
-        .signature-name {
-            font-size: 14px;
-            color: #666;
-        }
-        .certificate-info {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 12px;
-            color: #999;
-        }
-        .certificate-number {
-            font-family: monospace;
-            font-size: 14px;
-            color: #666;
-            margin-top: 10px;
-        }
-        .issued-date {
-            font-size: 16px;
-            color: #666;
-            margin-top: 20px;
-        }
-        @media print {
-            body {
-                background: white;
-            }
-            .certificate {
-                box-shadow: none;
-                width: 100%;
-                max-width: none;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="certificate">
-        <div class="header">
-            <h1><?php _e("수료증", "lectus-class-system"); ?></h1>
-        </div>
-        
-        <div class="content">
-            <p class="description"><?php _e("이 수료증은 아래 명시된 과정을 성공적으로 완료하였음을 증명합니다", "lectus-class-system"); ?></p>
-            
-            <div class="recipient"><?php echo esc_html($user->display_name); ?></div>
-            
-            <p class="description"><?php _e("님께서", "lectus-class-system"); ?></p>
-            
-            <div class="course-title"><?php echo esc_html($course->post_title); ?></div>
-            
-            <p class="description"><?php _e("과정을 성공적으로 수료하였음을 증명합니다", "lectus-class-system"); ?></p>
-            
-            <div class="issued-date">
-                <?php echo date_i18n("Y년 n월 j일", strtotime($certificate->issued_at)); ?>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <div class="signature">
-                <div class="signature-line"></div>
-                <div class="signature-name"><?php echo get_bloginfo("name"); ?></div>
-            </div>
-        </div>
-        
-        <div class="certificate-info">
-            <div class="certificate-number">
-                <?php _e("수료증 번호:", "lectus-class-system"); ?> <?php echo esc_html($certificate->certificate_number); ?>
-            </div>
-            <div>
-                <?php _e("발급일:", "lectus-class-system"); ?> <?php echo date_i18n(get_option("date_format"), strtotime($certificate->issued_at)); ?>
-            </div>
-        </div>
-    </div>
+    // Note: Certificate list display is handled by the [lectus_certificates] shortcode
+    // and WordPress pages. This keeps the system simple and maintainable.
     
-    <script>
-    window.onload = function() {
-        if (window.location.search.includes("download=pdf")) {
-            window.print();
-        }
-    }
-    </script>
-</body>
-</html>';
+    private static function create_default_certificate_template($file) {
+        // Create the template content with proper escaping
+        $content = '<!DOCTYPE html>' . "\n";
+        $content .= '<html lang="ko">' . "\n";
+        $content .= '<head>' . "\n";
+        $content .= '    <meta charset="UTF-8">' . "\n";
+        $content .= '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' . "\n";
+        $content .= '    <title><?php _e("수료증", "lectus-class-system"); ?></title>' . "\n";
+        $content .= '    <style>' . "\n";
+        $content .= '        @page { size: A4 landscape; margin: 0; }' . "\n";
+        $content .= '        body {' . "\n";
+        $content .= '            font-family: "Noto Sans KR", sans-serif;' . "\n";
+        $content .= '            margin: 0;' . "\n";
+        $content .= '            padding: 0;' . "\n";
+        $content .= '            display: flex;' . "\n";
+        $content .= '            justify-content: center;' . "\n";
+        $content .= '            align-items: center;' . "\n";
+        $content .= '            min-height: 100vh;' . "\n";
+        $content .= '            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);' . "\n";
+        $content .= '        }' . "\n";
+        $content .= '        .certificate {' . "\n";
+        $content .= '            width: 1024px;' . "\n";
+        $content .= '            background: white;' . "\n";
+        $content .= '            padding: 60px;' . "\n";
+        $content .= '            box-shadow: 0 20px 60px rgba(0,0,0,0.3);' . "\n";
+        $content .= '            position: relative;' . "\n";
+        $content .= '            border: 10px solid #gold;' . "\n";
+        $content .= '        }' . "\n";
+        $content .= '        .certificate::before {' . "\n";
+        $content .= '            content: "";' . "\n";
+        $content .= '            position: absolute;' . "\n";
+        $content .= '            top: 20px;' . "\n";
+        $content .= '            left: 20px;' . "\n";
+        $content .= '            right: 20px;' . "\n";
+        $content .= '            bottom: 20px;' . "\n";
+        $content .= '            border: 2px solid #ddd;' . "\n";
+        $content .= '        }' . "\n";
+        $content .= '        .header { text-align: center; margin-bottom: 40px; }' . "\n";
+        $content .= '        h1 { font-size: 48px; color: #333; margin: 0; font-weight: 300; letter-spacing: 5px; }' . "\n";
+        $content .= '        .content { text-align: center; margin: 40px 0; }' . "\n";
+        $content .= '        .recipient { font-size: 36px; color: #667eea; margin: 20px 0; font-weight: bold; }' . "\n";
+        $content .= '        .course-title { font-size: 28px; color: #555; margin: 20px 0; }' . "\n";
+        $content .= '        .description { font-size: 18px; color: #666; line-height: 1.6; margin: 30px auto; max-width: 600px; }' . "\n";
+        $content .= '        .footer { display: flex; justify-content: space-between; margin-top: 60px; padding-top: 40px; border-top: 1px solid #eee; }' . "\n";
+        $content .= '        .signature { text-align: center; flex: 1; }' . "\n";
+        $content .= '        .signature-line { width: 200px; border-bottom: 1px solid #333; margin: 0 auto 10px; height: 40px; }' . "\n";
+        $content .= '        .signature-name { font-size: 14px; color: #666; }' . "\n";
+        $content .= '        .certificate-info { text-align: center; margin-top: 30px; font-size: 12px; color: #999; }' . "\n";
+        $content .= '        .certificate-number { font-family: monospace; font-size: 14px; color: #666; margin-top: 10px; }' . "\n";
+        $content .= '        .issued-date { font-size: 16px; color: #666; margin-top: 20px; }' . "\n";
+        $content .= '        @media print { body { background: white; } .certificate { box-shadow: none; width: 100%; max-width: none; } }' . "\n";
+        $content .= '    </style>' . "\n";
+        $content .= '</head>' . "\n";
+        $content .= '<body>' . "\n";
+        $content .= '    <div class="certificate">' . "\n";
+        $content .= '        <div class="header">' . "\n";
+        $content .= '            <h1><?php _e("수료증", "lectus-class-system"); ?></h1>' . "\n";
+        $content .= '        </div>' . "\n";
+        $content .= '        <div class="content">' . "\n";
+        $content .= '            <p class="description"><?php _e("이 수료증은 아래 명시된 과정을 성공적으로 완료하였음을 증명합니다", "lectus-class-system"); ?></p>' . "\n";
+        $content .= '            <div class="recipient"><?php echo esc_html($user->display_name); ?></div>' . "\n";
+        $content .= '            <p class="description"><?php _e("님께서", "lectus-class-system"); ?></p>' . "\n";
+        $content .= '            <div class="course-title"><?php echo esc_html($course->post_title); ?></div>' . "\n";
+        $content .= '            <p class="description"><?php _e("과정을 성공적으로 수료하였음을 증명합니다", "lectus-class-system"); ?></p>' . "\n";
+        $content .= '            <div class="issued-date">' . "\n";
+        $content .= '                <?php echo date_i18n("Y년 n월 j일", strtotime($certificate->issued_at)); ?>' . "\n";
+        $content .= '            </div>' . "\n";
+        $content .= '        </div>' . "\n";
+        $content .= '        <div class="footer">' . "\n";
+        $content .= '            <div class="signature">' . "\n";
+        $content .= '                <div class="signature-line"></div>' . "\n";
+        $content .= '                <div class="signature-name"><?php echo get_bloginfo("name"); ?></div>' . "\n";
+        $content .= '            </div>' . "\n";
+        $content .= '        </div>' . "\n";
+        $content .= '        <div class="certificate-info">' . "\n";
+        $content .= '            <div class="certificate-number">' . "\n";
+        $content .= '                <?php _e("수료증 번호:", "lectus-class-system"); ?> <?php echo esc_html($certificate->certificate_number); ?>' . "\n";
+        $content .= '            </div>' . "\n";
+        $content .= '            <div>' . "\n";
+        $content .= '                <?php _e("발급일:", "lectus-class-system"); ?> <?php echo date_i18n(get_option("date_format"), strtotime($certificate->issued_at)); ?>' . "\n";
+        $content .= '            </div>' . "\n";
+        $content .= '        </div>' . "\n";
+        $content .= '    </div>' . "\n";
+        $content .= '    <script>' . "\n";
+        $content .= '    window.onload = function() {' . "\n";
+        $content .= '        if (window.location.search.includes("download=pdf")) {' . "\n";
+        $content .= '            window.print();' . "\n";
+        $content .= '        }' . "\n";
+        $content .= '    }' . "\n";
+        $content .= '    </script>' . "\n";
+        $content .= '</body>' . "\n";
+        $content .= '</html>';
         
         file_put_contents($file, $content);
     }

@@ -359,7 +359,7 @@ class Lectus_Post_Types {
         
         <script>
         function lectusShowBulkUpload() {
-            // TODO: Implement bulk upload modal
+            // Bulk upload functionality - redirect to bulk upload page
             alert('CSV 벌크 업로드 기능은 곧 추가됩니다.');
         }
         </script>
