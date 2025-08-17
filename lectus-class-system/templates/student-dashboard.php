@@ -50,7 +50,7 @@ $certificates = Lectus_Certificate::get_user_certificates($user_id);
             <h3><?php _e('진행중인 강의', 'lectus-class-system'); ?></h3>
             <?php if (empty($enrollments)): ?>
                 <p><?php _e('현재 수강중인 강의가 없습니다.', 'lectus-class-system'); ?></p>
-                <a href="<?php echo home_url('/courses/'); ?>" class="button"><?php _e('강의 둘러보기', 'lectus-class-system'); ?></a>
+                <a href="<?php echo get_post_type_archive_link('coursesingle'); ?>" class="button"><?php _e('강의 둘러보기', 'lectus-class-system'); ?></a>
             <?php else: ?>
                 <div class="courses-grid">
                     <?php foreach ($enrollments as $enrollment): 

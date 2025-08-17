@@ -243,6 +243,17 @@ function lectus_academy_scripts() {
 add_action('wp_enqueue_scripts', 'lectus_academy_scripts');
 
 /**
+ * Redirect /courses/ to /course/ for unified course listing
+ */
+add_action('template_redirect', 'lectus_redirect_courses_to_course');
+function lectus_redirect_courses_to_course() {
+    if (is_page('courses')) {
+        wp_redirect(get_post_type_archive_link('coursesingle'), 301);
+        exit;
+    }
+}
+
+/**
  * Register Widget Areas
  */
 function lectus_academy_widgets_init() {
