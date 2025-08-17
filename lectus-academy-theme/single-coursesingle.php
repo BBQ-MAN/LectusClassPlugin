@@ -41,11 +41,12 @@ while (have_posts()) :
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2">
                 <!-- Breadcrumb -->
-                <nav class="flex items-center gap-2 text-sm text-gray-400 mb-4">
-                    <a href="<?php echo esc_url(home_url()); ?>" class="hover:text-white transition-colors">홈</a>
-                    <span>/</span>
-                    <?php
-                    $categories = get_the_terms($course_id, 'course_category');
+                <nav class="flex items-center justify-between gap-2 text-sm text-gray-400 mb-4">
+                    <div class="flex items-center gap-2">
+                        <a href="<?php echo esc_url(home_url()); ?>" class="hover:text-white transition-colors">홈</a>
+                        <span>/</span>
+                        <?php
+                        $categories = get_the_terms($course_id, 'course_category');
                     if ($categories && !is_wp_error($categories)) :
                         $category = $categories[0];
                     ?>
@@ -55,6 +56,13 @@ while (have_posts()) :
                     <span>/</span>
                     <?php endif; ?>
                     <span><?php the_title(); ?></span>
+                    </div>
+                    <?php if (current_user_can('edit_post', $course_id)) : ?>
+                    <a href="<?php echo get_edit_post_link($course_id); ?>" class="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs font-medium">
+                        <i class="fas fa-edit"></i>
+                        <?php esc_html_e('편집', 'lectus-academy'); ?>
+                    </a>
+                    <?php endif; ?>
                 </nav>
                 
                 <!-- Course Title -->
@@ -464,7 +472,10 @@ while (have_posts()) :
                         
                         <div class="space-y-3 mb-4">
                             <?php if ($is_enrolled) : ?>
-                                <a href="<?php echo esc_url(home_url('/my-courses')); ?>" 
+                                <?php 
+                                $continue_url = Lectus_Progress::get_continue_learning_url(get_current_user_id(), $course_id);
+                                ?>
+                                <a href="<?php echo esc_url($continue_url); ?>" 
                                    class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
                                     <i class="fas fa-play"></i> 학습하기
                                 </a>

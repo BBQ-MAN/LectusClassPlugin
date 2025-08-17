@@ -58,14 +58,30 @@ if (have_posts()) :
                 <!-- Main Content -->
                 <div class="lg:col-span-3 space-y-6">
                     <!-- Breadcrumb -->
-                    <nav class="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-                        <a href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'lectus-academy'); ?></a>
-                        <span>/</span>
-                        <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>"><?php esc_html_e('Courses', 'lectus-academy'); ?></a>
-                        <span>/</span>
-                        <a href="<?php echo esc_url(get_permalink($course_id)); ?>"><?php echo esc_html($course->post_title); ?></a>
-                        <span>/</span>
-                        <span class="current"><?php the_title(); ?></span>
+                    <nav class="flex items-center justify-between text-sm text-gray-600 mb-6">
+                        <div class="flex items-center space-x-2">
+                            <a href="<?php echo esc_url(home_url('/')); ?>"><?php esc_html_e('Home', 'lectus-academy'); ?></a>
+                            <span>/</span>
+                            <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>"><?php esc_html_e('Courses', 'lectus-academy'); ?></a>
+                            <span>/</span>
+                            <a href="<?php echo esc_url(get_permalink($course_id)); ?>"><?php echo esc_html($course->post_title); ?></a>
+                            <span>/</span>
+                            <span class="current"><?php the_title(); ?></span>
+                        </div>
+                        <?php if (current_user_can('edit_post', $lesson_id)) : ?>
+                        <div class="flex items-center gap-2">
+                            <a href="<?php echo get_edit_post_link($lesson_id); ?>" class="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium">
+                                <i class="fas fa-edit"></i>
+                                <?php esc_html_e('레슨 편집', 'lectus-academy'); ?>
+                            </a>
+                            <?php if (current_user_can('edit_post', $course_id)) : ?>
+                            <a href="<?php echo get_edit_post_link($course_id); ?>" class="inline-flex items-center gap-2 px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs font-medium">
+                                <i class="fas fa-book"></i>
+                                <?php esc_html_e('강의 편집', 'lectus-academy'); ?>
+                            </a>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
                     </nav>
 
                     <h1 class="text-3xl font-bold text-gray-900 mb-4"><?php the_title(); ?></h1>
@@ -120,35 +136,6 @@ if (have_posts()) :
                         <?php the_content(); ?>
                     </div>
 
-                    <!-- Course Materials -->
-                    <?php if (class_exists('Lectus_Materials')) :
-                        $materials = Lectus_Materials::get_materials($course_id, $lesson_id);
-                        if (!empty($materials)) : ?>
-                            <div class="lesson-materials">
-                                <h3><?php esc_html_e('Course Materials', 'lectus-academy'); ?></h3>
-                                <ul class="materials-list">
-                                    <?php foreach ($materials as $material) : ?>
-                                        <li>
-                                            <?php if ($material->material_type == 'file') : ?>
-                                                <a href="<?php echo esc_url($material->file_url); ?>" download>
-                                                    <i class="fas fa-download"></i>
-                                                    <?php echo esc_html($material->title); ?>
-                                                </a>
-                                            <?php else : ?>
-                                                <a href="<?php echo esc_url($material->external_url); ?>" target="_blank">
-                                                    <i class="fas fa-external-link-alt"></i>
-                                                    <?php echo esc_html($material->title); ?>
-                                                </a>
-                                            <?php endif; ?>
-                                            <?php if ($material->description) : ?>
-                                                <small><?php echo esc_html($material->description); ?></small>
-                                            <?php endif; ?>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        <?php endif;
-                    endif; ?>
 
                     <!-- Lesson Navigation -->
                     <div class="lesson-navigation">
@@ -229,6 +216,115 @@ if (have_posts()) :
                             </div>
                         </div>
                     </div>
+
+                    <!-- Course Materials -->
+                    <?php if (class_exists('Lectus_Materials')) :
+                        // Get course materials (not lesson-specific)
+                        $materials = Lectus_Materials::get_materials($course_id, null);
+                        if (!empty($materials)) : ?>
+                            <div class="bg-white rounded-lg p-6 shadow-sm">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4">
+                                    <i class="fas fa-folder-open text-blue-600 mr-2"></i>
+                                    <?php esc_html_e('강의자료', 'lectus-academy'); ?>
+                                </h4>
+                                <ul class="space-y-3">
+                                    <?php foreach ($materials as $material) : ?>
+                                        <li class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
+                                            <?php if ($material->material_type == 'file') : 
+                                                // Determine file icon based on extension
+                                                $file_extension = pathinfo($material->file_url, PATHINFO_EXTENSION);
+                                                $file_icon = 'fa-file';
+                                                $icon_color = 'text-gray-500';
+                                                
+                                                switch(strtolower($file_extension)) {
+                                                    case 'pdf':
+                                                        $file_icon = 'fa-file-pdf';
+                                                        $icon_color = 'text-red-500';
+                                                        break;
+                                                    case 'doc':
+                                                    case 'docx':
+                                                        $file_icon = 'fa-file-word';
+                                                        $icon_color = 'text-blue-500';
+                                                        break;
+                                                    case 'xls':
+                                                    case 'xlsx':
+                                                        $file_icon = 'fa-file-excel';
+                                                        $icon_color = 'text-green-500';
+                                                        break;
+                                                    case 'ppt':
+                                                    case 'pptx':
+                                                        $file_icon = 'fa-file-powerpoint';
+                                                        $icon_color = 'text-orange-500';
+                                                        break;
+                                                    case 'zip':
+                                                    case 'rar':
+                                                        $file_icon = 'fa-file-archive';
+                                                        $icon_color = 'text-yellow-600';
+                                                        break;
+                                                    case 'jpg':
+                                                    case 'jpeg':
+                                                    case 'png':
+                                                    case 'gif':
+                                                        $file_icon = 'fa-file-image';
+                                                        $icon_color = 'text-purple-500';
+                                                        break;
+                                                    case 'mp4':
+                                                    case 'avi':
+                                                    case 'mov':
+                                                        $file_icon = 'fa-file-video';
+                                                        $icon_color = 'text-pink-500';
+                                                        break;
+                                                    default:
+                                                        $file_icon = 'fa-file-download';
+                                                        $icon_color = 'text-blue-500';
+                                                }
+                                            ?>
+                                                <a href="<?php echo esc_url($material->file_url); ?>" download class="flex items-start gap-3 text-gray-700 hover:text-blue-600">
+                                                    <i class="fas <?php echo $file_icon; ?> <?php echo $icon_color; ?> mt-1"></i>
+                                                    <div class="flex-1">
+                                                        <div class="font-medium"><?php echo esc_html($material->title); ?></div>
+                                                        <?php if ($material->description) : ?>
+                                                            <div class="text-xs text-gray-500 mt-1"><?php echo esc_html($material->description); ?></div>
+                                                        <?php endif; ?>
+                                                        <div class="text-xs text-gray-400 mt-1"><?php echo strtoupper($file_extension); ?> 파일</div>
+                                                    </div>
+                                                </a>
+                                            <?php else : 
+                                                // Determine external link icon
+                                                $external_icon = 'fa-external-link-alt';
+                                                $external_color = 'text-green-500';
+                                                
+                                                if (strpos($material->external_url, 'youtube.com') !== false || strpos($material->external_url, 'youtu.be') !== false) {
+                                                    $external_icon = 'fab fa-youtube';
+                                                    $external_color = 'text-red-600';
+                                                } elseif (strpos($material->external_url, 'vimeo.com') !== false) {
+                                                    $external_icon = 'fab fa-vimeo';
+                                                    $external_color = 'text-blue-500';
+                                                } elseif (strpos($material->external_url, 'drive.google.com') !== false) {
+                                                    $external_icon = 'fab fa-google-drive';
+                                                    $external_color = 'text-yellow-500';
+                                                } elseif (strpos($material->external_url, 'github.com') !== false) {
+                                                    $external_icon = 'fab fa-github';
+                                                    $external_color = 'text-gray-800';
+                                                }
+                                            ?>
+                                                <a href="<?php echo esc_url($material->external_url); ?>" target="_blank" class="flex items-start gap-3 text-gray-700 hover:text-blue-600">
+                                                    <i class="<?php echo $external_icon; ?> <?php echo $external_color; ?> mt-1"></i>
+                                                    <div class="flex-1">
+                                                        <div class="font-medium"><?php echo esc_html($material->title); ?></div>
+                                                        <?php if ($material->description) : ?>
+                                                            <div class="text-xs text-gray-500 mt-1"><?php echo esc_html($material->description); ?></div>
+                                                        <?php endif; ?>
+                                                        <div class="text-xs text-gray-400 mt-1">외부 링크</div>
+                                                    </div>
+                                                </a>
+                                            <?php endif; ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php endif;
+                    endif; ?>
 
                     <!-- Lesson List -->
                     <div class="bg-white rounded-lg p-6 shadow-sm">

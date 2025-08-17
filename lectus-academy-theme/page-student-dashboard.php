@@ -180,7 +180,10 @@ if ($wpdb->get_var("SHOW TABLES LIKE '$certificates_table'") == $certificates_ta
                                         <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: <?php echo $progress; ?>%"></div>
                                     </div>
                                     
-                                    <a href="<?php echo get_permalink($course->ID); ?>" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                    <?php 
+                                    $continue_url = Lectus_Progress::get_continue_learning_url($user_id, $course->ID);
+                                    ?>
+                                    <a href="<?php echo esc_url($continue_url); ?>" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
                                         <i class="fas fa-play"></i> 학습 계속하기
                                     </a>
                                 </div>

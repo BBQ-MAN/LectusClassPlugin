@@ -243,6 +243,44 @@ class Lectus_Progress {
         return $stats;
     }
     
+    public static function get_next_lesson_to_study($user_id, $course_id) {
+        // Get all lessons for the course ordered by menu_order
+        $lessons = get_posts(array(
+            'post_type' => 'lesson',
+            'meta_key' => '_course_id',
+            'meta_value' => $course_id,
+            'posts_per_page' => -1,
+            'orderby' => 'menu_order',
+            'order' => 'ASC'
+        ));
+        
+        if (empty($lessons)) {
+            return null;
+        }
+        
+        // Find the first incomplete lesson
+        foreach ($lessons as $lesson) {
+            $progress = self::get_lesson_progress($user_id, $course_id, $lesson->ID);
+            if ($progress < 100) {
+                return $lesson->ID;
+            }
+        }
+        
+        // If all lessons are completed, return the first lesson
+        return $lessons[0]->ID;
+    }
+    
+    public static function get_continue_learning_url($user_id, $course_id) {
+        $next_lesson_id = self::get_next_lesson_to_study($user_id, $course_id);
+        
+        if ($next_lesson_id) {
+            return get_permalink($next_lesson_id);
+        }
+        
+        // Fallback to course page if no lesson found
+        return get_permalink($course_id);
+    }
+    
     public static function daily_progress_check() {
         // Check for stale enrollments
         global $wpdb;

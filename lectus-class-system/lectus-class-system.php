@@ -108,6 +108,9 @@ class Lectus_Class_System {
         // Materials system
         require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-materials.php';
         
+        // Admin bar customization
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-admin-bar.php';
+        
         // Admin files
         if (is_admin()) {
             require_once LECTUS_PLUGIN_DIR . 'admin/class-lectus-admin.php';
@@ -165,6 +168,9 @@ class Lectus_Class_System {
         
         // Initialize materials system
         Lectus_Materials::init();
+        
+        // Initialize admin bar customization
+        Lectus_Admin_Bar::init();
     }
     
     public function plugins_loaded() {

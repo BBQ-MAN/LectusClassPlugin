@@ -92,7 +92,10 @@ $certificates = Lectus_Certificate::get_user_certificates($user_id);
                             </div>
                             
                             <div class="course-actions">
-                                <a href="<?php echo get_permalink($course->ID); ?>" class="button button-primary">
+                                <?php 
+                                $continue_url = Lectus_Progress::get_continue_learning_url($user_id, $course->ID);
+                                ?>
+                                <a href="<?php echo esc_url($continue_url); ?>" class="button button-primary">
                                     <?php echo $progress > 0 ? __('계속 학습', 'lectus-class-system') : __('학습 시작', 'lectus-class-system'); ?>
                                 </a>
                                 <?php if ($is_completed): ?>

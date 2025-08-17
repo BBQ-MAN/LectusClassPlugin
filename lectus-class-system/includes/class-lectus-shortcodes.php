@@ -178,8 +178,9 @@ class Lectus_Shortcodes {
                             <div class="flex gap-2">
                                 <?php
                                 if (is_user_logged_in() && Lectus_Enrollment::is_enrolled(get_current_user_id(), $course_id)) {
-                                    // User is already enrolled
-                                    echo '<a href="' . get_permalink($course_id) . '" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center">' . __('학습 계속하기', 'lectus-class-system') . '</a>';
+                                    // User is already enrolled - go to next lesson to study
+                                    $continue_url = Lectus_Progress::get_continue_learning_url(get_current_user_id(), $course_id);
+                                    echo '<a href="' . esc_url($continue_url) . '" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center">' . __('학습 계속하기', 'lectus-class-system') . '</a>';
                                 } else {
                                     // Check if course has WooCommerce product
                                     if (Lectus_WooCommerce::course_has_product($course_id)) {
@@ -272,7 +273,8 @@ class Lectus_Shortcodes {
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="<?php echo get_permalink($course->ID); ?>" class="button button-small">
+                                    <?php $continue_url = Lectus_Progress::get_continue_learning_url($user_id, $course->ID); ?>
+                                    <a href="<?php echo esc_url($continue_url); ?>" class="button button-small">
                                         <?php _e('계속 학습', 'lectus-class-system'); ?>
                                     </a>
                                 </td>
@@ -343,7 +345,8 @@ class Lectus_Shortcodes {
         
         // Check if user is already enrolled
         if (Lectus_Enrollment::is_enrolled($user_id, $course_id)) {
-            return '<a href="' . get_permalink($course_id) . '" class="' . esc_attr($atts['class']) . '">' . 
+            $continue_url = Lectus_Progress::get_continue_learning_url($user_id, $course_id);
+            return '<a href="' . esc_url($continue_url) . '" class="' . esc_attr($atts['class']) . '">' . 
                    __('학습 계속하기', 'lectus-class-system') . '</a>';
         }
         
