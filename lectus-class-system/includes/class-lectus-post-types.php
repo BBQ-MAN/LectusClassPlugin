@@ -297,14 +297,339 @@ class Lectus_Post_Types {
     }
     
     public static function render_course_lessons_meta_box($post) {
-        $lessons = get_posts(array(
-            'post_type' => 'lesson',
-            'meta_key' => '_course_id',
-            'meta_value' => $post->ID,
-            'posts_per_page' => -1,
-            'orderby' => 'menu_order',
-            'order' => 'ASC'
-        ));
+        // Use new unified items system
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-course-items.php';
+        $items = Lectus_Course_Items::get_course_items($post->ID);
+        ?>
+        <div class="lectus-course-items-manager">
+            <style>
+                .course-items-list {
+                    margin: 20px 0;
+                }
+                .course-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 10px;
+                    margin: 5px 0;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    cursor: move;
+                }
+                .course-item.section {
+                    background: #f0f8ff;
+                    border-left: 4px solid #0073aa;
+                    font-weight: bold;
+                }
+                .course-item.lesson {
+                    margin-left: 20px;
+                    border-left: 4px solid #28a745;
+                }
+                .course-item.dragging {
+                    opacity: 0.5;
+                }
+                .course-item .item-handle {
+                    cursor: move;
+                    margin-right: 10px;
+                    color: #999;
+                }
+                .course-item .item-title {
+                    flex-grow: 1;
+                }
+                .course-item .item-actions {
+                    display: flex;
+                    gap: 5px;
+                }
+                .course-item .item-meta {
+                    color: #666;
+                    font-size: 0.9em;
+                    margin-left: 10px;
+                }
+                .add-section-inline {
+                    display: none;
+                    padding: 15px;
+                    margin: 10px 0;
+                    background: #f9f9f9;
+                    border: 1px dashed #999;
+                    border-radius: 4px;
+                }
+                .add-section-inline.active {
+                    display: block;
+                }
+                .drop-zone {
+                    height: 40px;
+                    margin: 5px 0;
+                    border: 2px dashed transparent;
+                    transition: all 0.3s;
+                }
+                .drop-zone.active {
+                    border-color: #0073aa;
+                    background: #e3f2fd;
+                }
+            </style>
+            
+            <div class="toolbar" style="margin-bottom: 20px;">
+                <a href="<?php echo admin_url('post-new.php?post_type=lesson&course_id=' . $post->ID); ?>" class="button button-primary">
+                    <?php _e('새 레슨 추가', 'lectus-class-system'); ?>
+                </a>
+                <button type="button" class="button add-section-btn">
+                    <?php _e('섹션 구분선 추가', 'lectus-class-system'); ?>
+                </button>
+                <button type="button" class="button" onclick="lectusShowBulkUpload()">
+                    <?php _e('CSV 벌크 업로드', 'lectus-class-system'); ?>
+                </button>
+                <span style="margin-left: 20px; color: #666;">
+                    <?php _e('드래그하여 순서를 변경할 수 있습니다', 'lectus-class-system'); ?>
+                </span>
+            </div>
+            
+            <div class="add-section-inline">
+                <h4><?php _e('새 섹션 추가', 'lectus-class-system'); ?></h4>
+                <input type="text" class="section-title-input regular-text" placeholder="<?php _e('섹션 제목', 'lectus-class-system'); ?>" />
+                <input type="text" class="section-desc-input regular-text" placeholder="<?php _e('섹션 설명 (선택)', 'lectus-class-system'); ?>" style="margin-left: 10px;" />
+                <button type="button" class="button button-primary save-section-btn" style="margin-left: 10px;">
+                    <?php _e('저장', 'lectus-class-system'); ?>
+                </button>
+                <button type="button" class="button cancel-section-btn">
+                    <?php _e('취소', 'lectus-class-system'); ?>
+                </button>
+            </div>
+            
+            <div class="course-items-list" id="course-items-list">
+                <?php 
+                $current_section = null;
+                $section_lesson_index = 0;
+                
+                foreach ($items as $item): 
+                ?>
+                    <?php if ($item['type'] === 'section'): 
+                        // Reset lesson index for new section
+                        $section_lesson_index = 0;
+                    ?>
+                        <div class="course-item section" data-type="section" data-id="<?php echo $item['id']; ?>" data-order="<?php echo $item['display_order']; ?>">
+                            <span class="item-handle">☰</span>
+                            <span class="item-title">
+                                📁 <?php echo esc_html($item['title']); ?>
+                                <?php if (!empty($item['description'])): ?>
+                                    <span class="item-meta">(<?php echo esc_html($item['description']); ?>)</span>
+                                <?php endif; ?>
+                            </span>
+                            <div class="item-actions">
+                                <button type="button" class="button button-small edit-section-btn" 
+                                        data-id="<?php echo $item['id']; ?>"
+                                        data-title="<?php echo esc_attr($item['title']); ?>"
+                                        data-description="<?php echo esc_attr($item['description'] ?? ''); ?>">
+                                    <?php _e('편집', 'lectus-class-system'); ?>
+                                </button>
+                                <button type="button" class="button button-small delete-section-btn" 
+                                        data-id="<?php echo $item['id']; ?>">
+                                    <?php _e('삭제', 'lectus-class-system'); ?>
+                                </button>
+                            </div>
+                        </div>
+                    <?php elseif ($item['type'] === 'lesson'): 
+                        $section_lesson_index++;
+                    ?>
+                        <div class="course-item lesson" data-type="lesson" data-id="<?php echo $item['id']; ?>" data-order="<?php echo $item['display_order']; ?>">
+                            <span class="item-handle">☰</span>
+                            <span class="item-title">
+                                <?php echo $section_lesson_index; ?>. <?php echo esc_html($item['title']); ?>
+                                <span class="item-meta">
+                                    (<?php echo esc_html($item['lesson_type'] ?? 'text'); ?>, 
+                                    <?php echo esc_html($item['duration'] ?? '0'); ?>분)
+                                </span>
+                            </span>
+                            <div class="item-actions">
+                                <a href="<?php echo esc_url($item['edit_url']); ?>" class="button button-small">
+                                    <?php _e('편집', 'lectus-class-system'); ?>
+                                </a>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+                
+                <?php if (empty($items)): ?>
+                    <p style="padding: 20px; text-align: center; color: #999;">
+                        <?php _e('아직 레슨이나 섹션이 없습니다.', 'lectus-class-system'); ?>
+                    </p>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            var courseId = <?php echo $post->ID; ?>;
+            var isDragging = false;
+            
+            // Make items sortable
+            $('#course-items-list').sortable({
+                handle: '.item-handle',
+                placeholder: 'drop-zone active',
+                start: function(e, ui) {
+                    isDragging = true;
+                    ui.placeholder.height(ui.item.height());
+                },
+                stop: function(e, ui) {
+                    isDragging = false;
+                    
+                    // Get new order
+                    var items = [];
+                    $('#course-items-list .course-item').each(function() {
+                        items.push({
+                            type: $(this).data('type'),
+                            id: $(this).data('id')
+                        });
+                    });
+                    
+                    // Save new order
+                    $.ajax({
+                        url: lectus_ajax.ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'lectus_reorder_course_items',
+                            nonce: lectus_ajax.nonce,
+                            items: items
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                console.log('Order saved');
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Add section button
+            $('.add-section-btn').on('click', function() {
+                $('.add-section-inline').addClass('active');
+                $('.section-title-input').focus();
+            });
+            
+            // Cancel section
+            $('.cancel-section-btn').on('click', function() {
+                $('.add-section-inline').removeClass('active');
+                $('.section-title-input').val('');
+                $('.section-desc-input').val('');
+            });
+            
+            // Save section
+            $('.save-section-btn').on('click', function() {
+                var title = $('.section-title-input').val().trim();
+                var description = $('.section-desc-input').val().trim();
+                
+                if (!title) {
+                    alert('섹션 제목을 입력해주세요.');
+                    return;
+                }
+                
+                $.ajax({
+                    url: lectus_ajax.ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'lectus_add_section_item',
+                        nonce: lectus_ajax.nonce,
+                        course_id: courseId,
+                        title: title,
+                        description: description
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert(response.data.message || '섹션 추가에 실패했습니다.');
+                        }
+                    }
+                });
+            });
+            
+            // Edit section
+            $(document).on('click', '.edit-section-btn', function() {
+                var id = $(this).data('id');
+                var title = $(this).data('title');
+                var description = $(this).data('description');
+                
+                var newTitle = prompt('섹션 제목:', title);
+                if (newTitle && newTitle !== title) {
+                    var newDesc = prompt('섹션 설명 (선택):', description || '');
+                    
+                    $.ajax({
+                        url: lectus_ajax.ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'lectus_update_section_item',
+                            nonce: lectus_ajax.nonce,
+                            section_id: id,
+                            title: newTitle,
+                            description: newDesc || ''
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            } else {
+                                alert(response.data.message || '섹션 수정에 실패했습니다.');
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Delete section
+            $(document).on('click', '.delete-section-btn', function() {
+                if (!confirm('이 섹션을 삭제하시겠습니까?')) {
+                    return;
+                }
+                
+                var id = $(this).data('id');
+                
+                $.ajax({
+                    url: lectus_ajax.ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'lectus_remove_section_item',
+                        nonce: lectus_ajax.nonce,
+                        section_id: id
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.reload();
+                        } else {
+                            alert(response.data.message || '섹션 삭제에 실패했습니다.');
+                        }
+                    }
+                });
+            });
+        });
+        
+        function lectusShowBulkUpload() {
+            alert('CSV 벌크 업로드 기능은 곧 추가됩니다.');
+        }
+        </script>
+        <?php
+    }
+    
+    public static function render_course_lessons_meta_box_old($post) {
+        // Get sections for this course
+        $sections = Lectus_Sections::get_course_sections($post->ID);
+        
+        // Get unsectioned lessons
+        $unsectioned_lessons = Lectus_Sections::get_unsectioned_lessons($post->ID);
+        
+        // Fallback: If no lessons found through sections method, get all lessons for this course
+        if (empty($sections) && empty($unsectioned_lessons)) {
+            $all_lessons = get_posts(array(
+                'post_type' => 'lesson',
+                'meta_key' => '_course_id',
+                'meta_value' => $post->ID,
+                'posts_per_page' => -1,
+                'orderby' => 'menu_order',
+                'order' => 'ASC'
+            ));
+            
+            // If we found lessons this way, they are all unsectioned
+            if (!empty($all_lessons)) {
+                $unsectioned_lessons = $all_lessons;
+            }
+        }
         ?>
         <div class="lectus-lessons-manager">
             <div style="margin-bottom: 10px;">
@@ -314,47 +639,198 @@ class Lectus_Post_Types {
                 <button type="button" class="button" onclick="lectusShowBulkUpload()">
                     <?php _e('CSV 벌크 업로드', 'lectus-class-system'); ?>
                 </button>
+                <button type="button" class="button button-secondary" id="add-section-btn">
+                    <?php _e('섹션 추가', 'lectus-class-system'); ?>
+                </button>
             </div>
             
-            <?php if ($lessons): ?>
-                <table class="wp-list-table widefat fixed striped">
-                    <thead>
-                        <tr>
-                            <th style="width: 50px;"><?php _e('순서', 'lectus-class-system'); ?></th>
-                            <th><?php _e('레슨 제목', 'lectus-class-system'); ?></th>
-                            <th style="width: 120px;"><?php _e('타입', 'lectus-class-system'); ?></th>
-                            <th style="width: 100px;"><?php _e('소요 시간', 'lectus-class-system'); ?></th>
-                            <th style="width: 100px;"><?php _e('작업', 'lectus-class-system'); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($lessons as $index => $lesson): 
-                            $lesson_type = get_post_meta($lesson->ID, '_lesson_type', true);
-                            $duration = get_post_meta($lesson->ID, '_lesson_duration', true);
-                        ?>
-                            <tr>
-                                <td><?php echo $index + 1; ?></td>
-                                <td>
-                                    <strong>
-                                        <a href="<?php echo get_edit_post_link($lesson->ID); ?>">
-                                            <?php echo esc_html($lesson->post_title); ?>
-                                        </a>
-                                    </strong>
-                                </td>
-                                <td><?php echo esc_html($lesson_type); ?></td>
-                                <td><?php echo esc_html($duration); ?> <?php _e('분', 'lectus-class-system'); ?></td>
-                                <td>
-                                    <a href="<?php echo get_edit_post_link($lesson->ID); ?>" class="button button-small">
-                                        <?php _e('편집', 'lectus-class-system'); ?>
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
+            <!-- Section Add Form (Hidden by default) -->
+            <div id="add-section-form" style="display:none; margin-bottom: 20px; padding: 15px; background: #f0f0f0; border: 1px solid #ddd;">
+                <h4><?php _e('새 섹션 추가', 'lectus-class-system'); ?></h4>
+                <table class="form-table">
+                    <tr>
+                        <th><label for="section-title"><?php _e('섹션 제목', 'lectus-class-system'); ?></label></th>
+                        <td>
+                            <input type="text" id="section-title" class="regular-text" placeholder="<?php _e('섹션 제목을 입력하세요', 'lectus-class-system'); ?>" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th><label for="section-description"><?php _e('설명 (선택)', 'lectus-class-system'); ?></label></th>
+                        <td>
+                            <textarea id="section-description" rows="3" class="large-text" placeholder="<?php _e('섹션 설명을 입력하세요', 'lectus-class-system'); ?>"></textarea>
+                        </td>
+                    </tr>
                 </table>
-            <?php else: ?>
-                <p><?php _e('아직 레슨이 없습니다.', 'lectus-class-system'); ?></p>
-            <?php endif; ?>
+                <button type="button" class="button button-primary" id="save-section-btn">
+                    <?php _e('섹션 저장', 'lectus-class-system'); ?>
+                </button>
+                <button type="button" class="button" id="cancel-section-btn">
+                    <?php _e('취소', 'lectus-class-system'); ?>
+                </button>
+            </div>
+            
+            <!-- Sections and Lessons Display -->
+            <div id="sections-container" style="margin-top: 20px;">
+                <?php 
+                $lesson_counter = 1;
+                
+                // Display sections and their lessons
+                if (!empty($sections)): 
+                    foreach ($sections as $section): 
+                        $section_lessons = Lectus_Sections::get_section_lessons($section->id);
+                ?>
+                    <div class="section-wrapper" data-section-id="<?php echo $section->id; ?>" style="margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; background: #fff;">
+                        <div class="section-header" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                            <h3 style="margin: 0; display: inline-block;">
+                                <?php echo esc_html($section->title); ?>
+                            </h3>
+                            <span class="section-actions" style="float: right;">
+                                <button type="button" class="button button-small edit-section-btn" data-section-id="<?php echo $section->id; ?>" data-title="<?php echo esc_attr($section->title); ?>" data-description="<?php echo esc_attr($section->description); ?>">
+                                    <?php _e('편집', 'lectus-class-system'); ?>
+                                </button>
+                                <button type="button" class="button button-small delete-section-btn" data-section-id="<?php echo $section->id; ?>" style="color: #a00;">
+                                    <?php _e('삭제', 'lectus-class-system'); ?>
+                                </button>
+                            </span>
+                            <div style="clear: both;"></div>
+                            <?php if (!empty($section->description)): ?>
+                                <p style="margin: 5px 0 0; color: #666;"><?php echo esc_html($section->description); ?></p>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <?php if (!empty($section_lessons)): ?>
+                            <table class="wp-list-table widefat fixed striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;"><?php _e('순서', 'lectus-class-system'); ?></th>
+                                        <th><?php _e('레슨 제목', 'lectus-class-system'); ?></th>
+                                        <th style="width: 120px;"><?php _e('타입', 'lectus-class-system'); ?></th>
+                                        <th style="width: 100px;"><?php _e('소요 시간', 'lectus-class-system'); ?></th>
+                                        <th style="width: 150px;"><?php _e('작업', 'lectus-class-system'); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="section-lessons" data-section-id="<?php echo $section->id; ?>">
+                                    <?php foreach ($section_lessons as $lesson): 
+                                        $lesson_type = get_post_meta($lesson->ID, '_lesson_type', true);
+                                        $duration = get_post_meta($lesson->ID, '_lesson_duration', true);
+                                    ?>
+                                        <tr class="lesson-row" data-lesson-id="<?php echo $lesson->ID; ?>">
+                                            <td><?php echo $lesson_counter++; ?></td>
+                                            <td>
+                                                <strong>
+                                                    <a href="<?php echo get_edit_post_link($lesson->ID); ?>">
+                                                        <?php echo esc_html($lesson->post_title); ?>
+                                                    </a>
+                                                </strong>
+                                            </td>
+                                            <td><?php echo esc_html($lesson_type); ?></td>
+                                            <td><?php echo esc_html($duration); ?> <?php _e('분', 'lectus-class-system'); ?></td>
+                                            <td>
+                                                <a href="<?php echo get_edit_post_link($lesson->ID); ?>" class="button button-small">
+                                                    <?php _e('편집', 'lectus-class-system'); ?>
+                                                </a>
+                                                <button type="button" class="button button-small remove-from-section-btn" data-lesson-id="<?php echo $lesson->ID; ?>">
+                                                    <?php _e('섹션 제거', 'lectus-class-system'); ?>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php else: ?>
+                            <p style="padding: 10px; background: #f9f9f9;"><?php _e('이 섹션에 레슨이 없습니다.', 'lectus-class-system'); ?></p>
+                        <?php endif; ?>
+                    </div>
+                <?php 
+                    endforeach;
+                endif; 
+                ?>
+                
+                <!-- Unsectioned Lessons -->
+                <?php if (!empty($unsectioned_lessons)): ?>
+                    <div class="unsectioned-wrapper" style="margin-bottom: 30px; border: 1px solid #ddd; padding: 15px; background: #f9f9f9;">
+                        <div class="section-header" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #ddd;">
+                            <h3 style="margin: 0; color: #666;">
+                                <?php _e('섹션 미지정 레슨', 'lectus-class-system'); ?>
+                            </h3>
+                        </div>
+                        
+                        <table class="wp-list-table widefat fixed striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;"><?php _e('순서', 'lectus-class-system'); ?></th>
+                                    <th><?php _e('레슨 제목', 'lectus-class-system'); ?></th>
+                                    <th style="width: 120px;"><?php _e('타입', 'lectus-class-system'); ?></th>
+                                    <th style="width: 100px;"><?php _e('소요 시간', 'lectus-class-system'); ?></th>
+                                    <th style="width: 200px;"><?php _e('작업', 'lectus-class-system'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody id="unsectioned-lessons">
+                                <?php foreach ($unsectioned_lessons as $lesson): 
+                                    $lesson_type = get_post_meta($lesson->ID, '_lesson_type', true);
+                                    $duration = get_post_meta($lesson->ID, '_lesson_duration', true);
+                                ?>
+                                    <tr class="lesson-row" data-lesson-id="<?php echo $lesson->ID; ?>">
+                                        <td><?php echo $lesson_counter++; ?></td>
+                                        <td>
+                                            <strong>
+                                                <a href="<?php echo get_edit_post_link($lesson->ID); ?>">
+                                                    <?php echo esc_html($lesson->post_title); ?>
+                                                </a>
+                                            </strong>
+                                        </td>
+                                        <td><?php echo esc_html($lesson_type); ?></td>
+                                        <td><?php echo esc_html($duration); ?> <?php _e('분', 'lectus-class-system'); ?></td>
+                                        <td>
+                                            <a href="<?php echo get_edit_post_link($lesson->ID); ?>" class="button button-small">
+                                                <?php _e('편집', 'lectus-class-system'); ?>
+                                            </a>
+                                            <select class="assign-to-section" data-lesson-id="<?php echo $lesson->ID; ?>" style="margin-left: 5px;">
+                                                <option value=""><?php _e('섹션 선택...', 'lectus-class-system'); ?></option>
+                                                <?php foreach ($sections as $section): ?>
+                                                    <option value="<?php echo $section->id; ?>"><?php echo esc_html($section->title); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (empty($sections) && empty($unsectioned_lessons)): ?>
+                    <p><?php _e('아직 섹션이나 레슨이 없습니다.', 'lectus-class-system'); ?></p>
+                    
+                    <!-- Debug information -->
+                    <?php if (defined('WP_DEBUG') && WP_DEBUG): ?>
+                        <div style="margin-top: 10px; padding: 10px; background: #f0f0f0; border: 1px solid #ccc; font-size: 12px;">
+                            <strong>디버그 정보:</strong><br>
+                            코스 ID: <?php echo $post->ID; ?><br>
+                            섹션 수: <?php echo count($sections); ?><br>
+                            미지정 레슨 수: <?php echo count($unsectioned_lessons); ?><br>
+                            
+                            <?php
+                            // Check all lessons for this course
+                            $debug_lessons = get_posts(array(
+                                'post_type' => 'lesson',
+                                'meta_key' => '_course_id',
+                                'meta_value' => $post->ID,
+                                'posts_per_page' => -1
+                            ));
+                            ?>
+                            전체 레슨 수 (직접 조회): <?php echo count($debug_lessons); ?><br>
+                            
+                            <?php if (!empty($debug_lessons)): ?>
+                                레슨 목록:<br>
+                                <?php foreach ($debug_lessons as $lesson): ?>
+                                    - <?php echo $lesson->post_title; ?> (ID: <?php echo $lesson->ID; ?>)<br>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
         
         <script>
@@ -362,6 +838,170 @@ class Lectus_Post_Types {
             // Bulk upload functionality - redirect to bulk upload page
             alert('CSV 벌크 업로드 기능은 곧 추가됩니다.');
         }
+        
+        jQuery(document).ready(function($) {
+            var courseId = <?php echo $post->ID; ?>;
+            
+            // Toggle section add form
+            $('#add-section-btn').on('click', function() {
+                $('#add-section-form').slideToggle();
+                $('#section-title').focus();
+            });
+            
+            $('#cancel-section-btn').on('click', function() {
+                $('#add-section-form').slideUp();
+                $('#section-title').val('');
+                $('#section-description').val('');
+            });
+            
+            // Save new section
+            $('#save-section-btn').on('click', function() {
+                var title = $('#section-title').val().trim();
+                var description = $('#section-description').val().trim();
+                
+                if (!title) {
+                    alert('섹션 제목을 입력해주세요.');
+                    return;
+                }
+                
+                $.ajax({
+                    url: lectus_ajax.ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'lectus_add_section',
+                        nonce: lectus_ajax.nonce,
+                        course_id: courseId,
+                        title: title,
+                        description: description
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.data.message);
+                            location.reload(); // Reload to show new section
+                        } else {
+                            alert(response.data.message || '섹션 추가에 실패했습니다.');
+                        }
+                    },
+                    error: function() {
+                        alert('서버 오류가 발생했습니다.');
+                    }
+                });
+            });
+            
+            // Edit section
+            $('.edit-section-btn').on('click', function() {
+                var sectionId = $(this).data('section-id');
+                var title = $(this).data('title');
+                var description = $(this).data('description');
+                
+                var newTitle = prompt('섹션 제목을 수정하세요:', title);
+                if (newTitle && newTitle !== title) {
+                    var newDescription = prompt('섹션 설명을 수정하세요 (선택):', description || '');
+                    
+                    $.ajax({
+                        url: lectus_ajax.ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'lectus_update_section',
+                            nonce: lectus_ajax.nonce,
+                            section_id: sectionId,
+                            title: newTitle,
+                            description: newDescription || ''
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                alert(response.data.message);
+                                location.reload();
+                            } else {
+                                alert(response.data.message || '섹션 수정에 실패했습니다.');
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Delete section
+            $('.delete-section-btn').on('click', function() {
+                if (!confirm('이 섹션을 삭제하시겠습니까? 섹션에 속한 레슨은 미지정 상태가 됩니다.')) {
+                    return;
+                }
+                
+                var sectionId = $(this).data('section-id');
+                
+                $.ajax({
+                    url: lectus_ajax.ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'lectus_delete_section',
+                        nonce: lectus_ajax.nonce,
+                        section_id: sectionId
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.data.message);
+                            location.reload();
+                        } else {
+                            alert(response.data.message || '섹션 삭제에 실패했습니다.');
+                        }
+                    }
+                });
+            });
+            
+            // Assign lesson to section
+            $('.assign-to-section').on('change', function() {
+                var lessonId = $(this).data('lesson-id');
+                var sectionId = $(this).val();
+                
+                if (sectionId) {
+                    $.ajax({
+                        url: lectus_ajax.ajaxurl,
+                        type: 'POST',
+                        data: {
+                            action: 'lectus_assign_lesson_to_section',
+                            nonce: lectus_ajax.nonce,
+                            lesson_id: lessonId,
+                            section_id: sectionId
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                alert(response.data.message);
+                                location.reload();
+                            } else {
+                                alert(response.data.message || '레슨 할당에 실패했습니다.');
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Remove lesson from section
+            $('.remove-from-section-btn').on('click', function() {
+                if (!confirm('이 레슨을 섹션에서 제거하시겠습니까?')) {
+                    return;
+                }
+                
+                var lessonId = $(this).data('lesson-id');
+                
+                $.ajax({
+                    url: lectus_ajax.ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'lectus_assign_lesson_to_section',
+                        nonce: lectus_ajax.nonce,
+                        lesson_id: lessonId,
+                        section_id: 0 // 0 means remove from section
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert('레슨이 섹션에서 제거되었습니다.');
+                            location.reload();
+                        } else {
+                            alert(response.data.message || '레슨 제거에 실패했습니다.');
+                        }
+                    }
+                });
+            });
+        });
         </script>
         <?php
     }

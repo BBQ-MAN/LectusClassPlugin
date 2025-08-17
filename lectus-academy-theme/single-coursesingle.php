@@ -246,23 +246,99 @@ while (have_posts()) :
                         </div>
                         
                         <div class="space-y-4">
+                            <?php 
+                            // Get course items using the new unified system
+                            if (class_exists('Lectus_Course_Items')) {
+                                $course_items = Lectus_Course_Items::get_course_items($course_id);
+                            } else {
+                                // Fallback to old method if class doesn't exist
+                                $course_items = array();
+                                foreach ($lessons as $lesson) {
+                                    $course_items[] = array(
+                                        'type' => 'lesson',
+                                        'id' => $lesson->ID,
+                                        'title' => $lesson->post_title,
+                                        'duration' => get_post_meta($lesson->ID, '_lesson_duration', true)
+                                    );
+                                }
+                            }
+                            
+                            $current_section = null;
+                            $section_lesson_number = 0;
+                            $lessons_in_section = array();
+                            
+                            // First, group items by sections
+                            $sections_data = array();
+                            $current_section_data = null;
+                            
+                            foreach ($course_items as $item) {
+                                if ($item['type'] === 'section') {
+                                    // Save previous section if exists
+                                    if ($current_section_data !== null) {
+                                        $sections_data[] = $current_section_data;
+                                    }
+                                    // Start new section
+                                    $current_section_data = array(
+                                        'section' => $item,
+                                        'lessons' => array()
+                                    );
+                                } elseif ($item['type'] === 'lesson') {
+                                    if ($current_section_data === null) {
+                                        // Create default section for unsectioned lessons
+                                        $current_section_data = array(
+                                            'section' => array(
+                                                'type' => 'section',
+                                                'title' => '기본 커리큘럼',
+                                                'description' => ''
+                                            ),
+                                            'lessons' => array()
+                                        );
+                                    }
+                                    $current_section_data['lessons'][] = $item;
+                                }
+                            }
+                            
+                            // Add last section if exists
+                            if ($current_section_data !== null) {
+                                $sections_data[] = $current_section_data;
+                            }
+                            
+                            // If no sections at all, create a default one with all lessons
+                            if (empty($sections_data) && !empty($lessons)) {
+                                $sections_data[] = array(
+                                    'section' => array(
+                                        'type' => 'section',
+                                        'title' => '커리큘럼',
+                                        'description' => ''
+                                    ),
+                                    'lessons' => $course_items
+                                );
+                            }
+                            
+                            // Display sections
+                            foreach ($sections_data as $section_data) :
+                                $section = $section_data['section'];
+                                $section_lessons = $section_data['lessons'];
+                                $section_lesson_count = count($section_lessons);
+                            ?>
                             <div class="border rounded-lg overflow-hidden">
                                 <div class="bg-gray-100 px-4 py-3 flex justify-between items-center cursor-pointer hover:bg-gray-200 transition-colors" onclick="toggleSection(this)">
                                     <div class="flex items-center gap-2">
                                         <i class="fas fa-chevron-down text-gray-600"></i>
-                                        <span class="font-medium">섹션 1. 시작하기</span>
+                                        <span class="font-medium"><?php echo esc_html($section['title']); ?></span>
                                     </div>
                                     <div class="text-sm text-gray-600">
-                                        <span><?php echo $lesson_count; ?>강</span>
+                                        <span><?php echo $section_lesson_count; ?>강</span>
                                     </div>
                                 </div>
                                 
                                 <div class="bg-white" style="display: block;">
                                     <?php 
                                     $lesson_num = 1;
-                                    foreach ($lessons as $lesson) : 
-                                        $lesson_duration = get_post_meta($lesson->ID, '_lesson_duration', true) ?: 10;
-                                        $is_preview = get_post_meta($lesson->ID, '_is_preview', true);
+                                    foreach ($section_lessons as $lesson_item) : 
+                                        $lesson_id = $lesson_item['id'];
+                                        $lesson_duration = get_post_meta($lesson_id, '_lesson_duration', true) ?: 10;
+                                        $is_preview = get_post_meta($lesson_id, '_is_preview', true);
                                         $is_completed = false;
                                         
                                         if ($is_enrolled) {
@@ -273,7 +349,7 @@ while (have_posts()) :
                                                 $is_completed = $wpdb->get_var($wpdb->prepare(
                                                     "SELECT status FROM $table_name WHERE user_id = %d AND lesson_id = %d",
                                                     get_current_user_id(),
-                                                    $lesson->ID
+                                                    $lesson_id
                                                 )) === 'completed';
                                             }
                                         }
@@ -289,11 +365,11 @@ while (have_posts()) :
                                             </span>
                                             <span class="font-medium <?php echo $is_enrolled || $is_preview ? 'text-blue-600' : 'text-gray-700'; ?>">
                                                 <?php if ($is_enrolled || $is_preview) : ?>
-                                                    <a href="<?php echo get_permalink($lesson->ID); ?>" class="hover:underline">
-                                                        <?php echo esc_html($lesson->post_title); ?>
+                                                    <a href="<?php echo get_permalink($lesson_id); ?>" class="hover:underline">
+                                                        <?php echo esc_html($lesson_item['title']); ?>
                                                     </a>
                                                 <?php else : ?>
-                                                    <?php echo esc_html($lesson->post_title); ?>
+                                                    <?php echo esc_html($lesson_item['title']); ?>
                                                     <i class="fas fa-lock text-gray-400 ml-2"></i>
                                                 <?php endif; ?>
                                             </span>
@@ -313,6 +389,7 @@ while (have_posts()) :
                                     ?>
                                 </div>
                             </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
                     

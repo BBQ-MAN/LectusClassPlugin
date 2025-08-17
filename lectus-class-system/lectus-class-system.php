@@ -108,6 +108,12 @@ class Lectus_Class_System {
         // Materials system
         require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-materials.php';
         
+        // Sections system
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-sections.php';
+        
+        // Course Items system (new unified approach)
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-course-items.php';
+        
         // Admin bar customization
         require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-admin-bar.php';
         
@@ -125,6 +131,12 @@ class Lectus_Class_System {
     public function init() {
         // Load textdomain
         load_plugin_textdomain('lectus-class-system', false, dirname(LECTUS_PLUGIN_BASENAME) . '/languages');
+        
+        // Check for database upgrades
+        if (is_admin()) {
+            require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-db-upgrade.php';
+            Lectus_DB_Upgrade::check_db_upgrade();
+        }
         
         // Initialize post types
         Lectus_Post_Types::init();
@@ -168,6 +180,12 @@ class Lectus_Class_System {
         
         // Initialize materials system
         Lectus_Materials::init();
+        
+        // Initialize sections system
+        Lectus_Sections::init();
+        
+        // Initialize course items system
+        Lectus_Course_Items::init();
         
         // Initialize admin bar customization
         Lectus_Admin_Bar::init();
@@ -492,6 +510,42 @@ class Lectus_Class_System {
         // Create Materials tables
         Lectus_Materials::create_table();
         Lectus_QA::create_votes_table();
+        
+        // Create Sections table
+        $this->create_sections_table();
+    }
+    
+    private function create_sections_table() {
+        global $wpdb;
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        // Sections table for organizing lessons
+        $table_sections = $wpdb->prefix . 'lectus_sections';
+        $sql_sections = "CREATE TABLE IF NOT EXISTS $table_sections (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            course_id bigint(20) NOT NULL,
+            title varchar(255) NOT NULL,
+            description text,
+            display_order int(11) NOT NULL DEFAULT 0,
+            created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY course_id (course_id),
+            KEY display_order (display_order)
+        ) $charset_collate;";
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql_sections);
+        
+        // Add section_id column to existing lessons if not exists
+        $table_name = $wpdb->prefix . 'posts';
+        $column = $wpdb->get_results("SHOW COLUMNS FROM {$wpdb->postmeta} LIKE '_lesson_section_id'");
+        
+        if (empty($column)) {
+            // We'll use postmeta to store section_id for lessons
+            // No need to alter posts table
+        }
     }
     
     private function create_default_options() {

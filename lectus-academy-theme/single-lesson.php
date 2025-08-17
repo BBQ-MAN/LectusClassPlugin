@@ -331,27 +331,56 @@ if (have_posts()) :
                         <h4 class="text-lg font-semibold text-gray-900 mb-4"><?php esc_html_e('Course Content', 'lectus-academy'); ?></h4>
                         <ul class="space-y-2">
                             <?php
-                            foreach ($lessons as $index => $lesson) :
-                                $is_current = $lesson->ID == $lesson_id;
-                                $is_completed = false;
-                                
-                                if (class_exists('Lectus_Progress')) {
-                                    $lesson_progress = Lectus_Progress::get_lesson_progress(get_current_user_id(), $course_id, $lesson->ID);
-                                    $is_completed = $lesson_progress >= 100;
+                            // Get course items using the new unified system
+                            if (class_exists('Lectus_Course_Items')) {
+                                $course_items = Lectus_Course_Items::get_course_items($course_id);
+                            } else {
+                                // Fallback to old method if class doesn't exist
+                                $course_items = array();
+                                foreach ($lessons as $lesson) {
+                                    $course_items[] = array(
+                                        'type' => 'lesson',
+                                        'id' => $lesson->ID,
+                                        'title' => $lesson->post_title
+                                    );
                                 }
-                                ?>
-                                <li class="border border-gray-200 rounded-lg overflow-hidden <?php echo $is_current ? 'bg-blue-50 border-blue-500' : ''; ?> <?php echo $is_completed ? 'opacity-75' : ''; ?>">
-                                    <a href="<?php echo esc_url(get_permalink($lesson->ID)); ?>" class="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors <?php echo $is_current ? 'text-blue-600' : 'text-gray-700'; ?>">
-                                        <span class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium <?php echo $is_current ? 'bg-blue-600 text-white' : ($is_completed ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'); ?>"><?php echo esc_html($index + 1); ?></span>
-                                        <span class="flex-1 font-medium"><?php echo esc_html($lesson->post_title); ?></span>
-                                        <?php if ($is_completed) : ?>
-                                            <i class="fas fa-check-circle"></i>
-                                        <?php elseif ($is_current) : ?>
-                                            <i class="fas fa-play-circle"></i>
-                                        <?php endif; ?>
-                                    </a>
-                                </li>
-                            <?php endforeach; ?>
+                            }
+                            
+                            $current_section = null;
+                            $section_lesson_number = 0;
+                            
+                            foreach ($course_items as $item) :
+                                if ($item['type'] === 'section') :
+                                    // Display section header
+                                    $current_section = $item;
+                                    $section_lesson_number = 0;
+                                    ?>
+                                    <li class="pt-3 pb-1 px-3 text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                                        <?php echo esc_html($item['title']); ?>
+                                    </li>
+                                <?php elseif ($item['type'] === 'lesson') :
+                                    $section_lesson_number++;
+                                    $is_current = $item['id'] == $lesson_id;
+                                    $is_completed = false;
+                                    
+                                    if (class_exists('Lectus_Progress')) {
+                                        $lesson_progress = Lectus_Progress::get_lesson_progress(get_current_user_id(), $course_id, $item['id']);
+                                        $is_completed = $lesson_progress >= 100;
+                                    }
+                                    ?>
+                                    <li class="border border-gray-200 rounded-lg overflow-hidden <?php echo $is_current ? 'bg-blue-50 border-blue-500' : ''; ?> <?php echo $is_completed ? 'opacity-75' : ''; ?>">
+                                        <a href="<?php echo esc_url(get_permalink($item['id'])); ?>" class="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors <?php echo $is_current ? 'text-blue-600' : 'text-gray-700'; ?>">
+                                            <span class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium <?php echo $is_current ? 'bg-blue-600 text-white' : ($is_completed ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-700'); ?>"><?php echo esc_html($section_lesson_number); ?></span>
+                                            <span class="flex-1 font-medium"><?php echo esc_html($item['title']); ?></span>
+                                            <?php if ($is_completed) : ?>
+                                                <i class="fas fa-check-circle"></i>
+                                            <?php elseif ($is_current) : ?>
+                                                <i class="fas fa-play-circle"></i>
+                                            <?php endif; ?>
+                                        </a>
+                                    </li>
+                                <?php endif;
+                            endforeach; ?>
                         </ul>
                     </div>
 

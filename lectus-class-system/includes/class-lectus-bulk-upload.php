@@ -57,19 +57,26 @@ class Lectus_Bulk_Upload {
                 <div class="upload-section">
                     <h3><?php _e('CSV 파일 형식', 'lectus-class-system'); ?></h3>
                     <div class="csv-format-info">
+                        <p><strong><?php _e('섹션과 레슨을 함께 업로드하는 방법:', 'lectus-class-system'); ?></strong></p>
+                        <ul>
+                            <li><?php _e('type 컬럼에 "section" 또는 "lesson"을 지정하여 구분합니다', 'lectus-class-system'); ?></li>
+                            <li><?php _e('섹션과 레슨은 CSV 파일의 순서대로 배치됩니다', 'lectus-class-system'); ?></li>
+                            <li><?php _e('섹션 아래의 레슨들은 자동으로 해당 섹션에 속하게 됩니다', 'lectus-class-system'); ?></li>
+                        </ul>
+                        
                         <p><strong><?php _e('필수 컬럼:', 'lectus-class-system'); ?></strong></p>
                         <ul>
-                            <li><code>title</code> - <?php _e('레슨 제목', 'lectus-class-system'); ?></li>
-                            <li><code>content</code> - <?php _e('레슨 내용', 'lectus-class-system'); ?></li>
-                            <li><code>course_id</code> - <?php _e('강의 ID', 'lectus-class-system'); ?></li>
-                            <li><code>lesson_type</code> - <?php _e('레슨 타입 (video, text, quiz, assignment)', 'lectus-class-system'); ?></li>
+                            <li><code>type</code> - <?php _e('항목 타입 (section 또는 lesson)', 'lectus-class-system'); ?></li>
+                            <li><code>title</code> - <?php _e('제목', 'lectus-class-system'); ?></li>
+                            <li><code>content</code> - <?php _e('내용 (레슨만 필수)', 'lectus-class-system'); ?></li>
+                            <li><code>lesson_type</code> - <?php _e('레슨 타입 (레슨만: video, text, quiz, assignment)', 'lectus-class-system'); ?></li>
                         </ul>
                         <p><strong><?php _e('선택적 컬럼:', 'lectus-class-system'); ?></strong></p>
                         <ul>
-                            <li><code>duration</code> - <?php _e('예상 학습 시간 (분)', 'lectus-class-system'); ?></li>
-                            <li><code>order</code> - <?php _e('정렬 순서', 'lectus-class-system'); ?></li>
-                            <li><code>video_url</code> - <?php _e('비디오 URL (비디오 타입인 경우)', 'lectus-class-system'); ?></li>
-                            <li><code>description</code> - <?php _e('레슨 설명', 'lectus-class-system'); ?></li>
+                            <li><code>description</code> - <?php _e('설명 (섹션/레슨 모두 사용 가능)', 'lectus-class-system'); ?></li>
+                            <li><code>duration</code> - <?php _e('예상 학습 시간 (분, 레슨만)', 'lectus-class-system'); ?></li>
+                            <li><code>video_url</code> - <?php _e('비디오 URL (비디오 타입 레슨만)', 'lectus-class-system'); ?></li>
+                            <li><code>order</code> - <?php _e('정렬 순서 (자동 계산되지만 수동 지정 가능)', 'lectus-class-system'); ?></li>
                         </ul>
                         <a href="#" id="download-lesson-template" class="button"><?php _e('템플릿 다운로드', 'lectus-class-system'); ?></a>
                     </div>
@@ -347,9 +354,13 @@ class Lectus_Bulk_Upload {
             
             switch(type) {
                 case 'lessons':
-                    csv_content = 'title,content,course_id,lesson_type,duration,order,video_url,description\n';
-                    csv_content += '샘플 레슨 1,이것은 샘플 레슨 내용입니다,1,video,30,1,https://youtube.com/watch?v=example,비디오 레슨 설명\n';
-                    csv_content += '샘플 레슨 2,이것은 텍스트 레슨 내용입니다,1,text,15,2,,텍스트 레슨 설명';
+                    csv_content = 'type,title,content,lesson_type,duration,video_url,description,order\n';
+                    csv_content += 'section,Chapter 1: 기초,,,,,,1\n';
+                    csv_content += 'lesson,레슨 1.1: 소개,이것은 첫 번째 레슨입니다,text,10,,,2\n';
+                    csv_content += 'lesson,레슨 1.2: 기본 개념,기본 개념을 설명합니다,video,20,https://youtube.com/watch?v=example,비디오 레슨,3\n';
+                    csv_content += 'section,Chapter 2: 심화,,,,,,4\n';
+                    csv_content += 'lesson,레슨 2.1: 고급 기능,고급 기능을 설명합니다,text,15,,,5\n';
+                    csv_content += 'lesson,레슨 2.2: 실습,실습 과제입니다,assignment,30,,,6';
                     break;
                 case 'students':
                     csv_content = 'username,email,password,first_name,last_name,display_name,phone\n';
@@ -472,7 +483,7 @@ class Lectus_Bulk_Upload {
     }
     
     /**
-     * Process lesson CSV file
+     * Process lesson CSV file (now supports sections)
      */
     private static function process_lesson_csv($file_path, $course_id, $skip_duplicates = true, $auto_publish = true) {
         $results = array(
@@ -481,11 +492,14 @@ class Lectus_Bulk_Upload {
             'details' => array()
         );
         
+        // Include Course Items class for section handling
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-course-items.php';
+        
         if (($handle = fopen($file_path, 'r')) !== FALSE) {
             $header = fgetcsv($handle);
             
-            // Validate header
-            $required_fields = array('title', 'content', 'lesson_type');
+            // Validate header - 'type' is now required
+            $required_fields = array('type', 'title');
             $missing_fields = array_diff($required_fields, $header);
             
             if (!empty($missing_fields)) {
@@ -498,8 +512,11 @@ class Lectus_Bulk_Upload {
             }
             
             $row_number = 1;
+            $display_order = 0;
+            
             while (($data = fgetcsv($handle)) !== FALSE) {
                 $row_number++;
+                $display_order++;
                 
                 if (count($data) < count($required_fields)) {
                     $results['details'][] = array(
@@ -510,70 +527,118 @@ class Lectus_Bulk_Upload {
                     continue;
                 }
                 
-                $lesson_data = array_combine($header, $data);
+                $item_data = array_combine($header, $data);
                 
-                // Skip if duplicate title exists and skip_duplicates is enabled
-                if ($skip_duplicates) {
-                    $existing = get_posts(array(
-                        'post_type' => 'lesson',
-                        'title' => $lesson_data['title'],
-                        'post_status' => 'any',
-                        'meta_query' => array(
-                            array(
-                                'key' => '_course_id',
-                                'value' => $course_id
-                            )
-                        )
-                    ));
+                // Check item type
+                $item_type = strtolower(trim($item_data['type']));
+                
+                if ($item_type === 'section') {
+                    // Process section
+                    $section_title = sanitize_text_field($item_data['title']);
+                    $section_description = isset($item_data['description']) ? sanitize_text_field($item_data['description']) : '';
                     
-                    if (!empty($existing)) {
+                    // Add section using Course Items class
+                    $section_id = Lectus_Course_Items::add_section($course_id, $section_title, $section_description, $display_order);
+                    
+                    if ($section_id) {
+                        $results['success_count']++;
+                        $results['details'][] = array(
+                            'success' => true,
+                            'message' => sprintf(__('행 %d: 섹션 "%s"이(가) 생성되었습니다.', 'lectus-class-system'), $row_number, $section_title)
+                        );
+                    } else {
+                        $results['error_count']++;
                         $results['details'][] = array(
                             'success' => false,
-                            'message' => sprintf(__('행 %d: "%s" 제목이 이미 존재하여 건너뛰었습니다.', 'lectus-class-system'), $row_number, $lesson_data['title'])
+                            'message' => sprintf(__('행 %d: 섹션 "%s" 생성에 실패했습니다.', 'lectus-class-system'), $row_number, $section_title)
                         );
+                    }
+                    
+                } elseif ($item_type === 'lesson') {
+                    // Process lesson
+                    if (!isset($item_data['content']) || !isset($item_data['lesson_type'])) {
+                        $results['details'][] = array(
+                            'success' => false,
+                            'message' => sprintf(__('행 %d: 레슨에는 content와 lesson_type이 필요합니다.', 'lectus-class-system'), $row_number)
+                        );
+                        $results['error_count']++;
                         continue;
                     }
-                }
+                    
+                    $lesson_title = sanitize_text_field($item_data['title']);
+                    
+                    // Skip if duplicate title exists and skip_duplicates is enabled
+                    if ($skip_duplicates) {
+                        $existing = get_posts(array(
+                            'post_type' => 'lesson',
+                            'title' => $lesson_title,
+                            'post_status' => 'any',
+                            'meta_query' => array(
+                                array(
+                                    'key' => '_course_id',
+                                    'value' => $course_id
+                                )
+                            )
+                        ));
+                        
+                        if (!empty($existing)) {
+                            $results['details'][] = array(
+                                'success' => false,
+                                'message' => sprintf(__('행 %d: "%s" 제목이 이미 존재하여 건너뛰었습니다.', 'lectus-class-system'), $row_number, $lesson_title)
+                            );
+                            continue;
+                        }
+                    }
+                    
+                    // Create lesson
+                    $lesson_id = wp_insert_post(array(
+                        'post_title' => $lesson_title,
+                        'post_content' => wp_kses_post($item_data['content']),
+                        'post_type' => 'lesson',
+                        'post_status' => $auto_publish ? 'publish' : 'draft',
+                        'menu_order' => isset($item_data['order']) ? intval($item_data['order']) : $display_order
+                    ));
                 
-                // Create lesson
-                $lesson_id = wp_insert_post(array(
-                    'post_title' => sanitize_text_field($lesson_data['title']),
-                    'post_content' => wp_kses_post($lesson_data['content']),
-                    'post_type' => 'lesson',
-                    'post_status' => $auto_publish ? 'publish' : 'draft',
-                    'menu_order' => isset($lesson_data['order']) ? intval($lesson_data['order']) : $row_number
-                ));
-                
-                if ($lesson_id && !is_wp_error($lesson_id)) {
-                    // Set meta data
-                    update_post_meta($lesson_id, '_course_id', $course_id);
-                    update_post_meta($lesson_id, '_lesson_type', sanitize_text_field($lesson_data['lesson_type']));
-                    
-                    if (isset($lesson_data['duration'])) {
-                        update_post_meta($lesson_id, '_lesson_duration', intval($lesson_data['duration']));
+                    if ($lesson_id && !is_wp_error($lesson_id)) {
+                        // Set meta data
+                        update_post_meta($lesson_id, '_course_id', $course_id);
+                        update_post_meta($lesson_id, '_lesson_type', sanitize_text_field($item_data['lesson_type']));
+                        update_post_meta($lesson_id, '_display_order', $display_order);
+                        
+                        if (isset($item_data['duration'])) {
+                            update_post_meta($lesson_id, '_lesson_duration', intval($item_data['duration']));
+                        }
+                        
+                        if (isset($item_data['video_url']) && !empty($item_data['video_url'])) {
+                            update_post_meta($lesson_id, '_video_url', esc_url_raw($item_data['video_url']));
+                        }
+                        
+                        if (isset($item_data['description'])) {
+                            update_post_meta($lesson_id, '_lesson_description', sanitize_text_field($item_data['description']));
+                        }
+                        
+                        update_post_meta($lesson_id, '_completion_criteria', 'view');
+                        
+                        $results['success_count']++;
+                        $results['details'][] = array(
+                            'success' => true,
+                            'message' => sprintf(__('행 %d: 레슨 "%s"이(가) 생성되었습니다.', 'lectus-class-system'), $row_number, $lesson_title)
+                        );
+                    } else {
+                        $results['error_count']++;
+                        $results['details'][] = array(
+                            'success' => false,
+                            'message' => sprintf(__('행 %d: 레슨 "%s" 생성에 실패했습니다.', 'lectus-class-system'), $row_number, $lesson_title)
+                        );
                     }
                     
-                    if (isset($lesson_data['video_url']) && !empty($lesson_data['video_url'])) {
-                        update_post_meta($lesson_id, '_video_url', esc_url_raw($lesson_data['video_url']));
-                    }
-                    
-                    if (isset($lesson_data['description'])) {
-                        update_post_meta($lesson_id, '_lesson_description', sanitize_text_field($lesson_data['description']));
-                    }
-                    
-                    update_post_meta($lesson_id, '_completion_criteria', 'view');
-                    
-                    $results['success_count']++;
-                    $results['details'][] = array(
-                        'success' => true,
-                        'message' => sprintf(__('행 %d: "%s" 레슨이 생성되었습니다.', 'lectus-class-system'), $row_number, $lesson_data['title'])
-                    );
                 } else {
-                    $results['error_count']++;
+                    // Invalid type
                     $results['details'][] = array(
                         'success' => false,
-                        'message' => sprintf(__('행 %d: "%s" 레슨 생성에 실패했습니다.', 'lectus-class-system'), $row_number, $lesson_data['title'])
+                        'message' => sprintf(__('행 %d: 잘못된 타입 "%s". "section" 또는 "lesson"만 가능합니다.', 'lectus-class-system'), $row_number, $item_type)
                     );
+                    $results['error_count']++;
                 }
             }
             
