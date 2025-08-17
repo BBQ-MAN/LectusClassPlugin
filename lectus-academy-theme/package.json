@@ -1,0 +1,19 @@
+{
+  "name": "lectus-academy-theme",
+  "version": "1.0.0",
+  "description": "![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)\r ![WordPress](https://img.shields.io/badge/WordPress-5.0+-green.svg)\r ![PHP](https://img.shields.io/badge/PHP-7.4+-purple.svg)\r ![License](https://img.shields.io/badge/license-GPL--2.0+-red.svg)\r ![Responsive](https://img.shields.io/badge/responsive-yes-green.svg)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tailwindcss -i ./src/input.css -o ./style-tailwind.css --watch",
+    "build": "tailwindcss -i ./src/input.css -o ./style-tailwind.css --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
+  }
+}

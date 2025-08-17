@@ -44,7 +44,14 @@ if (!function_exists('lectus_academy_setup')) {
         // Register navigation menus
         register_nav_menus(array(
             'primary' => esc_html__('Primary Menu', 'lectus-academy'),
+            'top-menu' => esc_html__('Top Menu (교육/커리어)', 'lectus-academy'),
+            'main-menu' => esc_html__('Main Menu (강의/로드맵/멘토링)', 'lectus-academy'),
+            'category-menu' => esc_html__('Category Menu', 'lectus-academy'),
             'footer'  => esc_html__('Footer Menu', 'lectus-academy'),
+            'footer-company' => esc_html__('Footer Company Menu', 'lectus-academy'),
+            'footer-partner' => esc_html__('Footer Partner Menu', 'lectus-academy'),
+            'footer-support' => esc_html__('Footer Support Menu', 'lectus-academy'),
+            'footer-community' => esc_html__('Footer Community Menu', 'lectus-academy'),
             'mobile'  => esc_html__('Mobile Menu', 'lectus-academy'),
         ));
         
@@ -65,7 +72,7 @@ add_action('after_setup_theme', 'lectus_academy_setup');
  * Enqueue Scripts and Styles
  */
 function lectus_academy_scripts() {
-    // Theme stylesheet
+    // Theme stylesheet (WordPress theme info)
     wp_enqueue_style(
         'lectus-academy-style',
         get_stylesheet_uri(),
@@ -73,13 +80,23 @@ function lectus_academy_scripts() {
         wp_get_theme()->get('Version')
     );
     
-    // Responsive styles
+    // Tailwind CSS - force refresh with timestamp
     wp_enqueue_style(
-        'lectus-academy-responsive',
-        get_template_directory_uri() . '/assets/css/responsive.css',
-        array('lectus-academy-style'),
-        '1.0.0'
+        'lectus-academy-tailwind',
+        get_template_directory_uri() . '/style-tailwind.css',
+        array(),
+        filemtime(get_template_directory() . '/style-tailwind.css')
     );
+    
+    // Responsive styles - DISABLED for Tailwind
+    // if (file_exists(get_template_directory() . '/assets/css/responsive.css')) {
+    //     wp_enqueue_style(
+    //         'lectus-academy-responsive',
+    //         get_template_directory_uri() . '/assets/css/responsive.css',
+    //         array('lectus-academy-style'),
+    //         '1.0.0'
+    //     );
+    // }
     
     // Google Fonts or Pretendard
     wp_enqueue_style(
@@ -248,6 +265,16 @@ require get_template_directory() . '/inc/widgets.php';
  * Load test restoration functionality
  */
 require get_template_directory() . '/inc/test-restoration.php';
+
+/**
+ * Load theme setup and activation handler
+ */
+require get_template_directory() . '/inc/theme-setup.php';
+
+/**
+ * Load custom menu walkers
+ */
+require get_template_directory() . '/inc/menu-walkers.php';
 
 /**
  * Add custom body classes
@@ -625,6 +652,47 @@ function lectus_academy_flush_rewrites() {
 add_action('after_switch_theme', 'lectus_academy_flush_rewrites');
 
 /**
+ * Setup essential pages on theme activation
+ */
+function lectus_academy_theme_activation() {
+    // Create essential pages if they don't exist
+    if (class_exists('Lectus_Academy_Test_Restoration')) {
+        try {
+            $created_pages = Lectus_Academy_Test_Restoration::create_essential_pages();
+            
+            if (!empty($created_pages)) {
+                // Store a transient to show admin notice
+                set_transient('lectus_academy_pages_created', $created_pages, 60);
+            }
+        } catch (Exception $e) {
+            error_log('Lectus Academy: Failed to create pages on activation - ' . $e->getMessage());
+        }
+    }
+    
+    // Flush rewrite rules after creating pages
+    flush_rewrite_rules();
+}
+add_action('after_switch_theme', 'lectus_academy_theme_activation');
+
+/**
+ * Show admin notice after page creation
+ */
+function lectus_academy_activation_notice() {
+    $created_pages = get_transient('lectus_academy_pages_created');
+    
+    if ($created_pages && is_array($created_pages)) {
+        ?>
+        <div class="notice notice-success is-dismissible">
+            <p><strong><?php _e('Lectus Academy 테마가 활성화되었습니다!', 'lectus-academy'); ?></strong></p>
+            <p><?php printf(__('다음 페이지가 자동으로 생성되었습니다: %s', 'lectus-academy'), implode(', ', $created_pages)); ?></p>
+        </div>
+        <?php
+        delete_transient('lectus_academy_pages_created');
+    }
+}
+add_action('admin_notices', 'lectus_academy_activation_notice');
+
+/**
  * Add theme settings page with proper capability check
  * 
  * @return void
@@ -646,6 +714,119 @@ function lectus_academy_add_theme_page() {
 add_action('admin_menu', 'lectus_academy_add_theme_page');
 
 /**
+ * Register theme settings
+ */
+function lectus_academy_register_settings() {
+    // Register settings
+    register_setting('lectus_academy_settings', 'lectus_academy_general_settings');
+    
+    // Add settings section
+    add_settings_section(
+        'lectus_academy_general_section',
+        __('일반 설정', 'lectus-academy'),
+        'lectus_academy_general_section_callback',
+        'lectus_academy_settings'
+    );
+    
+    // Add settings fields
+    add_settings_field(
+        'site_title',
+        __('사이트 제목', 'lectus-academy'),
+        'lectus_academy_site_title_callback',
+        'lectus_academy_settings',
+        'lectus_academy_general_section'
+    );
+    
+    add_settings_field(
+        'site_description',
+        __('사이트 설명', 'lectus-academy'),
+        'lectus_academy_site_description_callback',
+        'lectus_academy_settings',
+        'lectus_academy_general_section'
+    );
+    
+    add_settings_field(
+        'footer_text',
+        __('푸터 텍스트', 'lectus-academy'),
+        'lectus_academy_footer_text_callback',
+        'lectus_academy_settings',
+        'lectus_academy_general_section'
+    );
+    
+    add_settings_field(
+        'enable_dark_mode',
+        __('다크 모드 활성화', 'lectus-academy'),
+        'lectus_academy_dark_mode_callback',
+        'lectus_academy_settings',
+        'lectus_academy_general_section'
+    );
+}
+add_action('admin_init', 'lectus_academy_register_settings');
+
+/**
+ * General section callback
+ */
+function lectus_academy_general_section_callback() {
+    echo '<p>' . __('테마의 기본 설정을 관리합니다.', 'lectus-academy') . '</p>';
+}
+
+/**
+ * Site title field callback
+ */
+function lectus_academy_site_title_callback() {
+    $options = get_option('lectus_academy_general_settings');
+    $value = isset($options['site_title']) ? $options['site_title'] : get_bloginfo('name');
+    ?>
+    <input type="text" name="lectus_academy_general_settings[site_title]" 
+           value="<?php echo esc_attr($value); ?>" 
+           class="regular-text" />
+    <p class="description"><?php _e('사이트 헤더에 표시될 제목입니다.', 'lectus-academy'); ?></p>
+    <?php
+}
+
+/**
+ * Site description field callback
+ */
+function lectus_academy_site_description_callback() {
+    $options = get_option('lectus_academy_general_settings');
+    $value = isset($options['site_description']) ? $options['site_description'] : get_bloginfo('description');
+    ?>
+    <textarea name="lectus_academy_general_settings[site_description]" 
+              rows="3" cols="50"><?php echo esc_textarea($value); ?></textarea>
+    <p class="description"><?php _e('사이트의 간단한 설명을 입력합니다.', 'lectus-academy'); ?></p>
+    <?php
+}
+
+/**
+ * Footer text field callback
+ */
+function lectus_academy_footer_text_callback() {
+    $options = get_option('lectus_academy_general_settings');
+    $value = isset($options['footer_text']) ? $options['footer_text'] : '© 2024 Lectus Academy. All rights reserved.';
+    ?>
+    <input type="text" name="lectus_academy_general_settings[footer_text]" 
+           value="<?php echo esc_attr($value); ?>" 
+           class="large-text" />
+    <p class="description"><?php _e('사이트 푸터에 표시될 저작권 정보입니다.', 'lectus-academy'); ?></p>
+    <?php
+}
+
+/**
+ * Dark mode field callback
+ */
+function lectus_academy_dark_mode_callback() {
+    $options = get_option('lectus_academy_general_settings');
+    $checked = isset($options['enable_dark_mode']) && $options['enable_dark_mode'] ? 'checked' : '';
+    ?>
+    <label>
+        <input type="checkbox" name="lectus_academy_general_settings[enable_dark_mode]" 
+               value="1" <?php echo $checked; ?> />
+        <?php _e('사용자가 다크 모드를 선택할 수 있도록 합니다.', 'lectus-academy'); ?>
+    </label>
+    <?php
+}
+
+/**
  * Theme settings page content with improved security
  * 
  * @return void
@@ -660,17 +841,17 @@ function lectus_academy_settings_page() {
         $active_tab = 'general';
     }
     ?>
-    <div class="wrap">
+    <div class="wrap lectus-academy-settings-wrap">
         <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
         
-        <h2 class="nav-tab-wrapper">
-            <a href="?page=lectus-academy-settings&tab=general" class="nav-tab <?php echo $active_tab == 'general' ? 'nav-tab-active' : ''; ?>">
+        <h2 class="nav-tab-wrapper lectus-theme-tabs">
+            <a href="<?php echo admin_url('themes.php?page=lectus-academy-settings&tab=general'); ?>" class="theme-tab <?php echo $active_tab == 'general' ? 'theme-tab-active' : ''; ?>" data-tab="general">
                 <?php _e('일반 설정', 'lectus-academy'); ?>
             </a>
-            <a href="?page=lectus-academy-settings&tab=test-restoration" class="nav-tab <?php echo $active_tab == 'test-restoration' ? 'nav-tab-active' : ''; ?>">
+            <a href="<?php echo admin_url('themes.php?page=lectus-academy-settings&tab=test-restoration'); ?>" class="theme-tab <?php echo $active_tab == 'test-restoration' ? 'theme-tab-active' : ''; ?>" data-tab="test-restoration">
                 <?php _e('테스트 구성 복원', 'lectus-academy'); ?>
             </a>
-            <a href="?page=lectus-academy-settings&tab=customization" class="nav-tab <?php echo $active_tab == 'customization' ? 'nav-tab-active' : ''; ?>">
+            <a href="<?php echo admin_url('themes.php?page=lectus-academy-settings&tab=customization'); ?>" class="theme-tab <?php echo $active_tab == 'customization' ? 'theme-tab-active' : ''; ?>" data-tab="customization">
                 <?php _e('커스터마이징', 'lectus-academy'); ?>
             </a>
         </h2>
@@ -756,8 +937,38 @@ function lectus_academy_settings_page() {
     .lectus-customization-tab ul li {
         margin-bottom: 5px;
     }
-    .nav-tab-wrapper {
+    .lectus-theme-tabs {
         margin-bottom: 20px;
+        border-bottom: 1px solid #c3c4c7;
+    }
+    /* Custom theme tab styles to avoid conflict */
+    .theme-tab {
+        display: inline-block;
+        margin: 0 8px -1px 0;
+        padding: 9px 14px;
+        font-size: 14px;
+        line-height: 24px;
+        color: #646970;
+        background: #fff;
+        border: 1px solid #c3c4c7;
+        border-bottom: 1px solid #fff;
+        text-decoration: none;
+        transition: none;
+    }
+    .theme-tab:hover {
+        background-color: #fff;
+        color: #3c434a;
+    }
+    .theme-tab:focus {
+        box-shadow: none;
+        outline: 1px dotted #646970;
+        outline-offset: -1px;
+    }
+    .theme-tab-active,
+    .theme-tab-active:hover {
+        background: #f0f0f1;
+        border-bottom: 1px solid #f0f0f1;
+        color: #000;
     }
     </style>
     <?php
