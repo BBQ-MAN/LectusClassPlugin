@@ -243,12 +243,19 @@ function lectus_academy_scripts() {
 add_action('wp_enqueue_scripts', 'lectus_academy_scripts');
 
 /**
- * Redirect /courses/ to /course/ for unified course listing
+ * Redirect old URLs to new unified pages
  */
-add_action('template_redirect', 'lectus_redirect_courses_to_course');
-function lectus_redirect_courses_to_course() {
+add_action('template_redirect', 'lectus_redirect_old_urls');
+function lectus_redirect_old_urls() {
+    // Redirect /courses/ to /course/
     if (is_page('courses')) {
         wp_redirect(get_post_type_archive_link('coursesingle'), 301);
+        exit;
+    }
+    
+    // Redirect /my-courses/ to /student-dashboard/
+    if (is_page('my-courses')) {
+        wp_redirect(home_url('/student-dashboard/'), 301);
         exit;
     }
 }

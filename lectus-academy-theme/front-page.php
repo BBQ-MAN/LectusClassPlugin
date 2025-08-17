@@ -15,7 +15,7 @@ get_header();
         <div class="hero-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="hero-content text-center">
                 <h1 class="hero-title text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                    <?php esc_html_e('성장하는 개발자를 위한', 'lectus-academy'); ?><br>
+                    <?php esc_html_e('성장하는 건축가를 위한', 'lectus-academy'); ?><br>
                     <?php esc_html_e('온라인 강의 플랫폼', 'lectus-academy'); ?>
                 </h1>
                 <p class="hero-subtitle text-xl md:text-2xl mb-8 text-blue-100">

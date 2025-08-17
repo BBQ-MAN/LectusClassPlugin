@@ -15,7 +15,7 @@ get_header();
         <div class="container">
             <div class="hero-content">
                 <h1 class="hero-title">
-                    <?php esc_html_e('성장하는 개발자를 위한', 'lectus-academy'); ?><br>
+                    <?php esc_html_e('성장하는 건축가를 위한', 'lectus-academy'); ?><br>
                     <?php esc_html_e('온라인 강의 플랫폼', 'lectus-academy'); ?>
                 </h1>
                 <p class="hero-subtitle">

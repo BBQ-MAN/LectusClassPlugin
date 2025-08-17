@@ -1,7 +1,7 @@
 <?php
 /**
- * Template Name: Student Dashboard
- * Description: Student dashboard page with Inflearn-inspired design
+ * Template Name: 내 강의실
+ * Description: My classroom page with student dashboard
  *
  * @package LectusAcademy
  */
@@ -59,8 +59,8 @@ if ($wpdb->get_var("SHOW TABLES LIKE '$certificates_table'") == $certificates_ta
 <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2"><?php printf(__('안녕하세요, %s님!', 'lectus-academy'), esc_html($user->display_name)); ?></h1>
-            <p class="text-blue-100 text-lg"><?php esc_html_e('오늘도 열심히 학습해보세요!', 'lectus-academy'); ?></p>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2"><?php esc_html_e('내 강의실', 'lectus-academy'); ?></h1>
+            <p class="text-blue-100 text-lg"><?php printf(__('%s님의 학습 현황입니다', 'lectus-academy'), esc_html($user->display_name)); ?></p>
         </div>
         
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">

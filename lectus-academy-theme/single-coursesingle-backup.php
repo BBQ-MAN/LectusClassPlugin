@@ -453,7 +453,7 @@ while (have_posts()) :
                         
                         <div class="space-y-3 mb-4">
                             <?php if ($is_enrolled) : ?>
-                                <a href="<?php echo esc_url(home_url('/my-courses')); ?>" 
+                                <a href="<?php echo esc_url(home_url('/student-dashboard')); ?>" 
                                    class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
                                     <i class="fas fa-play"></i> 학습하기
                                 </a>

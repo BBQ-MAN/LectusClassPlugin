@@ -82,12 +82,8 @@
                                 </a>
                                 <div class="user-dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 hidden">
                                     <a href="<?php echo esc_url(home_url('/student-dashboard')); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <i class="fas fa-tachometer-alt"></i>
-                                        <?php esc_html_e('대시보드', 'lectus-academy'); ?>
-                                    </a>
-                                    <a href="<?php echo esc_url(home_url('/my-courses')); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <i class="fas fa-book"></i>
-                                        <?php esc_html_e('내 강의', 'lectus-academy'); ?>
+                                        <?php esc_html_e('내 강의실', 'lectus-academy'); ?>
                                     </a>
                                     <a href="<?php echo esc_url(home_url('/certificates')); ?>" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <i class="fas fa-certificate"></i>
@@ -190,8 +186,8 @@
                             <?php
                         }
                         ?>
-                        <a href="<?php echo esc_url(home_url('/my-courses')); ?>" class="btn border-2 border-lectus-primary text-lectus-primary hover:bg-lectus-primary hover:text-white transition-all">
-                            <?php esc_html_e('내강의실', 'lectus-academy'); ?>
+                        <a href="<?php echo esc_url(home_url('/student-dashboard')); ?>" class="btn border-2 border-lectus-primary text-lectus-primary hover:bg-lectus-primary hover:text-white transition-all">
+                            <?php esc_html_e('내 강의실', 'lectus-academy'); ?>
                         </a>
                     </div>
                 </div>
@@ -297,10 +293,7 @@
                     </div>
                 </li>
                 <li><a href="<?php echo esc_url(home_url('/student-dashboard')); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="fas fa-tachometer-alt"></i> <?php esc_html_e('대시보드', 'lectus-academy'); ?>
-                </a></li>
-                <li><a href="<?php echo esc_url(home_url('/my-courses')); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="fas fa-book"></i> <?php esc_html_e('내 강의', 'lectus-academy'); ?>
+                    <i class="fas fa-book"></i> <?php esc_html_e('내 강의실', 'lectus-academy'); ?>
                 </a></li>
                 <?php else : ?>
                 <li><a href="<?php echo esc_url(wp_login_url()); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">

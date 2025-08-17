@@ -48,16 +48,10 @@ class Lectus_Academy_Theme_Setup {
                 'template' => 'page-courses.php'
             ),
             array(
-                'title' => '내 강의',
-                'slug' => 'my-courses',
-                'content' => '[lectus_my_courses]',
-                'template' => 'page-my-courses.php'
-            ),
-            array(
-                'title' => '학습 대시보드',
+                'title' => '내 강의실',
                 'slug' => 'student-dashboard',
                 'content' => '[lectus_student_dashboard]',
-                'template' => 'page-dashboard.php'
+                'template' => 'page-student-dashboard.php'
             ),
             array(
                 'title' => '수료증',
@@ -226,8 +220,7 @@ class Lectus_Academy_Theme_Setup {
             $menu_items = array(
                 array('title' => '홈', 'url' => home_url()),
                 array('title' => '강의', 'page' => 'courses'),
-                array('title' => '내 강의', 'page' => 'my-courses'),
-                array('title' => '대시보드', 'page' => 'student-dashboard'),
+                array('title' => '내 강의실', 'page' => 'student-dashboard'),
             );
             
             foreach ($menu_items as $item) {
@@ -349,7 +342,7 @@ class Lectus_Academy_Theme_Setup {
      * Check and show missing pages notice
      */
     public static function check_required_pages() {
-        $required_pages = array('courses', 'my-courses', 'student-dashboard');
+        $required_pages = array('student-dashboard');
         $missing_pages = array();
         
         foreach ($required_pages as $slug) {
