@@ -25,8 +25,10 @@
             
             // Document ready
             $(document).ready(function() {
-                // Initialize tooltips
-                $('[data-toggle="tooltip"]').tooltip();
+                // Initialize tooltips (only if Bootstrap is available)
+                if (typeof $.fn.tooltip !== 'undefined') {
+                    $('[data-toggle="tooltip"]').tooltip();
+                }
             });
         },
 
@@ -250,14 +252,8 @@
         },
 
         handleScroll: function() {
-            const scrollTop = $(window).scrollTop();
-            
-            // Sticky header
-            if (scrollTop > 100) {
-                $('.site-header').addClass('scrolled');
-            } else {
-                $('.site-header').removeClass('scrolled');
-            }
+            // Sticky header is now handled by CSS - no JavaScript needed
+            // Remove this method to prevent conflicts with CSS sticky positioning
         }
     };
 

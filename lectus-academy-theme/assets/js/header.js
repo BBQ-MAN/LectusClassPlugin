@@ -93,29 +93,19 @@
             }
         });
         
-        // Sticky header on scroll
-        let lastScroll = 0;
-        const header = $('#masthead');
-        const headerHeight = header.outerHeight();
-        
+        // Header scroll behavior - simplified for CSS sticky compatibility
+        // Removed auto-hide/show logic that conflicts with CSS sticky positioning
+        // CSS handles sticky positioning, JavaScript only handles visual effects
         $(window).on('scroll', function() {
             const currentScroll = $(this).scrollTop();
+            const header = $('#masthead');
             
-            if (currentScroll > headerHeight) {
+            // Only add visual effects, don't interfere with positioning
+            if (currentScroll > 50) {
                 header.addClass('scrolled');
-                
-                if (currentScroll > lastScroll && currentScroll > 200) {
-                    // Scrolling down
-                    header.addClass('hidden');
-                } else {
-                    // Scrolling up
-                    header.removeClass('hidden');
-                }
             } else {
-                header.removeClass('scrolled hidden');
+                header.removeClass('scrolled');
             }
-            
-            lastScroll = currentScroll;
         });
         
         // Window resize handler

@@ -1,11 +1,22 @@
 <?php
 /**
- * Single Course Template - Inflearn style
+ * Single Course Template - Inflearn style (Cleaned Version)
  *
  * @package LectusAcademy
  */
 
 get_header();
+
+// Enqueue JavaScript files for better compatibility
+wp_enqueue_script('course-tabs', get_template_directory_uri() . '/js/course-tabs.js', array(), '1.0.0', true);
+wp_enqueue_script('sticky-card', get_template_directory_uri() . '/js/sticky-card.js', array(), '1.0.0', true);
+wp_enqueue_script('course-enrollment', get_template_directory_uri() . '/js/course-enrollment.js', array('jquery'), '1.0.0', true);
+
+// Localize script for AJAX
+wp_localize_script('course-enrollment', 'lectusAcademy', array(
+    'ajaxurl' => admin_url('admin-ajax.php'),
+    'nonce' => wp_create_nonce('lectus_academy_nonce')
+));
 
 while (have_posts()) :
     the_post();
@@ -106,8 +117,8 @@ while (have_posts()) :
 <!-- Course Content -->
 <div class="py-12 bg-gray-50">
     <div class="course-layout">
-        <div class="course-content-wrapper grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="course-main-content lg:col-span-2">
+        <div class="course-content-wrapper">
+            <div class="course-main-content">
                 <!-- Tabs Navigation -->
                 <div class="bg-white rounded-lg shadow-sm mb-6">
                     <ul class="tab-navigation flex border-b">
@@ -434,9 +445,9 @@ while (have_posts()) :
             </div>
             
             <!-- Sidebar -->
-            <div class="course-sidebar lg:col-span-1">
+            <div class="course-sidebar">
                 <!-- Purchase Card -->
-                <div id="purchase-card" class="sticky-card bg-white rounded-lg shadow-lg p-6 h-fit sticky top-24 transition-all duration-300 hover:shadow-xl mb-6">
+                <div id="purchase-card" class="sticky-card bg-white rounded-lg shadow-lg p-6 h-fit">
                     <?php if (has_post_thumbnail()) : ?>
                     <div class="mb-4 rounded-lg overflow-hidden">
                         <?php the_post_thumbnail('course-thumbnail', ['class' => 'w-full h-48 object-cover']); ?>
@@ -512,342 +523,7 @@ while (have_posts()) :
 </div>
 
 <script>
-// Enhanced Edge/IE compatible tab switching
-(function() {
-    'use strict';
-    
-    // Cross-browser utilities
-    var utils = {
-        // Cross-browser event handler
-        addEvent: function(element, event, handler) {
-            if (element.addEventListener) {
-                element.addEventListener(event, handler, false);
-            } else if (element.attachEvent) {
-                element.attachEvent('on' + event, handler);
-            }
-        },
-        
-        // Cross-browser class manipulation
-        hasClass: function(element, className) {
-            if (element.classList) {
-                return element.classList.contains(className);
-            } else {
-                return element.className.indexOf(className) !== -1;
-            }
-        },
-        
-        addClass: function(element, className) {
-            if (element.classList) {
-                element.classList.add(className);
-            } else if (!this.hasClass(element, className)) {
-                element.className += ' ' + className;
-            }
-        },
-        
-        removeClass: function(element, className) {
-            if (element.classList) {
-                element.classList.remove(className);
-            } else {
-                element.className = element.className.replace(new RegExp('\\b' + className + '\\b', 'g'), '');
-            }
-        },
-        
-        // Cross-browser query selector
-        queryAll: function(selector) {
-            if (document.querySelectorAll) {
-                return document.querySelectorAll(selector);
-            } else {
-                // Fallback for older browsers
-                return document.getElementsByTagName('*');
-            }
-        }
-    };
-    
-    function initTabSwitching() {
-        var tabLinks = utils.queryAll('[data-tab]');
-        var tabPanes = utils.queryAll('.tab-pane');
-        
-        // Convert NodeList to Array for compatibility
-        var tabLinksArray = [];
-        var tabPanesArray = [];
-        
-        for (var i = 0; i < tabLinks.length; i++) {
-            tabLinksArray.push(tabLinks[i]);
-        }
-        
-        for (var j = 0; j < tabPanes.length; j++) {
-            tabPanesArray.push(tabPanes[j]);
-        }
-        
-        function switchTab(clickedLink) {
-            var targetTab = clickedLink.getAttribute('data-tab');
-            
-            // Remove active styles from all tabs
-            for (var i = 0; i < tabLinksArray.length; i++) {
-                var link = tabLinksArray[i];
-                utils.removeClass(link, 'border-blue-600');
-                utils.removeClass(link, 'text-blue-600');
-                utils.addClass(link, 'border-transparent');
-                utils.addClass(link, 'text-gray-600');
-            }
-            
-            // Hide all tab panes
-            for (var j = 0; j < tabPanesArray.length; j++) {
-                tabPanesArray[j].style.display = 'none';
-            }
-            
-            // Add active styles to clicked tab
-            utils.removeClass(clickedLink, 'border-transparent');
-            utils.removeClass(clickedLink, 'text-gray-600');
-            utils.addClass(clickedLink, 'border-blue-600');
-            utils.addClass(clickedLink, 'text-blue-600');
-            
-            // Show target tab pane
-            var targetPane = document.getElementById(targetTab);
-            if (targetPane) {
-                targetPane.style.display = 'block';
-            }
-            
-            // Debug log for Edge
-            if (window.console && console.log) {
-                console.log('Tab switched to:', targetTab);
-            }
-        }
-        
-        // Initialize first tab as active
-        if (tabLinksArray.length > 0) {
-            setTimeout(function() {
-                switchTab(tabLinksArray[0]);
-            }, 100);
-        }
-        
-        // Attach click handlers
-        for (var k = 0; k < tabLinksArray.length; k++) {
-            (function(link) {
-                utils.addEvent(link, 'click', function(e) {
-                    if (e && e.preventDefault) {
-                        e.preventDefault();
-                    } else {
-                        window.event.returnValue = false; // IE fallback
-                    }
-                    switchTab(link);
-                });
-            })(tabLinksArray[k]);
-        }
-    }
-    
-    // DOM ready function
-    function domReady(callback) {
-        if (document.readyState === 'complete' || 
-           (document.readyState !== 'loading' && !document.documentElement.doScroll)) {
-            callback();
-        } else {
-            utils.addEvent(document, 'DOMContentLoaded', callback);
-        }
-    }
-    
-    // Initialize everything when DOM is ready
-    domReady(function() {
-        initTabSwitching();
-        initStickyCard();
-        
-        // Debug for Edge
-        if (window.console && console.log) {
-            console.log('Course page initialized for Edge/IE compatibility');
-        }
-    });
-    
-    // Sticky card functionality with Edge support
-    function initStickyCard() {
-        var stickyCard = document.querySelector('.sticky-card');
-        if (!stickyCard) return;
-        
-        // Check if browser supports CSS sticky
-        var supportsStickyPosition = (function() {
-            var style = document.createElement('div').style;
-            return 'position' in style && (
-                style.position = 'sticky',
-                style.position === 'sticky'
-            );
-        })();
-        
-        if (!supportsStickyPosition) {
-            // Enhanced fallback for Edge and older browsers
-            var originalParent = stickyCard.parentNode;
-            
-            // Function to get current card dimensions and position
-            function getCurrentCardInfo() {
-                var rect = stickyCard.getBoundingClientRect();
-                return {
-                    top: rect.top + (window.pageYOffset || document.documentElement.scrollTop),
-                    left: rect.left + (window.pageXOffset || document.documentElement.scrollLeft),
-                    width: rect.width,
-                    height: rect.height
-                };
-            }
-            
-            var originalOffset = getCurrentCardInfo();
-            
-            function handleScroll() {
-                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                var triggerPoint = originalOffset.top - 96; // 6rem offset
-                
-                if (scrollTop >= triggerPoint) {
-                    // Apply fixed positioning with correct coordinates
-                    if (stickyCard.classList) {
-                        stickyCard.classList.add('js-fixed');
-                    } else {
-                        // IE fallback
-                        stickyCard.className += ' js-fixed';
-                    }
-                    
-                    // Calculate proper positioning for Edge
-                    var viewportWidth = window.innerWidth || document.documentElement.clientWidth;
-                    var containerMaxWidth = 1280; // max-width of course-layout
-                    var padding = 16; // 1rem padding
-                    
-                    if (viewportWidth >= 1024) {
-                        // Large screen: calculate sidebar position
-                        var containerWidth = Math.min(viewportWidth - (padding * 2), containerMaxWidth);
-                        var mainContentWidth = containerWidth * 0.666667; // 2/3 of container
-                        var sidebarWidth = containerWidth * 0.333333; // 1/3 of container
-                        var maxSidebarWidth = Math.min(sidebarWidth, 400);
-                        
-                        var leftOffset;
-                        if (viewportWidth > containerMaxWidth) {
-                            // Centered container
-                            leftOffset = (viewportWidth - containerMaxWidth) / 2;
-                        } else {
-                            // Full width with padding
-                            leftOffset = padding;
-                        }
-                        
-                        var sidebarLeft = leftOffset + mainContentWidth + 32; // 2rem gap
-                        
-                        stickyCard.style.position = 'fixed';
-                        stickyCard.style.top = '96px';
-                        stickyCard.style.left = sidebarLeft + 'px';
-                        stickyCard.style.right = 'auto';
-                        stickyCard.style.width = maxSidebarWidth + 'px';
-                        stickyCard.style.zIndex = '50';
-                    } else {
-                        // Small screen: use right positioning
-                        stickyCard.style.position = 'fixed';
-                        stickyCard.style.top = '96px';
-                        stickyCard.style.right = padding + 'px';
-                        stickyCard.style.left = 'auto';
-                        stickyCard.style.width = (originalOffset.width || 350) + 'px';
-                        stickyCard.style.zIndex = '50';
-                    }
-                } else {
-                    // Remove fixed positioning
-                    if (stickyCard.classList) {
-                        stickyCard.classList.remove('js-fixed');
-                    } else {
-                        // IE fallback
-                        stickyCard.className = stickyCard.className.replace(/\bjs-fixed\b/g, '');
-                    }
-                    
-                    stickyCard.style.position = '';
-                    stickyCard.style.top = '';
-                    stickyCard.style.right = '';
-                    stickyCard.style.left = '';
-                    stickyCard.style.width = '';
-                    stickyCard.style.zIndex = '';
-                }
-            }
-            
-            // Initial call and event binding
-            handleScroll();
-            utils.addEvent(window, 'scroll', handleScroll);
-            utils.addEvent(window, 'resize', function() {
-                // Recalculate original position on resize
-                if (!stickyCard.classList || !stickyCard.classList.contains('js-fixed')) {
-                    originalOffset = getCurrentCardInfo();
-                }
-                handleScroll();
-            });
-            
-            // Listen for card content changes (enrollment status changes)
-            var observer;
-            if (window.MutationObserver) {
-                observer = new MutationObserver(function(mutations) {
-                    var shouldUpdate = false;
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'childList' || mutation.type === 'characterData') {
-                            shouldUpdate = true;
-                        }
-                    });
-                    
-                    if (shouldUpdate && (!stickyCard.classList || !stickyCard.classList.contains('js-fixed'))) {
-                        // Card content changed and it's not currently fixed
-                        setTimeout(function() {
-                            originalOffset = getCurrentCardInfo();
-                        }, 100); // Small delay to ensure DOM updates are complete
-                    }
-                });
-                
-                observer.observe(stickyCard, {
-                    childList: true,
-                    subtree: true,
-                    characterData: true
-                });
-            }
-        }
-        
-        // Global function to recalculate sticky card position
-        // Can be called after enrollment status changes
-        window.recalculateStickyCard = function() {
-            if (stickyCard && !supportsStickyPosition) {
-                if (!stickyCard.classList || !stickyCard.classList.contains('js-fixed')) {
-                    originalOffset = getCurrentCardInfo();
-                }
-            }
-        };
-    }
-})();
-
-// Listen for enrollment status changes (for AJAX updates)
-document.addEventListener('DOMContentLoaded', function() {
-    // Override XMLHttpRequest to detect AJAX calls that might change enrollment status
-    var originalXHR = window.XMLHttpRequest;
-    var originalOpen = originalXHR.prototype.open;
-    var originalSend = originalXHR.prototype.send;
-    
-    originalXHR.prototype.open = function() {
-        this._url = arguments[1];
-        return originalOpen.apply(this, arguments);
-    };
-    
-    originalXHR.prototype.send = function() {
-        var xhr = this;
-        var originalOnLoad = xhr.onload;
-        
-        xhr.onload = function() {
-            // Check if this might be an enrollment-related request
-            if (xhr._url && (
-                xhr._url.indexOf('enroll') !== -1 || 
-                xhr._url.indexOf('purchase') !== -1 ||
-                xhr._url.indexOf('lectus') !== -1
-            )) {
-                // Recalculate sticky card position after potential enrollment change
-                setTimeout(function() {
-                    if (window.recalculateStickyCard) {
-                        window.recalculateStickyCard();
-                    }
-                }, 500);
-            }
-            
-            if (originalOnLoad) {
-                return originalOnLoad.apply(this, arguments);
-            }
-        };
-        
-        return originalSend.apply(this, arguments);
-    };
-});
-
-// Edge-compatible curriculum section toggle
+// Curriculum section toggle function (kept inline as it's simple)
 function toggleSection(header) {
     var section = header.parentElement;
     var content = header.nextElementSibling;
@@ -879,145 +555,6 @@ function toggleSection(header) {
         }
     }
 }
-
-// Edge-compatible Sticky Purchase Card
-function initStickyCard() {
-    var purchaseCard = document.getElementById('purchase-card');
-    var header = document.querySelector ? document.querySelector('header') : document.getElementsByTagName('header')[0];
-    
-    if (!purchaseCard || !header) {
-        if (window.console && console.log) {
-            console.log('Sticky card elements not found');
-        }
-        return;
-    }
-    
-    var isSticky = false;
-    var headerHeight = header.offsetHeight || 80;
-    var stickyOffset = 96; // 6rem in pixels
-    var originalPosition = null;
-    var originalTop = null;
-    var originalZIndex = null;
-    
-    // Enhanced Edge detection
-    var isEdge = navigator.userAgent.indexOf('Edge/') > -1 || navigator.userAgent.indexOf('Edg/') > -1;
-    
-    // Force fallback for Edge
-    var shouldUseFallback = isEdge || !CSS || !CSS.supports || !CSS.supports('position', 'sticky');
-    
-    if (window.console && console.log) {
-        console.log('Sticky card init - Edge detected:', isEdge, 'Use fallback:', shouldUseFallback);
-    }
-    
-    // Store original styles
-    var originalStyle = {
-        position: purchaseCard.style.position,
-        top: purchaseCard.style.top,
-        zIndex: purchaseCard.style.zIndex,
-        width: purchaseCard.style.width
-    };
-    
-    function updateCardPosition() {
-        var scrollY = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
-        var shouldBeSticky = scrollY > 200; // Increased threshold for better UX
-        
-        if (shouldUseFallback) {
-            // Force manual sticky positioning for Edge
-            if (shouldBeSticky && !isSticky) {
-                isSticky = true;
-                
-                // Use CSS class approach for Edge
-                if (purchaseCard.classList) {
-                    purchaseCard.classList.add('js-fixed', 'shadow-2xl');
-                } else {
-                    purchaseCard.className += ' js-fixed shadow-2xl';
-                }
-                
-                if (window.console && console.log) {
-                    console.log('Edge sticky activated - scrollY:', scrollY);
-                }
-                
-            } else if (!shouldBeSticky && isSticky) {
-                isSticky = false;
-                
-                // Remove CSS classes for Edge
-                if (purchaseCard.classList) {
-                    purchaseCard.classList.remove('js-fixed', 'shadow-2xl');
-                } else {
-                    purchaseCard.className = purchaseCard.className
-                        .replace(' js-fixed', '')
-                        .replace(' shadow-2xl', '')
-                        .replace('js-fixed', '')
-                        .replace('shadow-2xl', '');
-                }
-                
-                if (window.console && console.log) {
-                    console.log('Edge sticky deactivated - scrollY:', scrollY);
-                }
-            }
-        } else {
-            // For Chrome and other modern browsers, use CSS sticky with enhancement
-            if (shouldBeSticky && !isSticky) {
-                isSticky = true;
-                if (purchaseCard.classList) {
-                    purchaseCard.classList.add('shadow-2xl');
-                }
-            } else if (!shouldBeSticky && isSticky) {
-                isSticky = false;
-                if (purchaseCard.classList) {
-                    purchaseCard.classList.remove('shadow-2xl');
-                }
-            }
-        }
-    }
-    
-    // Cross-browser event attachment
-    function addScrollListener() {
-        if (window.addEventListener) {
-            window.addEventListener('scroll', updateCardPosition, { passive: true });
-            window.addEventListener('resize', updateCardPosition, { passive: true });
-        } else if (window.attachEvent) {
-            window.attachEvent('onscroll', updateCardPosition);
-            window.attachEvent('onresize', updateCardPosition);
-        }
-    }
-    
-    // Initialize
-    addScrollListener();
-    
-    // Initial check
-    setTimeout(function() {
-        updateCardPosition();
-    }, 100);
-}
-
-// Enrollment
-jQuery(document).ready(function($) {
-    // Initialize enhanced sticky card
-    initStickyCard();
-    
-    $('.enroll-btn').on('click', function() {
-        const courseId = $(this).data('course-id');
-        
-        $.ajax({
-            url: lectusAcademy.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'lectus_academy_enroll',
-                course_id: courseId,
-                nonce: lectusAcademy.nonce
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert(response.data.message);
-                    location.reload();
-                } else {
-                    alert(response.data.message);
-                }
-            }
-        });
-    });
-});
 </script>
 
 <?php

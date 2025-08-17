@@ -147,6 +147,94 @@ function lectus_academy_scripts() {
         )
     ));
     
+    // Course page specific scripts and fixes
+    if (is_singular('coursesingle')) {
+        // Enqueue separate tab and sticky card scripts
+        wp_enqueue_script(
+            'course-tabs',
+            get_template_directory_uri() . '/js/course-tabs.js',
+            array(),
+            '1.0.2',
+            true
+        );
+        
+        wp_enqueue_script(
+            'sticky-card',
+            get_template_directory_uri() . '/js/sticky-card.js',
+            array(),
+            '1.0.4',
+            true
+        );
+        
+        wp_enqueue_script(
+            'course-enrollment',
+            get_template_directory_uri() . '/js/course-enrollment.js',
+            array('jquery'),
+            '1.0.2',
+            true
+        );
+        
+        // Fix course layout DOM structure
+        wp_add_inline_script('lectus-academy-script', '
+            (function() {
+                console.log("[CourseLayout] Initializing layout fix");
+                
+                function ensureProperStructure() {
+                    var courseLayout = document.querySelector(".course-layout");
+                    var wrapper = document.querySelector(".course-content-wrapper");
+                    var mainContent = document.querySelector(".course-main-content");
+                    var sidebar = document.querySelector(".course-sidebar");
+                    
+                    // Ensure wrapper exists and has proper classes
+                    if (courseLayout && !wrapper) {
+                        wrapper = document.createElement("div");
+                        wrapper.className = "course-content-wrapper grid grid-cols-1 lg:grid-cols-3 gap-8";
+                        
+                        // Move all children to wrapper
+                        while (courseLayout.firstChild) {
+                            wrapper.appendChild(courseLayout.firstChild);
+                        }
+                        courseLayout.appendChild(wrapper);
+                        console.log("[CourseLayout] Created wrapper");
+                    }
+                    
+                    // Ensure sidebar is inside wrapper
+                    if (sidebar && wrapper && !wrapper.contains(sidebar)) {
+                        wrapper.appendChild(sidebar);
+                        console.log("[CourseLayout] Moved sidebar inside wrapper");
+                    }
+                    
+                    // Add grid classes if missing
+                    if (mainContent && !mainContent.classList.contains("lg:col-span-2")) {
+                        mainContent.classList.add("lg:col-span-2");
+                    }
+                    
+                    if (sidebar && !sidebar.classList.contains("lg:col-span-1")) {
+                        sidebar.classList.add("lg:col-span-1");
+                    }
+                }
+                
+                // Run on DOM ready
+                if (document.readyState === "loading") {
+                    document.addEventListener("DOMContentLoaded", ensureProperStructure);
+                } else {
+                    ensureProperStructure();
+                }
+                
+                // Run after delays for dynamic content
+                setTimeout(ensureProperStructure, 500);
+                setTimeout(ensureProperStructure, 1500);
+                
+                // Watch for AJAX changes
+                if (window.jQuery) {
+                    jQuery(document).ajaxComplete(function() {
+                        setTimeout(ensureProperStructure, 100);
+                    });
+                }
+            })();
+        ');
+    }
+    
     // Comment reply script
     if (is_singular() && comments_open() && get_option('thread_comments')) {
         wp_enqueue_script('comment-reply');

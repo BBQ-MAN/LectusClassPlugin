@@ -46,7 +46,7 @@ get_header();
         <?php else : ?>
             <div class="no-results">
                 <h2><?php esc_html_e('Nothing Found', 'lectus-academy'); ?></h2>
-                <p><?php esc_html_e('It seems we can't find what you're looking for. Perhaps searching can help.', 'lectus-academy'); ?></p>
+                <p><?php esc_html_e('It seems we can\'t find what you\'re looking for. Perhaps searching can help.', 'lectus-academy'); ?></p>
                 <?php get_search_form(); ?>
             </div>
         <?php endif; ?>

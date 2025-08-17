@@ -1,11 +1,22 @@
 <?php
 /**
- * Single Course Template - Inflearn style
+ * Single Course Template - Inflearn style (Cleaned Version)
  *
  * @package LectusAcademy
  */
 
 get_header();
+
+// Enqueue JavaScript files for better compatibility
+wp_enqueue_script('course-tabs', get_template_directory_uri() . '/js/course-tabs.js', array(), '1.0.0', true);
+wp_enqueue_script('sticky-card', get_template_directory_uri() . '/js/sticky-card.js', array(), '1.0.0', true);
+wp_enqueue_script('course-enrollment', get_template_directory_uri() . '/js/course-enrollment.js', array('jquery'), '1.0.0', true);
+
+// Localize script for AJAX
+wp_localize_script('course-enrollment', 'lectusAcademy', array(
+    'ajaxurl' => admin_url('admin-ajax.php'),
+    'nonce' => wp_create_nonce('lectus_academy_nonce')
+));
 
 while (have_posts()) :
     the_post();
@@ -105,12 +116,12 @@ while (have_posts()) :
 
 <!-- Course Content -->
 <div class="py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2">
+    <div class="course-layout max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="course-content-wrapper grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="course-main-content lg:col-span-2">
                 <!-- Tabs Navigation -->
                 <div class="bg-white rounded-lg shadow-sm mb-6">
-                    <ul class="flex border-b">
+                    <ul class="tab-navigation flex border-b">
                         <li class="active">
                             <a href="#overview" data-tab="overview" class="inline-flex items-center gap-2 px-6 py-4 border-b-2 border-blue-600 text-blue-600 font-medium">
                                 <i class="fas fa-info-circle"></i> 강의소개
@@ -434,9 +445,9 @@ while (have_posts()) :
             </div>
             
             <!-- Sidebar -->
-            <div class="lg:col-span-1">
+            <div class="course-sidebar lg:col-span-1">
                 <!-- Purchase Card -->
-                <div id="purchase-card" class="bg-white rounded-lg shadow-lg p-6 h-fit sticky top-24 transition-all duration-300 hover:shadow-xl mb-6">
+                <div id="purchase-card" class="sticky-card bg-white rounded-lg shadow-lg p-6 h-fit">
                     <?php if (has_post_thumbnail()) : ?>
                     <div class="mb-4 rounded-lg overflow-hidden">
                         <?php the_post_thumbnail('course-thumbnail', ['class' => 'w-full h-48 object-cover']); ?>
@@ -512,113 +523,38 @@ while (have_posts()) :
 </div>
 
 <script>
-// Tab switching
-document.addEventListener('DOMContentLoaded', function() {
-    const tabLinks = document.querySelectorAll('[data-tab]');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-    
-    tabLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Remove active styles from all tabs
-            tabLinks.forEach(l => {
-                l.classList.remove('border-blue-600', 'text-blue-600');
-                l.classList.add('border-transparent', 'text-gray-600');
-            });
-            
-            // Hide all tab panes
-            tabPanes.forEach(p => {
-                p.style.display = 'none';
-            });
-            
-            // Add active styles to clicked tab
-            this.classList.remove('border-transparent', 'text-gray-600');
-            this.classList.add('border-blue-600', 'text-blue-600');
-            
-            // Show selected tab pane
-            const tabId = this.getAttribute('data-tab');
-            document.getElementById(tabId).style.display = 'block';
-        });
-    });
-});
-
-// Curriculum section toggle
+// Curriculum section toggle function (kept inline as it's simple)
 function toggleSection(header) {
-    const section = header.parentElement;
-    const content = header.nextElementSibling;
-    const icon = header.querySelector('.fas');
+    var section = header.parentElement;
+    var content = header.nextElementSibling;
+    var icon = header.querySelector ? header.querySelector('.fas') : null;
     
-    if (content.style.display === 'none') {
+    if (!content) return;
+    
+    if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
-        icon.classList.remove('fa-chevron-right');
-        icon.classList.add('fa-chevron-down');
+        if (icon) {
+            if (icon.classList) {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                // IE fallback
+                icon.className = icon.className.replace('fa-chevron-right', 'fa-chevron-down');
+            }
+        }
     } else {
         content.style.display = 'none';
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-right');
-    }
-}
-
-// Enhanced Sticky Purchase Card
-function initStickyCard() {
-    const purchaseCard = document.getElementById('purchase-card');
-    const header = document.querySelector('header');
-    
-    if (!purchaseCard || !header) return;
-    
-    let isSticky = false;
-    const headerHeight = header.offsetHeight;
-    
-    function updateCardPosition() {
-        const scrollY = window.scrollY;
-        const cardRect = purchaseCard.getBoundingClientRect();
-        const shouldBeSticky = scrollY > 100;
-        
-        if (shouldBeSticky && !isSticky) {
-            isSticky = true;
-            purchaseCard.style.top = `${headerHeight + 20}px`;
-            purchaseCard.classList.add('shadow-2xl', 'scale-105');
-            purchaseCard.classList.remove('shadow-lg');
-        } else if (!shouldBeSticky && isSticky) {
-            isSticky = false;
-            purchaseCard.style.top = '6rem';
-            purchaseCard.classList.remove('shadow-2xl', 'scale-105');
-            purchaseCard.classList.add('shadow-lg');
+        if (icon) {
+            if (icon.classList) {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                // IE fallback
+                icon.className = icon.className.replace('fa-chevron-down', 'fa-chevron-right');
+            }
         }
     }
-    
-    window.addEventListener('scroll', updateCardPosition);
-    window.addEventListener('resize', updateCardPosition);
 }
-
-// Enrollment
-jQuery(document).ready(function($) {
-    // Initialize enhanced sticky card
-    initStickyCard();
-    
-    $('.enroll-btn').on('click', function() {
-        const courseId = $(this).data('course-id');
-        
-        $.ajax({
-            url: lectusAcademy.ajaxurl,
-            type: 'POST',
-            data: {
-                action: 'lectus_academy_enroll',
-                course_id: courseId,
-                nonce: lectusAcademy.nonce
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert(response.data.message);
-                    location.reload();
-                } else {
-                    alert(response.data.message);
-                }
-            }
-        });
-    });
-});
 </script>
 
 <?php

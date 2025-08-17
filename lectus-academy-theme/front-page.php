@@ -8,27 +8,27 @@
 get_header();
 ?>
 
-<main id="primary" class="site-main">
+<main id="primary" class="">
     
     <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <h1 class="hero-title">
+    <section class="hero-section bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
+        <div class="hero-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="hero-content text-center">
+                <h1 class="hero-title text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
                     <?php esc_html_e('성장하는 개발자를 위한', 'lectus-academy'); ?><br>
                     <?php esc_html_e('온라인 강의 플랫폼', 'lectus-academy'); ?>
                 </h1>
-                <p class="hero-subtitle">
+                <p class="hero-subtitle text-xl md:text-2xl mb-8 text-blue-100">
                     <?php esc_html_e('개발, 디자인, 비즈니스 등 다양한 분야의 전문 지식을 온라인으로 학습하세요', 'lectus-academy'); ?>
                 </p>
-                <div class="hero-search">
-                    <form role="search" method="get" class="search-form" action="<?php echo esc_url(home_url('/')); ?>">
+                <div class="hero-search max-w-2xl mx-auto">
+                    <form role="search" method="get" class="search-form relative" action="<?php echo esc_url(home_url('/')); ?>">
                         <input type="search" 
-                               class="search-input" 
+                               class="search-input w-full px-6 py-4 rounded-full text-gray-900 text-lg focus:outline-none focus:ring-4 focus:ring-blue-300" 
                                placeholder="<?php esc_attr_e('배우고 싶은 지식을 검색해보세요', 'lectus-academy'); ?>" 
                                value="<?php echo get_search_query(); ?>" 
                                name="s">
-                        <button type="submit" class="search-submit">
+                        <button type="submit" class="search-submit absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full transition">
                             <i class="fas fa-search"></i>
                         </button>
                     </form>
@@ -38,15 +38,15 @@ get_header();
     </section>
 
     <!-- Popular Keywords -->
-    <section class="popular-keywords">
-        <div class="container">
-            <div class="keywords-list">
-                <span class="keyword-label"><?php esc_html_e('인기 검색어', 'lectus-academy'); ?></span>
+    <section class="keywords-section bg-white py-4 border-b">
+        <div class="keywords-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="keywords-wrapper flex flex-wrap items-center gap-3">
+                <span class="keywords-label text-gray-600 font-medium"><?php esc_html_e('인기 검색어', 'lectus-academy'); ?></span>
                 <?php
                 $popular_keywords = array('React', 'Python', 'JavaScript', 'Spring', 'Node.js', 'Vue.js', 'Java', 'Django');
                 foreach ($popular_keywords as $keyword) :
                 ?>
-                <a href="<?php echo esc_url(home_url('/?s=' . urlencode($keyword))); ?>" class="keyword-tag">
+                <a href="<?php echo esc_url(home_url('/?s=' . urlencode($keyword))); ?>" class="keyword-tag px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition">
                     <?php echo esc_html($keyword); ?>
                 </a>
                 <?php endforeach; ?>
@@ -55,20 +55,20 @@ get_header();
     </section>
 
     <!-- Featured Courses -->
-    <section class="course-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-fire" style="color: #ff6b6b;"></i>
+    <section class="featured-section py-16 bg-gray-50">
+        <div class="featured-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="featured-header flex justify-between items-center mb-8">
+                <h2 class="section-title text-3xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-fire text-red-500"></i>
                     <?php esc_html_e('인기 강의', 'lectus-academy'); ?>
                 </h2>
-                <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>" class="section-link">
+                <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>" class="view-all text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
                     <?php esc_html_e('전체보기', 'lectus-academy'); ?>
                     <i class="fas fa-chevron-right"></i>
                 </a>
             </div>
             
-            <div class="course-grid">
+            <div class="featured-grid grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <?php
                 // Get featured courses
                 $featured_courses = new WP_Query(array(
@@ -121,54 +121,54 @@ get_header();
                             }
                         }
                 ?>
-                <article class="course-card">
-                    <a href="<?php the_permalink(); ?>" class="course-card-link">
-                        <div class="course-thumbnail">
+                <article class="course-card bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
+                    <a href="<?php the_permalink(); ?>" class="course-link block">
+                        <div class="course-thumbnail relative">
                             <?php if (has_post_thumbnail()) : ?>
-                                <?php the_post_thumbnail('medium_large'); ?>
+                                <?php the_post_thumbnail('medium_large', ['class' => 'w-full h-40 object-cover']); ?>
                             <?php else : ?>
-                                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/course-placeholder.jpg'); ?>" alt="">
+                                <img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/course-placeholder.jpg'); ?>" alt="" class="w-full h-40 object-cover">
                             <?php endif; ?>
                             <?php if ($discount_percent > 0) : ?>
-                                <span class="course-badge sale"><?php echo esc_html($discount_percent); ?>%</span>
+                                <span class="discount-badge absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold"><?php echo esc_html($discount_percent); ?>%</span>
                             <?php elseif ((time() - get_the_time('U')) < 7 * DAY_IN_SECONDS) : ?>
-                                <span class="course-badge new">NEW</span>
+                                <span class="new-badge absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded text-sm font-bold">NEW</span>
                             <?php endif; ?>
                         </div>
-                        <div class="course-content">
-                            <h3 class="course-title"><?php the_title(); ?></h3>
-                            <div class="course-instructor"><?php echo esc_html($instructor_name); ?></div>
+                        <div class="course-content p-4">
+                            <h3 class="course-title font-semibold text-gray-900 mb-1 line-clamp-2"><?php the_title(); ?></h3>
+                            <div class="course-instructor text-sm text-gray-600 mb-2"><?php echo esc_html($instructor_name); ?></div>
                             
-                            <div class="course-rating">
-                                <span class="rating-stars">
+                            <div class="course-rating flex items-center gap-1 mb-2">
+                                <span class="rating-stars text-yellow-400">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star-half-alt"></i>
                                 </span>
-                                <span class="rating-count">(<?php echo esc_html($enrolled_count); ?>)</span>
+                                <span class="rating-count text-sm text-gray-600">(<?php echo esc_html($enrolled_count); ?>)</span>
                             </div>
                             
-                            <div class="course-meta">
-                                <span class="course-meta-item">
+                            <div class="course-meta flex gap-3 text-xs text-gray-500 mb-3">
+                                <span class="meta-item flex items-center gap-1">
                                     <i class="fas fa-book"></i>
                                     <?php printf(esc_html__('%d개 수업', 'lectus-academy'), $lesson_count); ?>
                                 </span>
                                 <?php if ($level_name) : ?>
-                                <span class="course-meta-item">
+                                <span class="meta-item flex items-center gap-1">
                                     <i class="fas fa-signal"></i>
                                     <?php echo esc_html($level_name); ?>
                                 </span>
                                 <?php endif; ?>
                             </div>
                             
-                            <div class="course-price">
+                            <div class="course-pricing flex items-center gap-2">
                                 <?php if ($discount_percent > 0) : ?>
-                                    <span class="price-discount"><?php echo esc_html($discount_percent); ?>%</span>
-                                    <span class="price-original"><?php echo wc_price($original_price); ?></span>
+                                    <span class="discount-percent bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-bold"><?php echo esc_html($discount_percent); ?>%</span>
+                                    <span class="original-price text-gray-400 line-through text-sm"><?php echo wc_price($original_price); ?></span>
                                 <?php endif; ?>
-                                <span class="price-sale"><?php echo $price_html; ?></span>
+                                <span class="current-price font-bold text-lg text-gray-900"><?php echo $price_html; ?></span>
                             </div>
                         </div>
                     </a>
@@ -183,20 +183,20 @@ get_header();
     </section>
 
     <!-- New Courses -->
-    <section class="course-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">
-                    <i class="fas fa-sparkles" style="color: #4c6ef5;"></i>
+    <section class="new-courses-section py-16 bg-white">
+        <div class="new-courses-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="new-courses-header flex justify-between items-center mb-8">
+                <h2 class="section-title text-3xl font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-sparkles text-blue-500"></i>
                     <?php esc_html_e('신규 강의', 'lectus-academy'); ?>
                 </h2>
-                <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle') . '?orderby=date'); ?>" class="section-link">
+                <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle') . '?orderby=date'); ?>" class="view-all text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
                     <?php esc_html_e('전체보기', 'lectus-academy'); ?>
                     <i class="fas fa-chevron-right"></i>
                 </a>
             </div>
             
-            <div class="course-grid">
+            <div class="new-courses-grid grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 <?php
                 $new_courses = new WP_Query(array(
                     'post_type' => 'coursesingle',
@@ -218,15 +218,15 @@ get_header();
     </section>
 
     <!-- Categories Section -->
-    <section class="categories-section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">
+    <section class="categories-section py-16 bg-gray-50">
+        <div class="categories-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="categories-header mb-8">
+                <h2 class="section-title text-3xl font-bold text-gray-900 text-center">
                     <?php esc_html_e('카테고리별 강의', 'lectus-academy'); ?>
                 </h2>
             </div>
             
-            <div class="categories-grid">
+            <div class="categories-grid grid grid-cols-2 md:grid-cols-4 gap-4">
                 <?php
                 $categories = get_terms(array(
                     'taxonomy' => 'course_category',
@@ -243,10 +243,10 @@ get_header();
                     foreach ($categories as $index => $category) :
                         $color = isset($category_colors[$index]) ? $category_colors[$index] : '#667eea';
                 ?>
-                <a href="<?php echo esc_url(get_term_link($category)); ?>" class="category-card" style="background: linear-gradient(135deg, <?php echo esc_attr($color); ?> 0%, <?php echo esc_attr($color); ?>aa 100%);">
-                    <div class="category-card-content">
-                        <h3 class="category-name"><?php echo esc_html($category->name); ?></h3>
-                        <p class="category-count">
+                <a href="<?php echo esc_url(get_term_link($category)); ?>" class="category-card block p-8 rounded-lg text-white transition-transform hover:scale-105" style="background: linear-gradient(135deg, <?php echo esc_attr($color); ?> 0%, <?php echo esc_attr($color); ?>aa 100%);">
+                    <div class="category-content text-center">
+                        <h3 class="category-name text-lg font-bold mb-2"><?php echo esc_html($category->name); ?></h3>
+                        <p class="category-count text-sm opacity-90">
                             <?php printf(esc_html__('%d개 강의', 'lectus-academy'), $category->count); ?>
                         </p>
                     </div>
@@ -260,140 +260,26 @@ get_header();
     </section>
 
     <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <div class="cta-content">
-                <h2 class="cta-title">
-                    <?php esc_html_e('지식을 나누고 성장하는 공간', 'lectus-academy'); ?>
-                </h2>
-                <p class="cta-subtitle">
-                    <?php esc_html_e('당신의 지식과 경험을 공유하여 더 많은 사람들과 함께 성장하세요', 'lectus-academy'); ?>
-                </p>
-                <div class="cta-buttons">
-                    <a href="<?php echo esc_url(home_url('/apply-instructor')); ?>" class="btn btn-primary btn-lg">
-                        <?php esc_html_e('지식공유 신청하기', 'lectus-academy'); ?>
-                    </a>
-                    <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>" class="btn btn-outline btn-lg">
-                        <?php esc_html_e('강의 둘러보기', 'lectus-academy'); ?>
-                    </a>
-                </div>
+    <section class="cta-section py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div class="cta-container max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="cta-title text-4xl font-bold mb-4">
+                <?php esc_html_e('지식을 나누고 성장하는 공간', 'lectus-academy'); ?>
+            </h2>
+            <p class="cta-subtitle text-xl mb-8 text-blue-100">
+                <?php esc_html_e('당신의 지식과 경험을 공유하여 더 많은 사람들과 함께 성장하세요', 'lectus-academy'); ?>
+            </p>
+            <div class="cta-buttons flex flex-col md:flex-row gap-4 justify-center">
+                <a href="<?php echo esc_url(home_url('/apply-instructor')); ?>" class="cta-button-primary px-8 py-4 bg-white text-blue-600 font-bold rounded-lg hover:bg-gray-100 transition">
+                    <?php esc_html_e('지식공유 신청하기', 'lectus-academy'); ?>
+                </a>
+                <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>" class="cta-button-secondary px-8 py-4 border-2 border-white text-white font-bold rounded-lg hover:bg-white hover:text-blue-600 transition">
+                    <?php esc_html_e('강의 둘러보기', 'lectus-academy'); ?>
+                </a>
             </div>
         </div>
     </section>
 
 </main>
-
-<style>
-/* Additional styles for front page */
-.popular-keywords {
-    padding: 20px 0;
-    background: white;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.keywords-list {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.keyword-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.keyword-tag {
-    padding: 6px 12px;
-    background: var(--bg-gray);
-    border-radius: 20px;
-    font-size: 14px;
-    color: var(--text-primary);
-    transition: all 0.2s;
-}
-
-.keyword-tag:hover {
-    background: var(--primary-color);
-    color: white;
-}
-
-.categories-section {
-    padding: 60px 0;
-    background: var(--bg-gray);
-}
-
-.categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.category-card {
-    padding: 40px 30px;
-    border-radius: var(--radius-lg);
-    color: white;
-    text-align: center;
-    transition: transform 0.3s;
-}
-
-.category-card:hover {
-    transform: translateY(-4px);
-    color: white;
-}
-
-.category-name {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.category-count {
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-.cta-section {
-    padding: 80px 0;
-    background: linear-gradient(135deg, #30b2e5 0%, #2090c0 100%);
-    color: white;
-    text-align: center;
-}
-
-.cta-title {
-    font-size: 36px;
-    font-weight: 700;
-    margin-bottom: 16px;
-}
-
-.cta-subtitle {
-    font-size: 18px;
-    margin-bottom: 32px;
-    opacity: 0.95;
-}
-
-.cta-buttons {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-}
-
-.btn-lg {
-    padding: 14px 32px;
-    font-size: 16px;
-}
-
-.btn-outline {
-    background: transparent;
-    border: 2px solid white;
-    color: white;
-}
-
-.btn-outline:hover {
-    background: white;
-    color: var(--primary-color);
-}
-</style>
 
 <?php
 get_footer();

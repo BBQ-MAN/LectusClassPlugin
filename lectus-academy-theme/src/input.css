@@ -2,6 +2,318 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Browser Compatibility Fixes */
+@layer base {
+  /* IE11 and Edge flexbox fixes */
+  .ie-flex-fix {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: row;
+    flex-direction: row;
+  }
+  
+  /* Grid fallback for older browsers */
+  .grid-fallback {
+    display: block;
+  }
+  
+  /* Support for CSS Grid in IE11 */
+  @supports not (display: grid) {
+    .grid {
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+    }
+    
+    .lg\:grid-cols-3 > * {
+      -ms-flex: 0 0 33.333333%;
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+    }
+    
+    .md\:grid-cols-2 > * {
+      -ms-flex: 0 0 50%;
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+    
+    .grid-cols-1 > * {
+      -ms-flex: 0 0 100%;
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+  
+  /* Edge specific fixes */
+  @supports (-ms-ime-align: auto) {
+    .grid {
+      display: -ms-grid;
+      -ms-grid-columns: 1fr 2rem 1fr 2rem 1fr;
+      -ms-grid-rows: auto;
+    }
+    
+    .lg\:col-span-2 {
+      -ms-grid-column: 1;
+      -ms-grid-column-span: 3;
+    }
+    
+    .lg\:col-span-1 {
+      -ms-grid-column: 5;
+    }
+  }
+}
+
+@layer components {
+  /* Course layout component with browser compatibility */
+  .course-layout {
+    display: block;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  /* Use Grid by default with proper fallback */
+  .course-content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    width: 100%;
+  }
+  
+  @media (min-width: 1024px) {
+    .course-content-wrapper {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+  
+  /* Fallback for browsers without Grid support */
+  @supports not (display: grid) {
+    .course-content-wrapper {
+      display: block;
+      width: 100%;
+    }
+    
+    .course-main-content {
+      display: block;
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+    
+    .course-sidebar {
+      display: block;
+      width: 100%;
+    }
+    
+    @media (min-width: 1024px) {
+      .course-content-wrapper {
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        gap: 2rem;
+      }
+      
+      .course-main-content {
+        -ms-flex: 2;
+        flex: 2;
+        margin-bottom: 0;
+      }
+      
+      .course-sidebar {
+        -ms-flex: 1;
+        flex: 1;
+        max-width: 400px;
+      }
+    }
+  }
+  
+  /* Tab navigation fix for Edge */
+  .tab-navigation {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .tab-navigation li {
+    -ms-flex: none;
+    flex: none;
+  }
+  
+  /* Enhanced sticky positioning with Edge support */
+  .sticky-card {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 6rem;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    min-height: fit-content;
+    height: auto;
+  }
+  
+  /* IE11 fallback for sticky */
+  @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .sticky-card {
+      position: relative;
+    }
+  }
+  
+  /* Edge-specific sticky card fixes */
+  @supports (-ms-ime-align: auto) {
+    .sticky-card {
+      /* Force relative positioning for Edge fallback */
+      position: relative !important;
+      top: auto !important;
+    }
+    
+    /* When manually positioned by JavaScript */
+    .sticky-card.js-fixed {
+      position: fixed !important;
+      top: 6rem !important;
+      z-index: 50 !important;
+      margin: 0 !important;
+    }
+  }
+  
+  /* Edge Legacy specific fixes (Old Edge before Chromium) */
+  @supports (-ms-ime-align: auto) {
+    /* Force flexbox for legacy Edge */
+    .course-content-wrapper {
+      display: -ms-flexbox !important;
+      display: flex !important;
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    
+    .course-main-content,
+    .course-sidebar {
+      width: 100%;
+    }
+    
+    /* Large screen layout for legacy Edge */
+    @media (min-width: 1024px) {
+      .course-content-wrapper {
+        -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+      }
+      
+      .course-main-content {
+        -ms-flex: 2 1 66%;
+        flex: 2 1 66%;
+        max-width: calc(66.666667% - 1rem);
+      }
+      
+      .course-sidebar {
+        -ms-flex: 1 1 33%;
+        flex: 1 1 33%;
+        max-width: 400px;
+        margin-left: 2rem;
+      }
+      
+      /* Grid column compatibility */
+      .lg\\:col-span-2 {
+        -ms-flex: 2 1 66%;
+        flex: 2 1 66%;
+      }
+      
+      .lg\\:col-span-1 {
+        -ms-flex: 1 1 33%;
+        flex: 1 1 33%;
+      }
+    }
+    
+    /* Grid layout fallbacks */
+    .grid-cols-1 > * { 
+      -ms-flex: 1 1 100%; 
+      flex: 1 1 100%; 
+      width: 100%;
+      max-width: 100%; 
+    }
+    
+    .grid-cols-2 > * { 
+      -ms-flex: 1 1 48%; 
+      flex: 1 1 48%; 
+      width: 48%;
+      max-width: 48%; 
+      margin-right: 2%; 
+    }
+    
+    .grid-cols-3 > * { 
+      -ms-flex: 1 1 31%; 
+      flex: 1 1 31%; 
+      width: 31%;
+      max-width: 31%; 
+      margin-right: 2%; 
+    }
+    
+    @media (min-width: 768px) {
+      .md\\:grid-cols-2 > * { 
+        -ms-flex: 1 1 48%; 
+        flex: 1 1 48%; 
+        width: 48%;
+        max-width: 48%; 
+      }
+      .md\\:grid-cols-3 > * { 
+        -ms-flex: 1 1 31%; 
+        flex: 1 1 31%; 
+        width: 31%;
+        max-width: 31%; 
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .lg\\:grid-cols-3 > * { 
+        -ms-flex: 1 1 31%; 
+        flex: 1 1 31%; 
+        width: 31%;
+        max-width: 31%; 
+      }
+      .lg\\:grid-cols-5 > * { 
+        -ms-flex: 1 1 18%; 
+        flex: 1 1 18%; 
+        width: 18%;
+        max-width: 18%; 
+      }
+    }
+    
+    /* Tab navigation Edge fixes */
+    .tab-navigation {
+      display: -ms-flexbox !important;
+      display: flex !important;
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    
+    .tab-navigation [data-tab] {
+      -ms-flex: 0 0 auto;
+      flex: 0 0 auto;
+      display: block !important;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid transparent;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .tab-pane {
+      display: block !important;
+      width: 100%;
+    }
+    
+    /* Force hardware acceleration */
+    .course-card, .sticky-card, .tab-pane {
+      transform: translateZ(0);
+      -ms-transform: translateZ(0);
+      backface-visibility: hidden;
+      -ms-backface-visibility: hidden;
+    }
+  }
+}
+
 @layer utilities {
   /* User dropdown menu visibility */
   .user-dropdown-menu {

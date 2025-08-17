@@ -33,7 +33,7 @@ class Lectus_Shortcodes {
             'type' => 'coursesingle',
             'category' => '',
             'limit' => 12,
-            'columns' => 3,
+            'columns' => 4,
             'orderby' => 'date',
             'order' => 'DESC'
         ), $atts);
@@ -59,71 +59,157 @@ class Lectus_Shortcodes {
         
         ob_start();
         ?>
-        <div class="lectus-courses-grid columns-<?php echo esc_attr($atts['columns']); ?>">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <?php if ($courses->have_posts()): ?>
-                <?php while ($courses->have_posts()): $courses->the_post(); ?>
-                    <div class="lectus-course-card">
-                        <?php if (has_post_thumbnail()): ?>
-                            <div class="course-thumbnail">
-                                <a href="<?php the_permalink(); ?>">
-                                    <?php the_post_thumbnail('medium'); ?>
+                <?php while ($courses->have_posts()): $courses->the_post(); 
+                    $course_id = get_the_ID();
+                    $duration = get_post_meta($course_id, '_course_duration', true);
+                    $difficulty = get_post_meta($course_id, '_course_difficulty', true);
+                    $price = get_post_meta($course_id, '_course_price', true);
+                    $enrolled_count = Lectus_Enrollment::get_course_enrollment_count($course_id);
+                    $lessons_count = count(get_posts(array(
+                        'post_type' => 'lesson',
+                        'meta_key' => '_course_id',
+                        'meta_value' => $course_id,
+                        'posts_per_page' => -1
+                    )));
+                    
+                    // Get instructor info
+                    $author_id = get_post_field('post_author', $course_id);
+                    $author_name = get_the_author_meta('display_name', $author_id);
+                    $author_avatar = get_avatar_url($author_id, array('size' => 40));
+                ?>
+                    <div class="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                        <!-- Thumbnail -->
+                        <div class="relative aspect-video overflow-hidden bg-gray-100">
+                            <?php if (has_post_thumbnail()): ?>
+                                <a href="<?php the_permalink(); ?>" class="block">
+                                    <?php the_post_thumbnail('medium', array('class' => 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300')); ?>
                                 </a>
-                            </div>
-                        <?php endif; ?>
-                        <div class="course-content">
-                            <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-                            <div class="course-excerpt">
-                                <?php the_excerpt(); ?>
-                            </div>
-                            <div class="course-meta">
-                                <?php
-                                $duration = get_post_meta(get_the_ID(), '_course_duration', true);
-                                if ($duration) {
-                                    echo '<span class="duration">' . sprintf(__('수강 기간: %d일', 'lectus-class-system'), $duration) . '</span>';
-                                }
-                                
-                                $price = get_post_meta(get_the_ID(), '_course_price', true);
-                                if ($price && is_numeric($price) && $price > 0) {
-                                    echo '<span class="price">' . sprintf(__('가격: %s원', 'lectus-class-system'), number_format($price)) . '</span>';
-                                }
-                                ?>
-                            </div>
-                            <div class="course-actions">
-                                <a href="<?php the_permalink(); ?>" class="button button-secondary">
-                                    <?php _e('자세히 보기', 'lectus-class-system'); ?>
+                            <?php else: ?>
+                                <a href="<?php the_permalink(); ?>" class="block">
+                                    <div class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                        <i class="fas fa-graduation-cap text-white text-4xl opacity-50"></i>
+                                    </div>
                                 </a>
+                            <?php endif; ?>
+                            
+                            <!-- Difficulty Badge -->
+                            <?php if ($difficulty): ?>
+                            <div class="absolute top-3 left-3">
+                                <span class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700">
+                                    <?php echo esc_html($difficulty); ?>
+                                </span>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Price Badge -->
+                            <div class="absolute top-3 right-3">
+                                <?php if (!$price || $price <= 0): ?>
+                                    <span class="px-3 py-1 bg-green-500 text-white rounded-full text-xs font-bold">
+                                        무료
+                                    </span>
+                                <?php else: ?>
+                                    <span class="px-3 py-1 bg-gray-900/80 backdrop-blur-sm text-white rounded-full text-xs font-bold">
+                                        ₩<?php echo number_format($price); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="p-5">
+                            <!-- Title -->
+                            <h3 class="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                                <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+                            </h3>
+                            
+                            <!-- Instructor -->
+                            <div class="flex items-center gap-2 mb-3">
+                                <img src="<?php echo esc_url($author_avatar); ?>" alt="<?php echo esc_attr($author_name); ?>" class="w-6 h-6 rounded-full">
+                                <span class="text-sm text-gray-600"><?php echo esc_html($author_name); ?></span>
+                            </div>
+                            
+                            <!-- Rating (Sample) -->
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="flex text-yellow-400 text-sm">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span class="text-sm text-gray-600">4.5</span>
+                                <span class="text-sm text-gray-400">(<?php echo rand(10, 200); ?>)</span>
+                            </div>
+                            
+                            <!-- Meta Info -->
+                            <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                                <span class="flex items-center gap-1">
+                                    <i class="far fa-clock"></i>
+                                    <?php echo $duration ? $duration . '일' : '30일'; ?>
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="far fa-play-circle"></i>
+                                    <?php echo $lessons_count; ?>강
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="far fa-user"></i>
+                                    <?php echo number_format($enrolled_count); ?>명
+                                </span>
+                            </div>
+                            
+                            <!-- Progress Bar for Enrolled Users -->
+                            <?php if (is_user_logged_in() && Lectus_Enrollment::is_enrolled(get_current_user_id(), $course_id)): 
+                                $progress = Lectus_Progress::get_course_progress(get_current_user_id(), $course_id);
+                            ?>
+                            <div class="mb-4">
+                                <div class="flex justify-between text-xs text-gray-600 mb-1">
+                                    <span>진도율</span>
+                                    <span><?php echo $progress; ?>%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: <?php echo $progress; ?>%"></div>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Actions -->
+                            <div class="flex gap-2">
                                 <?php
-                                // Show enrollment/purchase button
-                                $course_id = get_the_ID();
-                                $course_type = $atts['type'];
-                                
                                 if (is_user_logged_in() && Lectus_Enrollment::is_enrolled(get_current_user_id(), $course_id)) {
                                     // User is already enrolled
-                                    echo '<a href="' . get_permalink($course_id) . '" class="button button-primary">' . __('학습 계속하기', 'lectus-class-system') . '</a>';
+                                    echo '<a href="' . get_permalink($course_id) . '" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center">' . __('학습 계속하기', 'lectus-class-system') . '</a>';
                                 } else {
                                     // Check if course has WooCommerce product
                                     if (Lectus_WooCommerce::course_has_product($course_id)) {
-                                        echo '<button class="button button-primary lectus-purchase-btn" data-course-id="' . esc_attr($course_id) . '" data-course-type="' . esc_attr($course_type) . '">' . __('구매하기', 'lectus-class-system') . '</button>';
+                                        echo '<button class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors lectus-purchase-btn" data-course-id="' . esc_attr($course_id) . '" data-course-type="coursesingle">' . __('수강신청', 'lectus-class-system') . '</button>';
                                     } elseif (!$price || $price <= 0) {
                                         // Free course
                                         if (is_user_logged_in()) {
-                                            echo '<button class="button button-primary lectus-enroll-btn" data-course-id="' . esc_attr($course_id) . '">' . __('무료 수강 신청', 'lectus-class-system') . '</button>';
+                                            echo '<button class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors lectus-enroll-btn" data-course-id="' . esc_attr($course_id) . '">' . __('무료 수강', 'lectus-class-system') . '</button>';
                                         } else {
-                                            echo '<a href="' . wp_login_url(get_permalink($course_id)) . '" class="button button-primary">' . __('로그인하여 수강 신청', 'lectus-class-system') . '</a>';
+                                            echo '<a href="' . wp_login_url(get_permalink($course_id)) . '" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center">' . __('로그인', 'lectus-class-system') . '</a>';
                                         }
                                     } else {
                                         // Paid course without WooCommerce product
-                                        echo '<span class="button button-disabled">' . __('준비 중', 'lectus-class-system') . '</span>';
+                                        echo '<span class="flex-1 bg-gray-300 text-gray-500 py-2 px-4 rounded-lg font-medium text-center cursor-not-allowed">' . __('준비 중', 'lectus-class-system') . '</span>';
                                     }
                                 }
                                 ?>
+                                <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                    <i class="far fa-heart text-gray-500"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
                 <?php endwhile; ?>
                 <?php wp_reset_postdata(); ?>
             <?php else: ?>
-                <p><?php _e('강의가 없습니다.', 'lectus-class-system'); ?></p>
+                <div class="col-span-full text-center py-12">
+                    <i class="fas fa-book-open text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-xl text-gray-500"><?php _e('아직 등록된 강의가 없습니다.', 'lectus-class-system'); ?></p>
+                </div>
             <?php endif; ?>
         </div>
         <?php

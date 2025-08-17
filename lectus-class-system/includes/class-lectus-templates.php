@@ -75,6 +75,14 @@ class Lectus_Templates {
             return $content;
         }
         
+        // Check if theme has its own template - if so, don't modify content
+        $theme = wp_get_theme();
+        if ($theme->get('Name') === 'Lectus Academy' || 
+            file_exists(get_stylesheet_directory() . '/single-coursesingle.php')) {
+            // Theme handles its own layout
+            return $content;
+        }
+        
         $course_id = get_the_ID();
         $user_id = get_current_user_id();
         

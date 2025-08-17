@@ -10,8 +10,23 @@
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="profile" href="https://gmpg.org/xfn/11">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Browser compatibility scripts -->
+    <!--[if lt IE 9]>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <!-- CSS Grid polyfill for IE11 -->
+    <script>
+        if (!window.CSS || !CSS.supports || !CSS.supports('display', 'grid')) {
+            document.documentElement.className += ' no-grid';
+        }
+    </script>
+    
     <?php wp_head(); ?>
 </head>
 
@@ -59,9 +74,6 @@
                         <?php if (is_user_logged_in()) : 
                             $current_user = wp_get_current_user();
                         ?>
-                            <a href="<?php echo esc_url(home_url('/my-courses')); ?>" class="top-link text-sm text-gray-600 hover:text-lectus-primary transition-colors">
-                                <?php esc_html_e('내 강의', 'lectus-academy'); ?>
-                            </a>
                             <div class="user-dropdown relative">
                                 <a href="#" class="user-dropdown-toggle flex items-center gap-2 text-sm text-gray-700 hover:text-lectus-primary transition-colors">
                                     <?php echo get_avatar($current_user->ID, 28); ?>
@@ -178,8 +190,8 @@
                             <?php
                         }
                         ?>
-                        <a href="<?php echo esc_url(home_url('/apply-instructor')); ?>" class="btn border-2 border-lectus-primary text-lectus-primary hover:bg-lectus-primary hover:text-white transition-all">
-                            <?php esc_html_e('지식공유참여', 'lectus-academy'); ?>
+                        <a href="<?php echo esc_url(home_url('/my-courses')); ?>" class="btn border-2 border-lectus-primary text-lectus-primary hover:bg-lectus-primary hover:text-white transition-all">
+                            <?php esc_html_e('내강의실', 'lectus-academy'); ?>
                         </a>
                     </div>
                 </div>

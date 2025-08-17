@@ -221,6 +221,19 @@ class Lectus_Enrollment {
         return isset($labels[$status]) ? $labels[$status] : $status;
     }
     
+    public static function get_course_enrollment_count($course_id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'lectus_enrollment';
+        
+        $count = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM $table 
+             WHERE course_id = %d AND status = 'active'",
+            $course_id
+        ));
+        
+        return intval($count);
+    }
+    
     public static function handle_free_enrollment() {
         if (!isset($_POST['lectus_free_enroll_nonce']) || 
             !wp_verify_nonce($_POST['lectus_free_enroll_nonce'], 'lectus_free_enroll')) {

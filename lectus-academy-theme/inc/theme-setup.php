@@ -42,9 +42,9 @@ class Lectus_Academy_Theme_Setup {
         $default_pages = array(
             // Core LMS pages
             array(
-                'title' => '모든 강의',
-                'slug' => 'all-courses',
-                'content' => '[lectus_course_list]',
+                'title' => '강의',
+                'slug' => 'courses',
+                'content' => '[lectus_courses]',
                 'template' => 'page-courses.php'
             ),
             array(
@@ -55,7 +55,7 @@ class Lectus_Academy_Theme_Setup {
             ),
             array(
                 'title' => '학습 대시보드',
-                'slug' => 'dashboard',
+                'slug' => 'student-dashboard',
                 'content' => '[lectus_student_dashboard]',
                 'template' => 'page-dashboard.php'
             ),
@@ -225,9 +225,9 @@ class Lectus_Academy_Theme_Setup {
             // Add menu items
             $menu_items = array(
                 array('title' => '홈', 'url' => home_url()),
-                array('title' => '모든 강의', 'page' => 'all-courses'),
+                array('title' => '강의', 'page' => 'courses'),
                 array('title' => '내 강의', 'page' => 'my-courses'),
-                array('title' => '대시보드', 'page' => 'dashboard'),
+                array('title' => '대시보드', 'page' => 'student-dashboard'),
             );
             
             foreach ($menu_items as $item) {
@@ -260,6 +260,40 @@ class Lectus_Academy_Theme_Setup {
     }
     
     /**
+     * Restore missing pages
+     */
+    public static function restore_missing_pages() {
+        // Check if restoration is requested
+        if (!isset($_GET['restore_pages']) || $_GET['restore_pages'] !== '1') {
+            return;
+        }
+        
+        // Verify nonce for security
+        if (!isset($_GET['_wpnonce']) || !wp_verify_nonce($_GET['_wpnonce'], 'restore_pages_nonce')) {
+            return;
+        }
+        
+        // Check user capability
+        if (!current_user_can('edit_theme_options')) {
+            return;
+        }
+        
+        // Create missing pages
+        $created_pages = self::create_default_pages();
+        
+        // Set transient for admin notice
+        if (!empty($created_pages)) {
+            set_transient('lectus_academy_restored_pages', $created_pages, 300);
+        } else {
+            set_transient('lectus_academy_no_pages_created', true, 300);
+        }
+        
+        // Redirect to remove query parameters
+        wp_redirect(admin_url('themes.php?page=lectus-academy-settings&tab=test-restoration'));
+        exit;
+    }
+    
+    /**
      * Show activation notice
      */
     public static function activation_notice() {
@@ -289,13 +323,33 @@ class Lectus_Academy_Theme_Setup {
             // Remove the activation flag
             delete_option('lectus_academy_theme_activated');
         }
+        
+        // Show restoration success message
+        $restored_pages = get_transient('lectus_academy_restored_pages');
+        if ($restored_pages && is_array($restored_pages)) {
+            ?>
+            <div class="notice notice-success is-dismissible">
+                <p><?php echo sprintf(__('다음 페이지가 복원되었습니다: %s', 'lectus-academy'), implode(', ', $restored_pages)); ?></p>
+            </div>
+            <?php
+            delete_transient('lectus_academy_restored_pages');
+        }
+        
+        if (get_transient('lectus_academy_no_pages_created')) {
+            ?>
+            <div class="notice notice-info is-dismissible">
+                <p><?php _e('모든 필수 페이지가 이미 존재합니다.', 'lectus-academy'); ?></p>
+            </div>
+            <?php
+            delete_transient('lectus_academy_no_pages_created');
+        }
     }
     
     /**
      * Check and show missing pages notice
      */
     public static function check_required_pages() {
-        $required_pages = array('all-courses', 'my-courses', 'dashboard');
+        $required_pages = array('courses', 'my-courses', 'student-dashboard');
         $missing_pages = array();
         
         foreach ($required_pages as $slug) {
@@ -312,7 +366,13 @@ class Lectus_Academy_Theme_Setup {
                     <?php _e('일부 필수 페이지가 누락되었습니다.', 'lectus-academy'); ?>
                 </p>
                 <p>
-                    <a href="<?php echo admin_url('themes.php?page=lectus-academy-settings&tab=test-restoration'); ?>" class="button">
+                    <?php 
+                    $restore_url = wp_nonce_url(
+                        admin_url('themes.php?page=lectus-academy-settings&tab=test-restoration&restore_pages=1'),
+                        'restore_pages_nonce'
+                    );
+                    ?>
+                    <a href="<?php echo esc_url($restore_url); ?>" class="button">
                         <?php _e('페이지 복원하기', 'lectus-academy'); ?>
                     </a>
                 </p>
@@ -326,3 +386,4 @@ class Lectus_Academy_Theme_Setup {
 add_action('after_switch_theme', array('Lectus_Academy_Theme_Setup', 'activate'));
 add_action('admin_notices', array('Lectus_Academy_Theme_Setup', 'activation_notice'));
 add_action('admin_notices', array('Lectus_Academy_Theme_Setup', 'check_required_pages'));
+add_action('admin_init', array('Lectus_Academy_Theme_Setup', 'restore_missing_pages'));

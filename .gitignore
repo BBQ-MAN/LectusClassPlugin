@@ -81,3 +81,4 @@ cleanup-backup/
 
 # Claude specific
 .claude/settings.local.json
+.playwright-mcp/
