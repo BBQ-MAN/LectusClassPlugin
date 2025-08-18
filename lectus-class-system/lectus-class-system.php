@@ -117,6 +117,21 @@ class Lectus_Class_System {
         // Admin bar customization
         require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-admin-bar.php';
         
+        // Instructor Q&A system
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-instructor-qa.php';
+        
+        // Instructor Dashboard
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-instructor-dashboard.php';
+        
+        // Instructor Menu
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-instructor-menu.php';
+        
+        // Instructor Setup
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-instructor-setup.php';
+        
+        // Login Redirect Handler
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-login-redirect.php';
+        
         // Admin files
         if (is_admin()) {
             require_once LECTUS_PLUGIN_DIR . 'admin/class-lectus-admin.php';
@@ -189,6 +204,21 @@ class Lectus_Class_System {
         
         // Initialize admin bar customization
         Lectus_Admin_Bar::init();
+        
+        // Initialize instructor Q&A system
+        Lectus_Instructor_QA::init();
+        
+        // Initialize instructor dashboard
+        Lectus_Instructor_Dashboard::init();
+        
+        // Initialize instructor menu
+        Lectus_Instructor_Menu::init();
+        
+        // Initialize instructor setup
+        Lectus_Instructor_Setup::init();
+        
+        // Initialize login redirect
+        Lectus_Login_Redirect::init();
     }
     
     public function plugins_loaded() {

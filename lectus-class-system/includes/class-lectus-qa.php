@@ -17,6 +17,7 @@ class Lectus_QA {
         add_action('wp_ajax_lectus_submit_question', array(__CLASS__, 'ajax_submit_question'));
         add_action('wp_ajax_lectus_submit_answer', array(__CLASS__, 'ajax_submit_answer'));
         add_action('wp_ajax_lectus_vote_qa', array(__CLASS__, 'ajax_vote_qa'));
+        add_action('wp_ajax_lectus_get_qa_details', array(__CLASS__, 'ajax_get_qa_details'));
         
         // Frontend handlers
         add_action('wp_ajax_nopriv_lectus_submit_question', array(__CLASS__, 'ajax_submit_question'));
@@ -680,6 +681,133 @@ class Lectus_QA {
         } else {
             wp_send_json_error(array('message' => __('투표에 실패했습니다.', 'lectus-class-system')));
         }
+    }
+    
+    /**
+     * AJAX handler for getting Q&A details
+     */
+    public static function ajax_get_qa_details() {
+        // Check nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-qa-nonce')) {
+            wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')));
+            return;
+        }
+        
+        $question_id = isset($_POST['question_id']) ? intval($_POST['question_id']) : 0;
+        
+        if (!$question_id) {
+            wp_send_json_error(array('message' => __('잘못된 요청입니다.', 'lectus-class-system')));
+            return;
+        }
+        
+        global $wpdb;
+        $table = $wpdb->prefix . 'lectus_qa';
+        
+        // Get question details
+        $question = $wpdb->get_row($wpdb->prepare(
+            "SELECT q.*, u.display_name, c.post_title as course_title, l.post_title as lesson_title
+             FROM $table q
+             LEFT JOIN {$wpdb->users} u ON q.user_id = u.ID
+             LEFT JOIN {$wpdb->posts} c ON q.course_id = c.ID
+             LEFT JOIN {$wpdb->posts} l ON q.lesson_id = l.ID
+             WHERE q.id = %d AND q.type = 'question'",
+            $question_id
+        ));
+        
+        if (!$question) {
+            wp_send_json_error(array('message' => __('질문을 찾을 수 없습니다.', 'lectus-class-system')));
+            return;
+        }
+        
+        // Get answers
+        $answers = $wpdb->get_results($wpdb->prepare(
+            "SELECT a.*, u.display_name
+             FROM $table a
+             LEFT JOIN {$wpdb->users} u ON a.user_id = u.ID
+             WHERE a.parent_id = %d AND a.type = 'answer'
+             ORDER BY a.is_best_answer DESC, a.created_at ASC",
+            $question_id
+        ));
+        
+        // Check if current user is instructor
+        $current_user_id = get_current_user_id();
+        $is_instructor = current_user_can('answer_questions');
+        $is_course_instructor = false;
+        
+        if ($is_instructor && !current_user_can('manage_options')) {
+            $instructor_id = get_post_meta($question->course_id, '_course_instructor_id', true);
+            $is_course_instructor = ($instructor_id == $current_user_id);
+        }
+        
+        // Build HTML response
+        ob_start();
+        ?>
+        <div class="qa-question">
+            <h3><?php echo esc_html($question->title ?: wp_trim_words($question->content, 15)); ?></h3>
+            <p class="qa-meta">
+                <?php printf(
+                    __('작성자: %s | 강의: %s | 레슨: %s | 날짜: %s', 'lectus-class-system'),
+                    esc_html($question->display_name),
+                    esc_html($question->course_title),
+                    esc_html($question->lesson_title ?: '-'),
+                    date_i18n(get_option('date_format'), strtotime($question->created_at))
+                ); ?>
+            </p>
+            <div class="qa-content">
+                <?php echo wp_kses_post($question->content); ?>
+            </div>
+        </div>
+        
+        <div class="qa-answers">
+            <h4><?php printf(__('답변 (%d)', 'lectus-class-system'), count($answers)); ?></h4>
+            <?php if (empty($answers)): ?>
+                <p><?php _e('아직 답변이 없습니다.', 'lectus-class-system'); ?></p>
+            <?php else: ?>
+                <?php foreach ($answers as $answer): ?>
+                    <?php 
+                    $is_instructor_answer = user_can($answer->user_id, 'answer_questions');
+                    ?>
+                    <div class="qa-answer <?php echo $is_instructor_answer ? 'instructor-answer' : ''; ?> <?php echo $answer->is_best_answer ? 'best-answer' : ''; ?>">
+                        <?php if ($answer->is_best_answer): ?>
+                            <span class="best-answer-badge"><?php _e('베스트 답변', 'lectus-class-system'); ?></span>
+                        <?php endif; ?>
+                        <?php if ($is_instructor_answer): ?>
+                            <span class="instructor-badge"><?php _e('강사', 'lectus-class-system'); ?></span>
+                        <?php endif; ?>
+                        <p class="answer-meta">
+                            <?php printf(
+                                __('%s | %s', 'lectus-class-system'),
+                                esc_html($answer->display_name),
+                                date_i18n(get_option('date_format'), strtotime($answer->created_at))
+                            ); ?>
+                        </p>
+                        <div class="answer-content">
+                            <?php echo wp_kses_post($answer->content); ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+        
+        <?php if ($is_instructor && ($is_course_instructor || current_user_can('manage_options'))): ?>
+            <div class="answer-form">
+                <h4><?php _e('답변 작성', 'lectus-class-system'); ?></h4>
+                <form id="instructor-answer-form">
+                    <input type="hidden" name="question_id" value="<?php echo $question->id; ?>" />
+                    <textarea name="answer" rows="5" style="width: 100%;" required></textarea>
+                    <p>
+                        <button type="submit" class="button button-primary">
+                            <?php _e('답변 등록', 'lectus-class-system'); ?>
+                        </button>
+                    </p>
+                </form>
+            </div>
+        <?php endif; ?>
+        <?php
+        
+        $html = ob_get_clean();
+        
+        wp_send_json_success(array('html' => $html));
     }
     
     /**

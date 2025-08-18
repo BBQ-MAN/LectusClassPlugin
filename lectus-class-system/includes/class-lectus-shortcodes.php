@@ -466,6 +466,14 @@ class Lectus_Shortcodes {
             return '<p>' . __('로그인이 필요합니다.', 'lectus-class-system') . '</p>';
         }
         
+        $user = wp_get_current_user();
+        
+        // If user is instructor, redirect to instructor center
+        if (in_array('lectus_instructor', $user->roles)) {
+            wp_redirect(admin_url('admin.php?page=lectus-instructor-center'));
+            exit;
+        }
+        
         ob_start();
         
         // Include the student dashboard template

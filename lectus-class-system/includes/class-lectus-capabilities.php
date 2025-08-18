@@ -44,6 +44,12 @@ class Lectus_Capabilities {
                 'view_students' => true,
                 'manage_students' => true,
                 'view_reports' => true,
+                
+                // Q&A management
+                'manage_qa' => true,
+                'moderate_qa' => true,
+                'answer_questions' => true,
+                'delete_qa' => true,
             )
         );
         
@@ -116,6 +122,12 @@ class Lectus_Capabilities {
             
             // Settings
             $administrator->add_cap('manage_lectus_settings');
+            
+            // Q&A management
+            $administrator->add_cap('manage_qa');
+            $administrator->add_cap('moderate_qa');
+            $administrator->add_cap('answer_questions');
+            $administrator->add_cap('delete_qa');
         }
         
         // Editor capabilities

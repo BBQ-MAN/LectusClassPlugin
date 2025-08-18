@@ -159,6 +159,16 @@ class Lectus_Post_Types {
             'high'
         );
         
+        // Add Instructor Assignment Meta Box
+        add_meta_box(
+            'coursesingle_instructor',
+            __('강사 할당', 'lectus-class-system'),
+            array(__CLASS__, 'render_course_instructor_meta_box'),
+            'coursesingle',
+            'side',
+            'high'
+        );
+        
         // Lesson Meta Boxes
         add_meta_box(
             'lesson_details',
@@ -293,6 +303,35 @@ class Lectus_Post_Types {
                 </td>
             </tr>
         </table>
+        <?php
+    }
+    
+    public static function render_course_instructor_meta_box($post) {
+        $instructor_id = get_post_meta($post->ID, '_course_instructor_id', true);
+        
+        // Get all users with instructor or administrator role
+        $instructors = get_users(array(
+            'role__in' => array('administrator', 'lectus_instructor'),
+            'orderby' => 'display_name',
+            'order' => 'ASC'
+        ));
+        ?>
+        <div class="lectus-instructor-selector">
+            <p>
+                <label for="course_instructor_id"><?php _e('강사 선택:', 'lectus-class-system'); ?></label>
+            </p>
+            <select id="course_instructor_id" name="course_instructor_id" style="width: 100%;">
+                <option value=""><?php _e('-- 강사 없음 --', 'lectus-class-system'); ?></option>
+                <?php foreach ($instructors as $instructor): ?>
+                    <option value="<?php echo $instructor->ID; ?>" <?php selected($instructor_id, $instructor->ID); ?>>
+                        <?php echo esc_html($instructor->display_name); ?> (<?php echo esc_html($instructor->user_email); ?>)
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <p class="description">
+                <?php _e('이 강의의 강사를 선택하세요. 강사는 이 강의의 Q&A를 관리할 수 있습니다.', 'lectus-class-system'); ?>
+            </p>
+        </div>
         <?php
     }
     
@@ -1137,6 +1176,11 @@ class Lectus_Post_Types {
                 update_post_meta($post_id, '_completion_score', sanitize_text_field($_POST['completion_score']));
             }
             update_post_meta($post_id, '_certificate_enabled', isset($_POST['certificate_enabled']) ? '1' : '0');
+            
+            // Save instructor assignment
+            if (isset($_POST['course_instructor_id'])) {
+                update_post_meta($post_id, '_course_instructor_id', absint($_POST['course_instructor_id']));
+            }
         }
         
         if ($post->post_type === 'lesson') {
@@ -1203,6 +1247,7 @@ class Lectus_Post_Types {
         $new_columns['cb'] = $columns['cb'];
         $new_columns['title'] = $columns['title'];
         $new_columns['package'] = __('패키지', 'lectus-class-system');
+        $new_columns['instructor'] = __('강사', 'lectus-class-system');
         $new_columns['lessons_count'] = __('레슨 수', 'lectus-class-system');
         $new_columns['duration'] = __('수강 기간', 'lectus-class-system');
         $new_columns['enrolled'] = __('수강생', 'lectus-class-system');
@@ -1231,6 +1276,19 @@ class Lectus_Post_Types {
                     'posts_per_page' => -1
                 ));
                 echo count($lessons);
+                break;
+            case 'instructor':
+                $instructor_id = get_post_meta($post_id, '_course_instructor_id', true);
+                if ($instructor_id) {
+                    $instructor = get_user_by('id', $instructor_id);
+                    if ($instructor) {
+                        echo esc_html($instructor->display_name);
+                    } else {
+                        echo __('미할당', 'lectus-class-system');
+                    }
+                } else {
+                    echo __('미할당', 'lectus-class-system');
+                }
                 break;
             case 'duration':
                 $duration = get_post_meta($post_id, '_course_duration', true);
