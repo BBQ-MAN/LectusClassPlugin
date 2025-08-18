@@ -19,6 +19,11 @@ class Lectus_Ajax {
         add_action('wp_ajax_lectus_generate_certificate', array(__CLASS__, 'generate_certificate'));
         add_action('wp_ajax_lectus_bulk_upload_lessons', array(__CLASS__, 'bulk_upload_lessons'));
         
+        // Student management AJAX handlers
+        add_action('wp_ajax_lectus_extend_access', array(__CLASS__, 'extend_access'));
+        add_action('wp_ajax_lectus_change_status', array(__CLASS__, 'change_status'));
+        add_action('wp_ajax_lectus_export_students', array(__CLASS__, 'export_students'));
+        
         // Settings AJAX handlers
         add_action('wp_ajax_lectus_generate_test_data', array(__CLASS__, 'generate_test_data'));
         add_action('wp_ajax_lectus_clear_logs', array(__CLASS__, 'clear_logs'));
@@ -629,5 +634,204 @@ class Lectus_Ajax {
         } else {
             wp_send_json_error(array('message' => __('테스트 페이지 파일을 찾을 수 없습니다.', 'lectus-class-system')));
         }
+    }
+    
+    /**
+     * Extend student access period
+     */
+    public static function extend_access() {
+        // Verify nonce and admin capabilities
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-ajax-nonce')) {
+            wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')), 403);
+            return;
+        }
+        
+        if (!current_user_can('manage_students')) {
+            wp_send_json_error(array('message' => __('권한이 없습니다.', 'lectus-class-system')), 403);
+            return;
+        }
+        
+        $user_id = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+        $course_id = isset($_POST['course_id']) ? absint($_POST['course_id']) : 0;
+        $days = isset($_POST['days']) ? absint($_POST['days']) : 0;
+        
+        if (!$user_id || !$course_id || !$days) {
+            wp_send_json_error(array('message' => __('필수 정보가 누락되었습니다.', 'lectus-class-system')), 400);
+            return;
+        }
+        
+        global $wpdb;
+        $enrollment_table = $wpdb->prefix . 'lectus_enrollment';
+        
+        // Get current enrollment
+        $enrollment = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $enrollment_table WHERE user_id = %d AND course_id = %d",
+            $user_id, $course_id
+        ));
+        
+        if (!$enrollment) {
+            wp_send_json_error(array('message' => __('등록 정보를 찾을 수 없습니다.', 'lectus-class-system')), 404);
+            return;
+        }
+        
+        // Calculate new expiry date
+        $current_expiry = $enrollment->expires_at ? strtotime($enrollment->expires_at) : time();
+        $new_expiry = date('Y-m-d H:i:s', $current_expiry + ($days * DAY_IN_SECONDS));
+        
+        // Update expiry date
+        $result = $wpdb->update(
+            $enrollment_table,
+            array('expires_at' => $new_expiry),
+            array('user_id' => $user_id, 'course_id' => $course_id),
+            array('%s'),
+            array('%d', '%d')
+        );
+        
+        if ($result !== false) {
+            wp_send_json_success(array(
+                'message' => sprintf(__('수강 기간이 %d일 연장되었습니다.', 'lectus-class-system'), $days),
+                'new_expiry' => date_i18n(get_option('date_format'), strtotime($new_expiry))
+            ));
+        } else {
+            wp_send_json_error(array('message' => __('수강 기간 연장에 실패했습니다.', 'lectus-class-system')));
+        }
+    }
+    
+    /**
+     * Change student enrollment status
+     */
+    public static function change_status() {
+        // Verify nonce and admin capabilities
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-ajax-nonce')) {
+            wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')), 403);
+            return;
+        }
+        
+        if (!current_user_can('manage_students')) {
+            wp_send_json_error(array('message' => __('권한이 없습니다.', 'lectus-class-system')), 403);
+            return;
+        }
+        
+        $user_id = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+        $course_id = isset($_POST['course_id']) ? absint($_POST['course_id']) : 0;
+        $status = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : '';
+        
+        if (!$user_id || !$course_id || !$status) {
+            wp_send_json_error(array('message' => __('필수 정보가 누락되었습니다.', 'lectus-class-system')), 400);
+            return;
+        }
+        
+        // Validate status
+        $valid_statuses = array('active', 'paused', 'expired', 'cancelled');
+        if (!in_array($status, $valid_statuses)) {
+            wp_send_json_error(array('message' => __('유효하지 않은 상태입니다.', 'lectus-class-system')), 400);
+            return;
+        }
+        
+        global $wpdb;
+        $enrollment_table = $wpdb->prefix . 'lectus_enrollment';
+        
+        // Update status
+        $result = $wpdb->update(
+            $enrollment_table,
+            array('status' => $status),
+            array('user_id' => $user_id, 'course_id' => $course_id),
+            array('%s'),
+            array('%d', '%d')
+        );
+        
+        if ($result !== false) {
+            $status_label = Lectus_Enrollment::get_status_label($status);
+            wp_send_json_success(array(
+                'message' => sprintf(__('상태가 %s(으)로 변경되었습니다.', 'lectus-class-system'), $status_label),
+                'status' => $status,
+                'status_label' => $status_label
+            ));
+        } else {
+            wp_send_json_error(array('message' => __('상태 변경에 실패했습니다.', 'lectus-class-system')));
+        }
+    }
+    
+    /**
+     * Export students data to CSV
+     */
+    public static function export_students() {
+        // Verify nonce and admin capabilities
+        if (!isset($_GET['nonce']) || !wp_verify_nonce($_GET['nonce'], 'lectus-ajax-nonce')) {
+            wp_die(__('보안 검증 실패', 'lectus-class-system'));
+        }
+        
+        if (!current_user_can('manage_students')) {
+            wp_die(__('권한이 없습니다.', 'lectus-class-system'));
+        }
+        
+        global $wpdb;
+        $enrollment_table = $wpdb->prefix . 'lectus_enrollment';
+        
+        // Get filter parameters
+        $course_filter = isset($_GET['course_id']) ? intval($_GET['course_id']) : 0;
+        $status_filter = isset($_GET['status']) ? sanitize_text_field($_GET['status']) : '';
+        
+        // Build query
+        $query = "SELECT e.*, u.display_name, u.user_email 
+                 FROM $enrollment_table e
+                 LEFT JOIN {$wpdb->users} u ON e.user_id = u.ID
+                 WHERE 1=1";
+        
+        if ($course_filter) {
+            $query .= $wpdb->prepare(" AND e.course_id = %d", $course_filter);
+        }
+        
+        if ($status_filter) {
+            $query .= $wpdb->prepare(" AND e.status = %s", $status_filter);
+        }
+        
+        $query .= " ORDER BY e.enrolled_at DESC";
+        
+        $enrollments = $wpdb->get_results($query);
+        
+        // Set headers for CSV download
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="students-' . date('Y-m-d') . '.csv"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Add BOM for Excel UTF-8 compatibility
+        echo "\xEF\xBB\xBF";
+        
+        // Open output stream
+        $output = fopen('php://output', 'w');
+        
+        // Write CSV headers
+        fputcsv($output, array(
+            __('수강생 이름', 'lectus-class-system'),
+            __('이메일', 'lectus-class-system'),
+            __('강의명', 'lectus-class-system'),
+            __('진도율', 'lectus-class-system'),
+            __('상태', 'lectus-class-system'),
+            __('등록일', 'lectus-class-system'),
+            __('만료일', 'lectus-class-system')
+        ));
+        
+        // Write data rows
+        foreach ($enrollments as $enrollment) {
+            $course = get_post($enrollment->course_id);
+            if (!$course) continue;
+            
+            $progress = Lectus_Progress::get_course_progress($enrollment->user_id, $enrollment->course_id);
+            
+            fputcsv($output, array(
+                $enrollment->display_name,
+                $enrollment->user_email,
+                $course->post_title,
+                $progress . '%',
+                Lectus_Enrollment::get_status_label($enrollment->status),
+                date_i18n(get_option('date_format'), strtotime($enrollment->enrolled_at)),
+                $enrollment->expires_at ? date_i18n(get_option('date_format'), strtotime($enrollment->expires_at)) : __('무제한', 'lectus-class-system')
+            ));
+        }
+        
+        fclose($output);
+        exit;
     }
 }
