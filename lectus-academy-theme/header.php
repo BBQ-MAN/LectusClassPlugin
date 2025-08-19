@@ -230,7 +230,14 @@
             </form>
         </div>
         
-        <!-- Category Navigation -->
+        <!-- Category Navigation - Visible only on 768px and above -->
+        <style>
+            @media (max-width: 767px) {
+                .category-nav {
+                    display: none !important;
+                }
+            }
+        </style>
         <nav class="category-nav bg-white border-t border-gray-200">
             <div class="container mx-auto px-4">
                 <?php
