@@ -17,10 +17,7 @@ class Lectus_Post_Types {
         add_action('add_meta_boxes', array(__CLASS__, 'add_meta_boxes'));
         add_action('save_post', array(__CLASS__, 'save_meta_boxes'), 10, 2);
         
-        // Custom columns
-        add_filter('manage_coursepackage_posts_columns', array(__CLASS__, 'package_columns'));
-        add_action('manage_coursepackage_posts_custom_column', array(__CLASS__, 'package_custom_column'), 10, 2);
-        
+        // Custom columns - removed coursepackage columns
         add_filter('manage_coursesingle_posts_columns', array(__CLASS__, 'course_columns'));
         add_action('manage_coursesingle_posts_custom_column', array(__CLASS__, 'course_custom_column'), 10, 2);
         
@@ -29,35 +26,7 @@ class Lectus_Post_Types {
     }
     
     public static function register_post_types() {
-        // Register Course Package Post Type
-        register_post_type('coursepackage', array(
-            'labels' => array(
-                'name' => __('패키지강의', 'lectus-class-system'),
-                'singular_name' => __('패키지강의', 'lectus-class-system'),
-                'add_new' => __('새 패키지강의 추가', 'lectus-class-system'),
-                'add_new_item' => __('새 패키지강의 추가', 'lectus-class-system'),
-                'edit_item' => __('패키지강의 편집', 'lectus-class-system'),
-                'new_item' => __('새 패키지강의', 'lectus-class-system'),
-                'view_item' => __('패키지강의 보기', 'lectus-class-system'),
-                'search_items' => __('패키지강의 검색', 'lectus-class-system'),
-                'not_found' => __('패키지강의를 찾을 수 없습니다', 'lectus-class-system'),
-                'not_found_in_trash' => __('휴지통에 패키지강의가 없습니다', 'lectus-class-system'),
-                'all_items' => __('모든 패키지강의', 'lectus-class-system'),
-                'menu_name' => __('패키지강의', 'lectus-class-system'),
-            ),
-            'public' => true,
-            'publicly_queryable' => true,
-            'show_ui' => true,
-            'show_in_menu' => false,
-            'query_var' => true,
-            'rewrite' => array('slug' => 'course-package'),
-            'capability_type' => 'post',
-            'has_archive' => true,
-            'hierarchical' => false,
-            'menu_position' => null,
-            'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
-            'show_in_rest' => true,
-        ));
+        // Note: Course Package is now handled as WooCommerce products with multiple courses
         
         // Register Single Course Post Type
         register_post_type('coursesingle', array(
@@ -121,25 +90,6 @@ class Lectus_Post_Types {
     }
     
     public static function add_meta_boxes() {
-        // Package Course Meta Boxes
-        add_meta_box(
-            'coursepackage_details',
-            __('패키지강의 설정', 'lectus-class-system'),
-            array(__CLASS__, 'render_package_meta_box'),
-            'coursepackage',
-            'normal',
-            'high'
-        );
-        
-        add_meta_box(
-            'coursepackage_courses',
-            __('포함된 단과강의', 'lectus-class-system'),
-            array(__CLASS__, 'render_package_courses_meta_box'),
-            'coursepackage',
-            'normal',
-            'high'
-        );
-        
         // Single Course Meta Boxes
         add_meta_box(
             'coursesingle_details',

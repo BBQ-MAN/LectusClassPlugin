@@ -16,6 +16,9 @@ class Lectus_Shortcodes {
         add_shortcode('lectus_my_courses', array(__CLASS__, 'my_courses'));
         add_shortcode('lectus_course_progress', array(__CLASS__, 'course_progress'));
         
+        // Package shortcodes
+        add_shortcode('lectus_packages', array(__CLASS__, 'packages_list'));
+        
         // Enrollment shortcodes
         add_shortcode('lectus_enroll_button', array(__CLASS__, 'enroll_button'));
         add_shortcode('lectus_enrollment_form', array(__CLASS__, 'enrollment_form'));
@@ -213,6 +216,84 @@ class Lectus_Shortcodes {
                 </div>
             <?php endif; ?>
         </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Display package products list
+     */
+    public static function packages_list($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 12,
+            'columns' => 3,
+            'orderby' => 'date',
+            'order' => 'DESC',
+            'category' => ''
+        ), $atts);
+        
+        // Get products with course packages
+        $args = array(
+            'post_type' => 'product',
+            'posts_per_page' => $atts['limit'],
+            'orderby' => $atts['orderby'],
+            'order' => $atts['order'],
+            'meta_query' => array(
+                array(
+                    'key' => '_lectus_course_ids',
+                    'compare' => 'EXISTS'
+                )
+            )
+        );
+        
+        // Package type removed - using categories instead
+        
+        // Filter by product category if specified
+        if (!empty($atts['category'])) {
+            $args['tax_query'] = array(
+                array(
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => $atts['category']
+                )
+            );
+        }
+        
+        $products = new WP_Query($args);
+        
+        ob_start();
+        ?>
+        <div class="lectus-packages-grid" style="display: grid; grid-template-columns: repeat(<?php echo esc_attr($atts['columns']); ?>, 1fr); gap: 30px;">
+            <?php if ($products->have_posts()): ?>
+                <?php while ($products->have_posts()): $products->the_post(); 
+                    $product = wc_get_product(get_the_ID());
+                    if (!$product) continue;
+                    
+                    // Load package card template
+                    include LECTUS_PLUGIN_DIR . 'templates/package-card.php';
+                ?>
+                <?php endwhile; ?>
+                <?php wp_reset_postdata(); ?>
+            <?php else: ?>
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <p><?php _e('패키지 상품이 없습니다.', 'lectus-class-system'); ?></p>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <style>
+        @media (max-width: 1024px) {
+            .lectus-packages-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .lectus-packages-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        </style>
         <?php
         return ob_get_clean();
     }

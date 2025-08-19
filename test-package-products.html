@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>패키지 상품 테스트 페이지</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #007cba;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 10px;
+        }
+        .test-list {
+            list-style: none;
+            padding: 0;
+        }
+        .test-list li {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f8f8;
+            border-left: 4px solid #007cba;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .test-list li.completed {
+            border-left-color: #4caf50;
+            background: #f1f8e9;
+        }
+        .test-list li.failed {
+            border-left-color: #f44336;
+            background: #ffebee;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.pending {
+            background: #e0e0e0;
+            color: #666;
+        }
+        .status.completed {
+            background: #4caf50;
+            color: white;
+        }
+        .status.failed {
+            background: #f44336;
+            color: white;
+        }
+        .shortcode-display {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .info-box h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007cba;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background: #005a87;
+        }
+        .button.secondary {
+            background: #666;
+        }
+        .button.secondary:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎓 Lectus Class System - 패키지 상품 테스트</h1>
+
+    <div class="section">
+        <h2>📋 구현 완료 사항</h2>
+        <ul class="test-list">
+            <li class="completed">
+                <span>✅ WooCommerce 상품에 여러 강의 연결 기능</span>
+                <span class="status completed">완료</span>
+            </li>
+            <li class="completed">
+                <span>✅ 패키지 타입 선택 (번들/구독형/평생소장)</span>
+                <span class="status completed">완료</span>
+            </li>
+            <li class="completed">
+                <span>✅ 패키지 상품 카드 컴포넌트</span>
+                <span class="status completed">완료</span>
+            </li>
+            <li class="completed">
+                <span>✅ 패키지 상품 목록 Shortcode</span>
+                <span class="status completed">완료</span>
+            </li>
+            <li class="completed">
+                <span>✅ 상품 구매 시 여러 강의 자동 등록</span>
+                <span class="status completed">완료</span>
+            </li>
+            <li class="completed">
+                <span>✅ 기존 패키지강의 Post Type 제거</span>
+                <span class="status completed">완료</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🔧 사용 방법</h2>
+        
+        <div class="info-box">
+            <h3>1. WooCommerce 상품 생성</h3>
+            <ol>
+                <li>WooCommerce → 상품 → 새로 추가</li>
+                <li>상품 데이터 섹션에서 "연결된 강의들" 선택 (Ctrl+클릭으로 다중 선택)</li>
+                <li>패키지 유형 선택 (번들/구독형/평생소장)</li>
+                <li>수강 기간 설정</li>
+                <li>자동 수강 등록 체크</li>
+            </ol>
+        </div>
+
+        <div class="info-box">
+            <h3>2. 패키지 상품 표시</h3>
+            <p>아래 Shortcode를 페이지나 포스트에 추가하세요:</p>
+            <div class="shortcode-display">[lectus_packages limit="12" columns="3" type="bundle"]</div>
+            <p><strong>파라미터:</strong></p>
+            <ul>
+                <li><strong>limit</strong>: 표시할 상품 수 (기본: 12)</li>
+                <li><strong>columns</strong>: 열 개수 (기본: 3)</li>
+                <li><strong>type</strong>: 패키지 유형 (bundle/subscription/lifetime)</li>
+                <li><strong>category</strong>: 상품 카테고리 slug</li>
+                <li><strong>orderby</strong>: 정렬 기준 (date/title/price)</li>
+                <li><strong>order</strong>: 정렬 순서 (ASC/DESC)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 주요 기능</h2>
+        
+        <div class="info-box">
+            <h3>패키지 상품 카드에 표시되는 정보</h3>
+            <ul>
+                <li>패키지 타입 배지 (번들/구독형/평생소장)</li>
+                <li>포함된 강의 목록</li>
+                <li>총 강의 수 및 레슨 수</li>
+                <li>예상 수강 시간</li>
+                <li>수강 기간</li>
+                <li>가격 정보 (할인가 포함)</li>
+                <li>수강 상태 표시 (수강중/미수강)</li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>자동화된 기능</h3>
+            <ul>
+                <li>결제 완료 시 선택된 모든 강의에 자동 등록</li>
+                <li>이미 수강중인 강의 체크 및 알림</li>
+                <li>환불 시 자동 수강 취소</li>
+                <li>주문 노트에 등록 내역 자동 기록</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧪 테스트 시나리오</h2>
+        
+        <p>다음 시나리오를 테스트하려면 WordPress 관리자 페이지에 로그인하세요:</p>
+        
+        <div style="margin: 20px 0;">
+            <a href="http://localhost:8000/wp-admin" class="button" target="_blank">
+                관리자 페이지 열기
+            </a>
+            <a href="http://localhost:8000/wp-admin/post-new.php?post_type=product" class="button secondary" target="_blank">
+                새 상품 만들기
+            </a>
+        </div>
+
+        <ol>
+            <li><strong>패키지 상품 생성</strong>
+                <ul>
+                    <li>WooCommerce 상품 생성</li>
+                    <li>여러 강의 선택</li>
+                    <li>패키지 타입 설정</li>
+                </ul>
+            </li>
+            <li><strong>상품 페이지 확인</strong>
+                <ul>
+                    <li>강의 정보 탭 표시</li>
+                    <li>포함된 강의 목록 확인</li>
+                    <li>패키지 요약 정보 확인</li>
+                </ul>
+            </li>
+            <li><strong>구매 프로세스</strong>
+                <ul>
+                    <li>장바구니 추가</li>
+                    <li>이미 수강중인 강의 체크</li>
+                    <li>결제 진행</li>
+                </ul>
+            </li>
+            <li><strong>자동 등록 확인</strong>
+                <ul>
+                    <li>주문 완료 후 강의 접근 확인</li>
+                    <li>내 강의 페이지에서 확인</li>
+                    <li>진도 추적 가능 여부</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <h2>📝 추가 개선 사항 (향후)</h2>
+        <ul>
+            <li>패키지별 할인율 자동 계산</li>
+            <li>패키지 구매 시 보너스 강의 추가</li>
+            <li>시간 제한 특별 패키지 기능</li>
+            <li>패키지 구매자 전용 커뮤니티 접근</li>
+            <li>패키지별 수료증 발급</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('패키지 상품 테스트 페이지 로드 완료');
+        console.log('구현 기능:');
+        console.log('- WooCommerce 상품에 여러 강의 연결');
+        console.log('- 패키지 타입 (번들/구독형/평생소장)');
+        console.log('- 패키지 상품 카드 컴포넌트');
+        console.log('- Shortcode: [lectus_packages]');
+    </script>
+</body>
+</html>
