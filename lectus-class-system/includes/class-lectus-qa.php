@@ -743,17 +743,19 @@ class Lectus_QA {
         ob_start();
         ?>
         <div class="qa-question">
-            <h3><?php echo esc_html($question->title ?: wp_trim_words($question->content, 15)); ?></h3>
-            <p class="qa-meta">
-                <?php printf(
-                    __('작성자: %s | 강의: %s | 레슨: %s | 날짜: %s', 'lectus-class-system'),
-                    esc_html($question->display_name),
-                    esc_html($question->course_title),
-                    esc_html($question->lesson_title ?: '-'),
-                    date_i18n(get_option('date_format'), strtotime($question->created_at))
-                ); ?>
-            </p>
-            <div class="qa-content">
+            <h3 class="text-lg font-semibold text-gray-900 mb-3"><?php echo esc_html($question->title ?: wp_trim_words($question->content, 15)); ?></h3>
+            <div class="qa-meta">
+                <span class="qa-author"><?php echo esc_html($question->display_name); ?></span>
+                <span class="text-gray-500">•</span>
+                <span><?php echo esc_html($question->course_title); ?></span>
+                <?php if ($question->lesson_title): ?>
+                    <span class="text-gray-500">•</span>
+                    <span><?php echo esc_html($question->lesson_title); ?></span>
+                <?php endif; ?>
+                <span class="text-gray-500">•</span>
+                <span><?php echo date_i18n(get_option('date_format'), strtotime($question->created_at)); ?></span>
+            </div>
+            <div class="qa-content prose prose-sm max-w-none mt-4">
                 <?php echo wp_kses_post($question->content); ?>
             </div>
         </div>

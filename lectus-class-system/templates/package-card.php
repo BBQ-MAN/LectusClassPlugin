@@ -80,81 +80,100 @@ if (is_user_logged_in() && !empty($course_ids)) {
 }
 ?>
 
-<div class="lectus-package-card" data-product-id="<?php echo esc_attr($product_id); ?>">
-    <div class="package-card-header">
+<div class="package-card" data-product-id="<?php echo esc_attr($product_id); ?>">
+    <div class="relative overflow-hidden">
         <?php if ($is_package): ?>
-            <span class="package-badge package-multi">
+            <span class="package-badge">
                 <?php echo sprintf(__('%d개 강의 패키지', 'lectus-class-system'), count($course_ids)); ?>
             </span>
         <?php endif; ?>
         
         <?php if ($product->is_on_sale()): ?>
-            <span class="sale-badge">SALE</span>
+            <span class="absolute top-3 right-3 px-3 py-1 bg-lectus-danger text-white text-xs font-semibold rounded-full z-10">
+                SALE
+            </span>
         <?php endif; ?>
         
         <?php if (has_post_thumbnail($product_id)): ?>
-            <div class="package-thumbnail">
-                <?php echo get_the_post_thumbnail($product_id, 'medium'); ?>
+            <div class="w-full h-48 overflow-hidden bg-gray-100">
+                <?php echo get_the_post_thumbnail($product_id, 'medium', array('class' => 'w-full h-full object-cover')); ?>
             </div>
         <?php else: ?>
-            <div class="package-thumbnail placeholder">
-                <img src="<?php echo LECTUS_PLUGIN_URL; ?>assets/images/package-placeholder.jpg" alt="<?php echo esc_attr($product->get_name()); ?>">
+            <div class="w-full h-48 flex items-center justify-center bg-gradient-to-br from-lectus-secondary to-lectus-secondary-dark">
+                <svg class="w-16 h-16 text-white opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
             </div>
         <?php endif; ?>
     </div>
     
-    <div class="package-card-body">
-        <h3 class="package-title">
-            <a href="<?php echo esc_url($product->get_permalink()); ?>">
+    <div class="card-body">
+        <h3 class="text-lg font-semibold mb-2">
+            <a href="<?php echo esc_url($product->get_permalink()); ?>" class="text-gray-900 hover:text-lectus-primary transition-colors">
                 <?php echo esc_html($product->get_name()); ?>
             </a>
         </h3>
         
         <?php if ($product->get_short_description()): ?>
-            <div class="package-excerpt">
+            <p class="text-gray-600 text-sm mb-4 line-clamp-2">
                 <?php echo wp_trim_words($product->get_short_description(), 20); ?>
-            </div>
+            </p>
         <?php endif; ?>
         
-        <div class="package-info">
-            <div class="info-item">
-                <i class="dashicons dashicons-book-alt"></i>
+        <div class="flex flex-wrap gap-3 mb-4 pb-4 border-b border-gray-200">
+            <div class="package-info-item">
+                <svg class="w-4 h-4 text-lectus-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
                 <span><?php echo sprintf(__('%d개 강의', 'lectus-class-system'), count($course_ids)); ?></span>
             </div>
             
-            <div class="info-item">
-                <i class="dashicons dashicons-media-document"></i>
+            <div class="package-info-item">
+                <svg class="w-4 h-4 text-lectus-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
                 <span><?php echo sprintf(__('%d개 레슨', 'lectus-class-system'), $total_lessons); ?></span>
             </div>
             
             <?php if ($duration_text): ?>
-                <div class="info-item">
-                    <i class="dashicons dashicons-clock"></i>
+                <div class="package-info-item">
+                    <svg class="w-4 h-4 text-lectus-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                     <span><?php echo esc_html($duration_text); ?></span>
                 </div>
             <?php endif; ?>
             
             <?php if ($duration): ?>
-                <div class="info-item">
-                    <i class="dashicons dashicons-calendar-alt"></i>
+                <div class="package-info-item">
+                    <svg class="w-4 h-4 text-lectus-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
                     <span><?php echo sprintf(__('수강기간 %d일', 'lectus-class-system'), $duration); ?></span>
                 </div>
             <?php else: ?>
-                <div class="info-item">
-                    <i class="dashicons dashicons-calendar-alt"></i>
+                <div class="package-info-item">
+                    <svg class="w-4 h-4 text-lectus-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
                     <span><?php _e('무제한 수강', 'lectus-class-system'); ?></span>
                 </div>
             <?php endif; ?>
         </div>
         
         <?php if (!empty($courses_data)): ?>
-            <div class="package-courses">
-                <h4 class="courses-title"><?php _e('포함된 강의', 'lectus-class-system'); ?></h4>
-                <ul class="courses-list">
+            <div class="mb-4">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2"><?php _e('포함된 강의', 'lectus-class-system'); ?></h4>
+                <ul class="space-y-1">
                     <?php foreach ($courses_data as $course_data): ?>
-                        <li>
-                            <span class="course-name"><?php echo esc_html($course_data['title']); ?></span>
-                            <span class="lesson-count">(<?php echo sprintf(__('%d개 레슨', 'lectus-class-system'), $course_data['lesson_count']); ?>)</span>
+                        <li class="flex items-center justify-between text-sm">
+                            <span class="flex items-center gap-1 text-gray-600">
+                                <svg class="w-3 h-3 text-lectus-success" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                <?php echo esc_html($course_data['title']); ?>
+                            </span>
+                            <span class="text-xs text-gray-500"><?php echo sprintf(__('%d개 레슨', 'lectus-class-system'), $course_data['lesson_count']); ?></span>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -162,24 +181,26 @@ if (is_user_logged_in() && !empty($course_ids)) {
         <?php endif; ?>
     </div>
     
-    <div class="package-card-footer">
+    <div class="card-footer flex items-center justify-between">
         <div class="package-price">
             <?php echo $product->get_price_html(); ?>
         </div>
         
-        <div class="package-actions">
+        <div class="flex gap-2">
             <?php if ($is_enrolled): ?>
-                <a href="<?php echo esc_url(wc_get_account_endpoint_url('my-courses')); ?>" class="button enrolled-button">
-                    <i class="dashicons dashicons-yes-alt"></i>
+                <a href="<?php echo esc_url(wc_get_account_endpoint_url('my-courses')); ?>" class="btn btn-success">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
                     <?php _e('수강중', 'lectus-class-system'); ?>
                 </a>
             <?php elseif ($enrolled_count > 0): ?>
-                <a href="<?php echo esc_url($product->add_to_cart_url()); ?>" class="button add-to-cart-button">
-                    <?php echo sprintf(__('%d개 추가 수강', 'lectus-class-system'), count($course_ids) - $enrolled_count); ?>
+                <a href="<?php echo esc_url($product->add_to_cart_url()); ?>" class="btn btn-primary">
+                    <?php echo sprintf(__('%d개 추가', 'lectus-class-system'), count($course_ids) - $enrolled_count); ?>
                 </a>
             <?php else: ?>
                 <a href="<?php echo esc_url($product->add_to_cart_url()); ?>" 
-                   class="button add-to-cart-button <?php echo esc_attr($product->is_purchasable() && $product->is_in_stock() ? '' : 'disabled'); ?>"
+                   class="btn btn-primary <?php echo esc_attr($product->is_purchasable() && $product->is_in_stock() ? '' : 'opacity-50 cursor-not-allowed'); ?>"
                    <?php if ($product->supports('ajax_add_to_cart')): ?>
                    data-product_id="<?php echo esc_attr($product_id); ?>"
                    data-quantity="1"
@@ -188,275 +209,10 @@ if (is_user_logged_in() && !empty($course_ids)) {
                 </a>
             <?php endif; ?>
             
-            <a href="<?php echo esc_url($product->get_permalink()); ?>" class="button view-details-button">
+            <a href="<?php echo esc_url($product->get_permalink()); ?>" class="btn btn-outline">
                 <?php _e('상세보기', 'lectus-class-system'); ?>
             </a>
         </div>
     </div>
 </div>
 
-<style>
-.lectus-package-card {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    background: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.lectus-package-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transform: translateY(-2px);
-}
-
-.package-card-header {
-    position: relative;
-    overflow: hidden;
-}
-
-.package-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    z-index: 2;
-    text-transform: uppercase;
-}
-
-.package-badge.package-multi {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.sale-badge {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #f44336;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    z-index: 2;
-}
-
-.package-thumbnail {
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-    background: #f5f5f5;
-}
-
-.package-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.package-thumbnail.placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.package-card-body {
-    padding: 20px;
-}
-
-.package-title {
-    margin: 0 0 10px;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.package-title a {
-    color: #333;
-    text-decoration: none;
-}
-
-.package-title a:hover {
-    color: #007cba;
-}
-
-.package-excerpt {
-    color: #666;
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 15px;
-}
-
-.package-info {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.info-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 13px;
-    color: #666;
-}
-
-.info-item .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    color: #007cba;
-}
-
-.package-courses {
-    margin-top: 15px;
-}
-
-.courses-title {
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0 0 10px;
-    color: #333;
-}
-
-.courses-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
-.courses-list li {
-    padding: 5px 0;
-    font-size: 13px;
-    color: #666;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.courses-list li:before {
-    content: "✓";
-    color: #4CAF50;
-    font-weight: bold;
-    margin-right: 8px;
-}
-
-.course-name {
-    flex: 1;
-}
-
-.lesson-count {
-    font-size: 12px;
-    color: #999;
-}
-
-.package-card-footer {
-    padding: 15px 20px;
-    background: #f8f8f8;
-    border-top: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.package-price {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
-}
-
-.package-price del {
-    color: #999;
-    font-size: 16px;
-    margin-right: 5px;
-}
-
-.package-price ins {
-    color: #f44336;
-    text-decoration: none;
-}
-
-.package-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.package-actions .button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.add-to-cart-button {
-    background: #007cba;
-    color: white;
-}
-
-.add-to-cart-button:hover {
-    background: #005a87;
-}
-
-.add-to-cart-button.disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-.view-details-button {
-    background: #fff;
-    color: #007cba;
-    border: 1px solid #007cba;
-}
-
-.view-details-button:hover {
-    background: #007cba;
-    color: white;
-}
-
-.enrolled-button {
-    background: #4CAF50;
-    color: white;
-}
-
-.enrolled-button .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .package-info {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .package-card-footer {
-        flex-direction: column;
-        gap: 15px;
-    }
-    
-    .package-actions {
-        width: 100%;
-        justify-content: stretch;
-    }
-    
-    .package-actions .button {
-        flex: 1;
-        justify-content: center;
-    }
-}
-</style>

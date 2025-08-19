@@ -1,0 +1,346 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Admin-specific Component Classes */
+@layer components {
+  /* Admin Tables */
+  .admin-table {
+    @apply w-full bg-white shadow-sm rounded-lg overflow-hidden;
+  }
+  
+  .admin-table thead {
+    @apply bg-gray-50 border-b border-gray-200;
+  }
+  
+  .admin-table th {
+    @apply px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider;
+  }
+  
+  .admin-table tbody {
+    @apply divide-y divide-gray-200;
+  }
+  
+  .admin-table td {
+    @apply px-6 py-4 text-sm text-gray-900;
+  }
+  
+  .admin-table tr:hover {
+    @apply bg-gray-50;
+  }
+  
+  /* Admin Dashboard Cards */
+  .dashboard-card {
+    @apply bg-white rounded-lg shadow p-6;
+  }
+  
+  .dashboard-stat {
+    @apply flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200;
+  }
+  
+  .dashboard-stat-value {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  
+  .dashboard-stat-label {
+    @apply text-sm text-gray-600 mt-1;
+  }
+  
+  .dashboard-stat-icon {
+    @apply w-12 h-12 rounded-lg flex items-center justify-center;
+  }
+  
+  /* Admin Navigation */
+  .admin-nav {
+    @apply flex space-x-1 border-b border-gray-200;
+  }
+  
+  .admin-nav-item {
+    @apply px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-t-lg transition-colors;
+  }
+  
+  .admin-nav-item.active {
+    @apply text-lectus-primary bg-white border-b-2 border-lectus-primary;
+  }
+  
+  /* Admin Forms */
+  .admin-form-group {
+    @apply mb-4;
+  }
+  
+  .admin-form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+  
+  .admin-form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-lectus-primary focus:border-lectus-primary;
+  }
+  
+  .admin-form-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-lectus-primary focus:border-lectus-primary bg-white;
+  }
+  
+  .admin-form-checkbox {
+    @apply h-4 w-4 text-lectus-primary focus:ring-lectus-primary border-gray-300 rounded;
+  }
+  
+  /* Admin Buttons */
+  .admin-btn {
+    @apply inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors;
+  }
+  
+  .admin-btn-primary {
+    @apply bg-lectus-primary text-white hover:bg-lectus-primary-dark focus:ring-lectus-primary;
+  }
+  
+  .admin-btn-secondary {
+    @apply bg-white text-gray-700 border-gray-300 hover:bg-gray-50 focus:ring-lectus-primary;
+  }
+  
+  .admin-btn-danger {
+    @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+  }
+  
+  /* Admin Alerts */
+  .admin-notice {
+    @apply p-4 rounded-md mb-4;
+  }
+  
+  .admin-notice-success {
+    @apply bg-green-50 text-green-800 border border-green-200;
+  }
+  
+  .admin-notice-error {
+    @apply bg-red-50 text-red-800 border border-red-200;
+  }
+  
+  .admin-notice-warning {
+    @apply bg-yellow-50 text-yellow-800 border border-yellow-200;
+  }
+  
+  .admin-notice-info {
+    @apply bg-blue-50 text-blue-800 border border-blue-200;
+  }
+  
+  /* Student Management */
+  .student-card {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow;
+  }
+  
+  .student-info {
+    @apply flex items-center space-x-4 mb-3;
+  }
+  
+  .student-avatar {
+    @apply w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-semibold;
+  }
+  
+  .student-details {
+    @apply flex-1;
+  }
+  
+  .student-name {
+    @apply font-medium text-gray-900;
+  }
+  
+  .student-email {
+    @apply text-sm text-gray-500;
+  }
+  
+  .student-status {
+    @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium;
+  }
+  
+  .student-status.active {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .student-status.expired {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  .student-status.pending {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  /* Progress Tracking */
+  .progress-card {
+    @apply bg-white rounded-lg p-4 border border-gray-200;
+  }
+  
+  .progress-header {
+    @apply flex items-center justify-between mb-3;
+  }
+  
+  .progress-title {
+    @apply font-medium text-gray-900;
+  }
+  
+  .progress-percentage {
+    @apply text-sm font-semibold text-lectus-primary;
+  }
+  
+  .progress-bar-container {
+    @apply w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+  }
+  
+  .progress-bar-fill {
+    @apply h-full bg-gradient-to-r from-lectus-primary to-lectus-primary-dark transition-all duration-300;
+  }
+  
+  /* Settings Tabs */
+  .settings-tabs {
+    @apply border-b border-gray-200;
+  }
+  
+  .settings-tab-list {
+    @apply -mb-px flex space-x-8;
+  }
+  
+  .settings-tab {
+    @apply py-2 px-1 border-b-2 font-medium text-sm cursor-pointer transition-colors;
+  }
+  
+  .settings-tab.active {
+    @apply border-lectus-primary text-lectus-primary;
+  }
+  
+  .settings-tab:not(.active) {
+    @apply border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300;
+  }
+  
+  .settings-panel {
+    @apply py-6;
+  }
+  
+  /* Reports & Analytics */
+  .report-card {
+    @apply bg-white rounded-lg shadow p-6;
+  }
+  
+  .report-header {
+    @apply flex items-center justify-between mb-4 pb-4 border-b border-gray-200;
+  }
+  
+  .report-title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .report-actions {
+    @apply flex items-center space-x-2;
+  }
+  
+  .report-stat {
+    @apply text-center;
+  }
+  
+  .report-stat-value {
+    @apply text-3xl font-bold text-gray-900;
+  }
+  
+  .report-stat-label {
+    @apply text-sm text-gray-600 mt-1;
+  }
+  
+  .report-stat-change {
+    @apply text-xs mt-2;
+  }
+  
+  .report-stat-change.positive {
+    @apply text-green-600;
+  }
+  
+  .report-stat-change.negative {
+    @apply text-red-600;
+  }
+  
+  /* Bulk Actions */
+  .bulk-actions {
+    @apply flex items-center space-x-3 p-4 bg-gray-50 rounded-lg;
+  }
+  
+  .bulk-select-all {
+    @apply flex items-center space-x-2;
+  }
+  
+  .bulk-action-buttons {
+    @apply flex items-center space-x-2 ml-auto;
+  }
+  
+  /* File Upload */
+  .file-upload-area {
+    @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors;
+  }
+  
+  .file-upload-area.dragging {
+    @apply border-lectus-primary bg-blue-50;
+  }
+  
+  .file-upload-icon {
+    @apply mx-auto h-12 w-12 text-gray-400;
+  }
+  
+  .file-upload-text {
+    @apply mt-2 text-sm text-gray-600;
+  }
+  
+  .file-upload-button {
+    @apply mt-2 text-sm text-lectus-primary hover:text-lectus-primary-dark;
+  }
+  
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity z-50;
+  }
+  
+  .modal-container {
+    @apply fixed inset-0 z-50 overflow-y-auto;
+  }
+  
+  .modal-wrapper {
+    @apply flex min-h-full items-center justify-center p-4;
+  }
+  
+  .modal-content {
+    @apply relative bg-white rounded-lg shadow-xl max-w-lg w-full;
+  }
+  
+  .modal-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+  
+  .modal-title {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .modal-body {
+    @apply px-6 py-4;
+  }
+  
+  .modal-footer {
+    @apply px-6 py-4 border-t border-gray-200 flex justify-end space-x-3;
+  }
+}
+
+/* WordPress Admin Compatibility */
+@layer utilities {
+  /* Fix for WordPress admin bar */
+  .wp-admin-bar-adjust {
+    margin-top: 32px;
+  }
+  
+  @media screen and (max-width: 782px) {
+    .wp-admin-bar-adjust {
+      margin-top: 46px;
+    }
+  }
+  
+  /* WordPress admin specific overrides */
+  #wpcontent {
+    @apply p-0;
+  }
+  
+  .wrap {
+    @apply m-0 p-0;
+  }
+}

@@ -1,0 +1,278 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Component Classes */
+@layer components {
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md font-medium text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply bg-lectus-primary text-white hover:bg-lectus-primary-dark focus:ring-lectus-primary;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500;
+  }
+  
+  .btn-success {
+    @apply bg-lectus-success text-white hover:bg-lectus-success-dark focus:ring-lectus-success;
+  }
+  
+  .btn-danger {
+    @apply bg-lectus-danger text-white hover:bg-red-600 focus:ring-lectus-danger;
+  }
+  
+  .btn-outline {
+    @apply bg-transparent border-2 border-lectus-primary text-lectus-primary hover:bg-lectus-primary hover:text-white;
+  }
+  
+  /* Cards */
+  .card {
+    @apply bg-white rounded-lg shadow-card overflow-hidden transition-all duration-300 hover:shadow-card-hover;
+  }
+  
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+  }
+  
+  .card-body {
+    @apply px-6 py-4;
+  }
+  
+  .card-footer {
+    @apply px-6 py-4 bg-gray-50 border-t border-gray-200;
+  }
+  
+  /* Course Components */
+  .course-card {
+    @apply card hover:-translate-y-0.5;
+  }
+  
+  .course-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+  }
+  
+  .course-progress {
+    @apply relative w-full bg-gray-200 rounded-full h-2 overflow-hidden;
+  }
+  
+  .course-progress-bar {
+    @apply absolute top-0 left-0 h-full bg-gradient-to-r from-lectus-success to-lectus-success-dark transition-all duration-300;
+  }
+  
+  /* Lessons */
+  .lesson-item {
+    @apply flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors;
+  }
+  
+  .lesson-item.completed {
+    @apply opacity-70;
+  }
+  
+  .lesson-item.locked {
+    @apply opacity-50 cursor-not-allowed;
+  }
+  
+  .lesson-status {
+    @apply inline-flex items-center text-sm font-medium;
+  }
+  
+  .lesson-status.completed {
+    @apply text-lectus-success;
+  }
+  
+  .lesson-status.locked {
+    @apply text-gray-400;
+  }
+  
+  /* Forms */
+  .form-group {
+    @apply mb-4;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+  
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lectus-primary focus:border-transparent transition-all;
+  }
+  
+  .form-textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lectus-primary focus:border-transparent transition-all resize-y;
+  }
+  
+  .form-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-lectus-primary focus:border-transparent transition-all;
+  }
+  
+  .form-error {
+    @apply text-sm text-lectus-danger mt-1;
+  }
+  
+  .form-help {
+    @apply text-sm text-gray-500 mt-1;
+  }
+  
+  /* Q&A System */
+  .qa-container {
+    @apply max-w-4xl mx-auto p-4 md:p-6;
+  }
+  
+  .qa-item {
+    @apply bg-white rounded-lg shadow-sm border border-gray-200 mb-4 overflow-hidden;
+  }
+  
+  .qa-question {
+    @apply p-4 md:p-6;
+  }
+  
+  .qa-answer {
+    @apply p-4 md:p-6 bg-gray-50 border-t border-gray-200;
+  }
+  
+  .qa-meta {
+    @apply flex flex-wrap gap-3 text-sm text-gray-600 mb-3;
+  }
+  
+  .qa-author {
+    @apply font-semibold text-lectus-primary;
+  }
+  
+  .qa-vote-btn {
+    @apply inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-sm hover:bg-gray-50 transition-colors;
+  }
+  
+  /* Materials */
+  .materials-table {
+    @apply w-full border-collapse bg-white shadow-sm rounded-lg overflow-hidden;
+  }
+  
+  .materials-table th {
+    @apply px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-b border-gray-200;
+  }
+  
+  .materials-table td {
+    @apply px-4 py-3 text-sm text-gray-900 border-b border-gray-100;
+  }
+  
+  .materials-table tr:hover {
+    @apply bg-gray-50;
+  }
+  
+  .download-btn {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 bg-lectus-primary text-white text-sm rounded hover:bg-lectus-primary-dark transition-colors;
+  }
+  
+  /* Alerts & Notifications */
+  .alert {
+    @apply p-4 rounded-lg mb-4;
+  }
+  
+  .alert-success {
+    @apply bg-green-50 border border-green-200 text-green-800;
+  }
+  
+  .alert-error {
+    @apply bg-red-50 border border-red-200 text-red-800;
+  }
+  
+  .alert-warning {
+    @apply bg-yellow-50 border border-yellow-200 text-yellow-800;
+  }
+  
+  .alert-info {
+    @apply bg-blue-50 border border-blue-200 text-blue-800;
+  }
+  
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .badge-primary {
+    @apply bg-blue-100 text-blue-800;
+  }
+  
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+  
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  
+  .badge-danger {
+    @apply bg-red-100 text-red-800;
+  }
+  
+  /* Package Cards */
+  .package-card {
+    @apply bg-white rounded-lg shadow-card overflow-hidden transition-all duration-300 hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+  
+  .package-badge {
+    @apply absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold z-10 bg-gradient-to-r from-lectus-secondary to-lectus-secondary-dark text-white;
+  }
+  
+  .package-info-item {
+    @apply flex items-center gap-2 text-sm text-gray-600;
+  }
+  
+  .package-price {
+    @apply text-xl font-bold text-gray-900;
+  }
+  
+  .package-price del {
+    @apply text-gray-400 text-base font-normal mr-2;
+  }
+  
+  .package-price ins {
+    @apply text-lectus-danger no-underline;
+  }
+  
+  /* Responsive Grid */
+  .courses-grid {
+    @apply grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  /* Progress Indicators */
+  .progress-ring {
+    @apply relative inline-flex items-center justify-center;
+  }
+  
+  .progress-ring-circle {
+    @apply transform -rotate-90;
+  }
+  
+  /* Animations */
+  .animate-slide-up {
+    @apply animate-slide-up;
+  }
+  
+  .animate-fade-in {
+    @apply animate-fade-in;
+  }
+}
+
+/* Custom Utilities */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
