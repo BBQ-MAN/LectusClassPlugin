@@ -1,6 +1,7 @@
 # Lectus Class System - WordPress LMS 플러그인
 
 ![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
+![Last Updated](https://img.shields.io/badge/updated-2025--08--19-green.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0+-green.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.0+-purple.svg)
 ![WooCommerce](https://img.shields.io/badge/WooCommerce-6.0+-orange.svg)
@@ -306,12 +307,17 @@ define('WP_DEBUG_DISPLAY', false);
 
 ## 📊 버전 히스토리
 
-### v1.2.0 (현재)
+### v1.2.0 (현재 - 2025.08.19)
+- ✅ WooCommerce 패키지 상품 시스템 완전 구현
+- ✅ 커스텀 상품 페이지 템플릿 개발
+- ✅ 검색 가능한 강의 선택 UI (카테고리 그룹핑)
+- ✅ 패키지강의 Post Type 제거 (WooCommerce 통합)
+- ✅ 강사 Q&A 관리 시스템 추가
+- ✅ jQuery 의존성 제거 (순수 JavaScript)
 - ✅ 외부 링크 자료 저장 기능 추가
 - ✅ 관리자 메뉴 통합 (설정 페이지 탭화)
 - ✅ 코드 품질 분석 및 개선 (7.8/10)
 - ✅ 프로젝트 정리 및 문서화
-- ✅ GitHub 저장소 업로드
 
 ### v1.1.0
 - Q&A 시스템 Rate Limiting 추가

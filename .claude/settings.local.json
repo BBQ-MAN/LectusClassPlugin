@@ -56,7 +56,9 @@
       "Bash(powershell:*)",
       "Bash(rm:*)",
       "mcp__playwright__browser_console_messages",
-      "mcp__playwright__browser_press_key"
+      "mcp__playwright__browser_press_key",
+      "Bash(true)",
+      "Bash(touch:*)"
     ],
     "deny": [],
     "ask": [],

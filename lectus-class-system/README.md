@@ -1,6 +1,6 @@
 # Lectus Class System - WordPress LMS 플러그인
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0+-green.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.0+-purple.svg)
 ![WooCommerce](https://img.shields.io/badge/WooCommerce-6.0+-orange.svg)
@@ -22,13 +22,16 @@ WordPress용 전문 온라인 교육 관리 시스템(LMS) 플러그인입니다
 ## 🎯 핵심 기능
 
 ### 📚 강의 관리 시스템
-- **3단계 계층 구조**: 패키지강의 → 단과강의 → 레슨
+- **WooCommerce 통합 구조**: 상품 → 단과강의 → 레슨
 - **유연한 콘텐츠 타입**: 텍스트, 동영상, 퀴즈, 과제
 - **벌크 업로드**: CSV 파일로 레슨 일괄 생성
 - **강의자료 관리**: 파일 업로드 및 외부 링크 지원
 - **순차적/자유 학습 모드**: 강의별 진행 방식 설정
+- **검색 가능한 강의 선택**: 카테고리별 그룹핑 지원
 
 ### 💳 WooCommerce 완전 통합
+- **패키지 상품 시스템**: 단일/패키지 자동 구분
+- **커스텀 상품 페이지**: 강의 전용 템플릿 제공
 - **자동 수강 등록**: 결제 완료 시 즉시 접근 권한 부여
 - **수강 기간 관리**: 상품별 개별 수강 기간 설정
 - **환불 처리**: 환불 시 자동 접근 권한 제거
@@ -144,14 +147,14 @@ Lectus Class System → 설정
 
 ### 강의 생성 워크플로우
 
-#### 단계 1: 패키지강의 생성
+#### 단계 1: WooCommerce 상품 생성
 ```
-Lectus Class System → 패키지강의 → 새로 추가
-├── 제목 및 설명
-├── 썸네일 이미지
-├── 최대 수강생 수
-├── 접근 레벨 설정
-└── 포함될 단과강의 선택
+WooCommerce → 상품 → 새로 추가
+├── 상품 정보 입력
+├── 가격 설정
+├── 단과강의 연결 (Lectus 강의 탭)
+├── 수강 기간 설정
+└── 게시 (자동으로 단일/패키지 구분)
 ```
 
 #### 단계 2: 단과강의 생성
@@ -226,6 +229,7 @@ lectus-class-system/
 │   └── js/
 ├── templates/                # 템플릿 파일
 │   ├── certificate-default.php
+│   ├── single-product-course.php
 │   └── student-dashboard.php
 ├── languages/                # 번역 파일
 ├── tests/                    # 테스트 파일
@@ -407,7 +411,7 @@ wp eval-file tests/test-instructor-qa.php
 
 ## 🚀 향후 개발 계획
 
-### v1.1.0 (2025 Q1)
+### v1.3.0 (2025 Q1)
 - [ ] 🎥 **라이브 스트리밍 연동**
   - Zoom/YouTube Live 통합
   - 실시간 채팅 기능
@@ -425,7 +429,7 @@ wp eval-file tests/test-instructor-qa.php
   - 이탈율 추적
   - 예측 분석 기능
 
-### v1.2.0 (2025 Q2)
+### v1.4.0 (2025 Q2)
 - [ ] 🤖 **AI 기반 학습 추천**
   - 개인화된 학습 경로
   - 자동 콘텐츠 추천
@@ -564,15 +568,26 @@ define('SCRIPT_DEBUG', true);
 
 ## 📈 변경 로그
 
-### Version 1.0.0 (2024)
+최신 변경사항은 [CHANGELOG.md](../CHANGELOG.md)를 참조하세요.
+
+### Version 1.2.0 (2025-08-19)
+- WooCommerce 패키지 상품 시스템 완전 구현
+- 커스텀 상품 페이지 템플릿 추가
+- 검색 가능한 강의 선택 UI
+- 강사 Q&A 관리 시스템 개선
+- jQuery 의존성 제거 (순수 JavaScript)
+
+### Version 1.1.0 (2025-08-13)
+- 강의 섹션 관리 시스템
+- 강사 센터 대시보드
+- 수강생 관리 기능 강화
+
+### Version 1.0.0 (2025-08-07)
 - 초기 릴리스
 - 핵심 LMS 기능
 - WooCommerce 통합
 - Q&A 시스템
 - 수료증 생성
-- 수강생 관리
-- 벌크 업로드 시스템
-- 종합 테스트 스위트
 
 ---
 

@@ -27,7 +27,9 @@ test-*.php
 quick-fix.php
 fix-*.php
 emergency-*.php
+emergency-*.sql
 enable-*.php
+enable-*.bat
 *.bat
 
 # OS generated files

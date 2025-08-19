@@ -1,6 +1,6 @@
 # Lectus Class System - 완전한 WordPress LMS 솔루션
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0+-green.svg)
 ![PHP](https://img.shields.io/badge/PHP-8.0+-purple.svg)
 ![WooCommerce](https://img.shields.io/badge/WooCommerce-6.0+-96588A.svg)
@@ -62,16 +62,18 @@ cp -r lectus-academy-theme/ /path/to/wordpress/wp-content/themes/
 ## 🎯 주요 기능
 
 ### 📚 교육 콘텐츠 관리
-- **3단계 구조**: 패키지강의 → 단과강의 → 레슨
+- **유연한 강의 구조**: WooCommerce 상품 기반 단과/패키지 강의
 - **다양한 콘텐츠**: 동영상, 텍스트, 퀴즈, 과제
 - **강의자료**: 파일 업로드, 외부 링크 연동
 - **접근 제어**: 순차적/자유 학습 모드
+- **검색 가능한 강의 선택**: 카테고리별 그룹핑 및 실시간 검색
 
 ### 💳 결제 및 상거래
-- **WooCommerce 통합**: 완벽한 전자상거래 기능
+- **WooCommerce 완전 통합**: 단일/패키지 강의 자동 구분
 - **자동 수강 등록**: 결제 완료 시 즉시 접근
 - **구독 모델**: 기간제 수강권 판매
 - **환불 관리**: 자동 접근 권한 해제
+- **커스텀 상품 페이지**: 강의 정보 통합 표시
 
 ### 👥 학습자 경험
 - **개인 대시보드**: 수강 현황, 진도 관리
@@ -151,15 +153,15 @@ DevOps:
 
 ### 2. 강의 생성
 ```
-패키지강의 생성
-  ↓
-단과강의 생성 및 연결
+단과강의 생성
   ↓
 레슨 추가 (동영상, 텍스트, 퀴즈)
   ↓
 강의자료 업로드
   ↓
-WooCommerce 상품 연결
+WooCommerce 상품 생성 및 연결
+  ↓
+패키지 상품 생성 (여러 강의 선택)
 ```
 
 ### 3. 수강생 관리
