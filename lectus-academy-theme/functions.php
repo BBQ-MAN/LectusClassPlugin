@@ -490,7 +490,7 @@ add_action('pre_get_posts', 'lectus_academy_course_query');
  */
 function lectus_academy_ajax_enroll() {
     // Verify nonce for security
-    if (!check_ajax_referer('lectus-academy-nonce', 'nonce', false)) {
+    if (!check_ajax_referer('lectus_academy_nonce', 'nonce', false)) {
         wp_send_json_error(array('message' => __('Security check failed', 'lectus-academy')));
     }
     
