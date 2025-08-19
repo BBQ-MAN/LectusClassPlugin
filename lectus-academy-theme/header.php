@@ -250,7 +250,7 @@
                     <ul class="category-list flex items-center gap-1 py-2 md:py-3 overflow-x-auto scrollbar-hide">
                         <li class="category-item flex-shrink-0">
                             <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>" class="category-link flex items-center gap-1 md:gap-2 px-4 md:px-4 py-2 md:py-2 rounded-lg bg-blue-50 text-lectus-primary font-medium transition-colors text-sm lg:text-base min-w-0">
-                                <i class="fas fa-th category-icon text-xs md:text-sm"></i>
+                                <i class="fas fa-layer-group category-icon text-xs md:text-sm"></i>
                                 <span class="whitespace-nowrap"><?php esc_html_e('전체강의', 'lectus-academy'); ?></span>
                             </a>
                         </li>
@@ -263,6 +263,14 @@
                         ));
                         
                         $category_icons = array(
+                            'new' => 'fa-sparkles',
+                            'drawing' => 'fa-pencil-ruler',
+                            'modeling' => 'fa-cube',
+                            'rendering' => 'fa-image',
+                            'retouching' => 'fa-magic',
+                            'bim' => 'fa-building',
+                            'ai' => 'fa-robot',
+                            'object' => 'fa-shapes',
                             'development' => 'fa-code',
                             'design' => 'fa-palette',
                             'business' => 'fa-briefcase',
