@@ -329,57 +329,127 @@
                     </div>
                 </li>
                 <li><a href="<?php echo esc_url(home_url('/student-dashboard')); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="fas fa-book"></i> <?php esc_html_e('내 강의실', 'lectus-academy'); ?>
+                    <i class="fas fa-book text-gray-600"></i> <?php esc_html_e('내 강의실', 'lectus-academy'); ?>
                 </a></li>
                 <?php else : ?>
                 <li><a href="<?php echo esc_url(wp_login_url()); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="fas fa-sign-in-alt"></i> <?php esc_html_e('로그인', 'lectus-academy'); ?>
+                    <i class="fas fa-sign-in-alt text-gray-600"></i> <?php esc_html_e('로그인', 'lectus-academy'); ?>
                 </a></li>
                 <li><a href="<?php echo esc_url(wp_registration_url()); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <i class="fas fa-user-plus"></i> <?php esc_html_e('회원가입', 'lectus-academy'); ?>
+                    <i class="fas fa-user-plus text-gray-600"></i> <?php esc_html_e('회원가입', 'lectus-academy'); ?>
                 </a></li>
                 <?php endif; ?>
                 
                 <li class="menu-divider border-t border-gray-200 my-2"></li>
                 
-                <li><a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>" class="block px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <li><a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-graduation-cap text-gray-600"></i>
                     <?php esc_html_e('강의', 'lectus-academy'); ?>
                 </a></li>
-                <li><a href="<?php echo esc_url(home_url('/roadmap')); ?>" class="block px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <li><a href="<?php echo esc_url(home_url('/roadmap')); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-route text-gray-600"></i>
                     <?php esc_html_e('로드맵', 'lectus-academy'); ?>
                 </a></li>
-                <li><a href="<?php echo esc_url(home_url('/mentoring')); ?>" class="block px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <li><a href="<?php echo esc_url(home_url('/mentoring')); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-user-friends text-gray-600"></i>
                     <?php esc_html_e('멘토링', 'lectus-academy'); ?>
                 </a></li>
-                <li><a href="<?php echo esc_url(home_url('/community')); ?>" class="block px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <li><a href="<?php echo esc_url(home_url('/community')); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-comments text-gray-600"></i>
                     <?php esc_html_e('커뮤니티', 'lectus-academy'); ?>
                 </a></li>
                 
                 <li class="menu-divider border-t border-gray-200 my-2"></li>
                 
                 <li class="has-children">
-                    <a href="#" class="block px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"><?php esc_html_e('카테고리', 'lectus-academy'); ?></a>
+                    <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-folder-open text-gray-600"></i>
+                        <?php esc_html_e('카테고리', 'lectus-academy'); ?>
+                    </a>
                     <ul class="sub-menu ml-6 mt-2 space-y-1">
                         <?php
-                        $categories = get_terms(array(
-                            'taxonomy' => 'course_category',
-                            'hide_empty' => false,
-                        ));
-                        
-                        if ($categories && !is_wp_error($categories)) :
-                            foreach ($categories as $category) :
-                        ?>
-                        <li><a href="<?php echo esc_url(get_term_link($category)); ?>" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors">
-                            <?php echo esc_html($category->name); ?>
-                        </a></li>
-                        <?php 
-                            endforeach;
-                        endif; 
+                        // Display Category Menu if assigned
+                        if (has_nav_menu('category-menu')) {
+                            wp_nav_menu(array(
+                                'theme_location' => 'category-menu',
+                                'container' => false,
+                                'menu_class' => 'space-y-1',
+                                'depth' => 1,
+                                'fallback_cb' => false,
+                                'items_wrap' => '%3$s',
+                                'link_class' => 'block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors',
+                            ));
+                        } else {
+                            // Fallback to dynamic categories with enhanced display
+                            ?>
+                            <li>
+                                <a href="<?php echo esc_url(get_post_type_archive_link('coursesingle')); ?>" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors flex items-center">
+                                    <i class="fas fa-th text-xs mr-2 text-lectus-primary"></i>
+                                    <span><?php esc_html_e('전체강의', 'lectus-academy'); ?></span>
+                                </a>
+                            </li>
+                            <?php
+                            // Get course categories with same configuration as category-nav
+                            $categories = get_terms(array(
+                                'taxonomy' => 'course_category',
+                                'hide_empty' => false,
+                                'number' => 10,
+                            ));
+                            
+                            $category_icons = array(
+                                'development' => 'fa-code',
+                                'design' => 'fa-palette',
+                                'business' => 'fa-briefcase',
+                                'marketing' => 'fa-bullhorn',
+                                'it' => 'fa-server',
+                                'photo' => 'fa-camera',
+                                'music' => 'fa-music',
+                                'language' => 'fa-language',
+                                'programming' => 'fa-code',
+                            );
+                            
+                            if ($categories && !is_wp_error($categories)) :
+                                foreach ($categories as $category) :
+                                    $icon = isset($category_icons[$category->slug]) ? $category_icons[$category->slug] : 'fa-folder';
+                            ?>
+                            <li>
+                                <a href="<?php echo esc_url(get_term_link($category)); ?>" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors flex items-center">
+                                    <i class="fas <?php echo esc_attr($icon); ?> text-xs mr-2 text-gray-600"></i>
+                                    <span><?php echo esc_html($category->name); ?></span>
+                                    <?php if ($category->count > 0) : ?>
+                                    <span class="ml-auto text-xs text-gray-500">(<?php echo number_format_i18n($category->count); ?>)</span>
+                                    <?php endif; ?>
+                                </a>
+                            </li>
+                            <?php 
+                                endforeach;
+                            ?>
+                            <li>
+                                <a href="<?php echo esc_url(home_url('/all-categories')); ?>" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors flex items-center">
+                                    <i class="fas fa-ellipsis-h text-xs mr-2 text-gray-600"></i>
+                                    <span><?php esc_html_e('더보기', 'lectus-academy'); ?></span>
+                                </a>
+                            </li>
+                            <?php
+                            endif; 
+                        }
                         ?>
                     </ul>
                 </li>
                 
                 <?php if (is_user_logged_in()) : ?>
+                <li class="menu-divider border-t border-gray-200 my-2"></li>
+                <li><a href="<?php echo esc_url(home_url('/certificates')); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-certificate text-gray-600"></i> <?php esc_html_e('수료증', 'lectus-academy'); ?>
+                </a></li>
+                <li><a href="<?php echo esc_url(get_edit_profile_url()); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-user-edit text-gray-600"></i> <?php esc_html_e('프로필 수정', 'lectus-academy'); ?>
+                </a></li>
+                <?php if (current_user_can('manage_options')) : ?>
+                <li><a href="<?php echo esc_url(admin_url()); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-cog text-gray-600"></i> <?php esc_html_e('관리자', 'lectus-academy'); ?>
+                </a></li>
+                <?php endif; ?>
                 <li class="menu-divider border-t border-gray-200 my-2"></li>
                 <li><a href="<?php echo esc_url(wp_logout_url(home_url())); ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-red-600">
                     <i class="fas fa-sign-out-alt"></i> <?php esc_html_e('로그아웃', 'lectus-academy'); ?>
