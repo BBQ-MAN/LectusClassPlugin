@@ -75,7 +75,7 @@ if (have_posts()) :
                                 <?php esc_html_e('레슨 편집', 'lectus-academy'); ?>
                             </a>
                             <?php if (current_user_can('edit_post', $course_id)) : ?>
-                            <a href="<?php echo get_edit_post_link($course_id); ?>" class="inline-flex items-center gap-2 px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs font-medium">
+                            <a href="<?php echo get_edit_post_link($course_id); ?>" class="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium">
                                 <i class="fas fa-book"></i>
                                 <?php esc_html_e('강의 편집', 'lectus-academy'); ?>
                             </a>
