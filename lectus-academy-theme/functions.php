@@ -140,7 +140,7 @@ function lectus_academy_scripts() {
     
     wp_localize_script('lectus-academy-script', 'lectusAcademy', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('lectus_academy_nonce'),
+        'nonce' => wp_create_nonce('lectus-ajax-nonce'),
         'is_user_logged_in' => is_user_logged_in(),
         'current_user_id' => get_current_user_id(),
         'wishlist_count' => $wishlist_count,
@@ -497,7 +497,7 @@ add_action('pre_get_posts', 'lectus_academy_course_query');
  */
 function lectus_academy_ajax_enroll() {
     // Verify nonce for security
-    if (!check_ajax_referer('lectus_academy_nonce', 'nonce', false)) {
+    if (!check_ajax_referer('lectus-ajax-nonce', 'nonce', false)) {
         wp_send_json_error(array('message' => __('Security check failed', 'lectus-academy')));
     }
     

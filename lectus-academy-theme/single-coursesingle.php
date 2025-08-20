@@ -16,7 +16,7 @@ wp_enqueue_script('wishlist', get_template_directory_uri() . '/js/wishlist.js', 
 // Localize script for AJAX
 wp_localize_script('course-enrollment', 'lectusAcademy', array(
     'ajaxurl' => admin_url('admin-ajax.php'),
-    'nonce' => wp_create_nonce('lectus_academy_nonce')
+    'nonce' => wp_create_nonce('lectus-ajax-nonce')
 ));
 
 while (have_posts()) :

@@ -102,15 +102,8 @@ class Lectus_Ajax {
     }
     
     public static function complete_lesson() {
-        // Verify nonce and request method - Check both possible nonce names for compatibility
-        $nonce_valid = false;
-        if (isset($_POST['nonce'])) {
-            // Check both nonce names for compatibility
-            $nonce_valid = wp_verify_nonce($_POST['nonce'], 'lectus-ajax-nonce') || 
-                           wp_verify_nonce($_POST['nonce'], 'lectus-academy-nonce');
-        }
-        
-        if (!$nonce_valid) {
+        // Verify nonce and request method
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-ajax-nonce')) {
             wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')), 403);
             return;
         }

@@ -388,7 +388,7 @@ class Lectus_Wishlist {
      */
     public static function ajax_toggle_wishlist() {
         // Verify nonce
-        if (!check_ajax_referer('lectus_academy_nonce', 'nonce', false)) {
+        if (!check_ajax_referer('lectus-ajax-nonce', 'nonce', false)) {
             wp_send_json_error(array('message' => __('보안 검증에 실패했습니다.', 'lectus-class-system')));
             return;
         }
@@ -447,7 +447,7 @@ class Lectus_Wishlist {
      */
     public static function ajax_get_wishlist_status() {
         // Verify nonce
-        if (!check_ajax_referer('lectus_academy_nonce', 'nonce', false)) {
+        if (!check_ajax_referer('lectus-ajax-nonce', 'nonce', false)) {
             wp_send_json_error(array('message' => __('보안 검증에 실패했습니다.', 'lectus-class-system')));
         }
         
