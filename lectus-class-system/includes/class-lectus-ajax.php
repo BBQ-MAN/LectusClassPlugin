@@ -29,6 +29,7 @@ class Lectus_Ajax {
         add_action('wp_ajax_lectus_clear_logs', array(__CLASS__, 'clear_logs'));
         add_action('wp_ajax_lectus_optimize_tables', array(__CLASS__, 'optimize_tables'));
         add_action('wp_ajax_lectus_create_test_pages', array(__CLASS__, 'create_test_pages'));
+        add_action('wp_ajax_lectus_create_wishlist_table', array(__CLASS__, 'create_wishlist_table'));
         
         // Frontend AJAX handlers
         add_action('wp_ajax_nopriv_lectus_update_lesson_progress', array(__CLASS__, 'update_lesson_progress'));
@@ -840,5 +841,34 @@ class Lectus_Ajax {
         
         fclose($output);
         exit;
+    }
+    
+    /**
+     * Create wishlist table
+     */
+    public static function create_wishlist_table() {
+        // Verify nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'lectus-create-table')) {
+            wp_send_json_error(array('message' => __('보안 검증 실패', 'lectus-class-system')));
+        }
+        
+        // Check permission
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => __('권한이 없습니다.', 'lectus-class-system')));
+        }
+        
+        // Load the wishlist class if not already loaded
+        if (!class_exists('Lectus_Wishlist')) {
+            require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-wishlist.php';
+        }
+        
+        // Create the table
+        $result = Lectus_Wishlist::create_table();
+        
+        if ($result) {
+            wp_send_json_success(array('message' => __('위시리스트 테이블이 성공적으로 생성되었습니다.', 'lectus-class-system')));
+        } else {
+            wp_send_json_error(array('message' => __('위시리스트 테이블 생성에 실패했습니다.', 'lectus-class-system')));
+        }
     }
 }

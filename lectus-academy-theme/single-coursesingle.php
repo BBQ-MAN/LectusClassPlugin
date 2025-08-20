@@ -11,6 +11,7 @@ get_header();
 wp_enqueue_script('course-tabs', get_template_directory_uri() . '/js/course-tabs.js', array(), '1.0.0', true);
 wp_enqueue_script('sticky-card', get_template_directory_uri() . '/js/sticky-card.js', array(), '1.0.0', true);
 wp_enqueue_script('course-enrollment', get_template_directory_uri() . '/js/course-enrollment.js', array('jquery'), '1.0.0', true);
+wp_enqueue_script('wishlist', get_template_directory_uri() . '/js/wishlist.js', array('jquery'), '1.0.0', true);
 
 // Localize script for AJAX
 wp_localize_script('course-enrollment', 'lectusAcademy', array(
@@ -569,8 +570,10 @@ while (have_posts()) :
                                         data-course-id="<?php echo $course_id; ?>">
                                     <i class="fas fa-shopping-cart"></i> 수강신청
                                 </button>
-                                <button class="w-full border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                                    <i class="fas fa-heart"></i> 위시리스트
+                                <button class="wishlist-btn w-full border-2 border-gray-300 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2" 
+                                        data-course-id="<?php echo $course_id; ?>" 
+                                        title="위시리스트에 추가">
+                                    <i class="far fa-heart"></i> <span class="btn-text">위시리스트</span>
                                 </button>
                             <?php endif; ?>
                         </div>

@@ -274,6 +274,72 @@ if ($wpdb->get_var("SHOW TABLES LIKE '$certificates_table'") == $certificates_ta
                     
                     <!-- Wishlist Tab -->
                     <div id="wishlist" class="tab-pane hidden">
+                        <?php
+                        // Get wishlist items
+                        $wishlist_items = array();
+                        if (class_exists('Lectus_Wishlist')) {
+                            $wishlist_items = Lectus_Wishlist::get_user_wishlist($user_id);
+                        }
+                        
+                        if (!empty($wishlist_items)) :
+                        ?>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <?php foreach ($wishlist_items as $item) :
+                                $course = $item['course'];
+                                if (!$course || $course->post_status !== 'publish') continue;
+                                
+                                $course_id = $course->ID;
+                                $instructor_name = lectus_academy_get_instructor_name($course_id);
+                                $lesson_count = count(lectus_academy_get_course_lessons($course_id));
+                                $enrolled_count = lectus_academy_get_enrolled_count($course_id);
+                            ?>
+                            <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                                <div class="relative">
+                                    <?php if (has_post_thumbnail($course_id)) : ?>
+                                        <a href="<?php echo get_permalink($course_id); ?>">
+                                            <?php echo get_the_post_thumbnail($course_id, 'course-thumbnail', ['class' => 'w-full h-48 object-cover']); ?>
+                                        </a>
+                                    <?php else : ?>
+                                        <a href="<?php echo get_permalink($course_id); ?>" class="block w-full h-48 bg-gray-200 flex items-center justify-center">
+                                            <i class="fas fa-graduation-cap text-4xl text-gray-400"></i>
+                                        </a>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Remove from wishlist button -->
+                                    <button class="wishlist-btn absolute top-2 right-2 bg-white rounded-full p-2 shadow-lg hover:bg-red-50 transition-colors active in-wishlist"
+                                            data-course-id="<?php echo $course_id; ?>"
+                                            title="위시리스트에서 제거">
+                                        <i class="fas fa-heart text-red-500"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="p-4">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                                        <a href="<?php echo get_permalink($course_id); ?>" class="hover:text-blue-600 transition-colors">
+                                            <?php echo esc_html($course->post_title); ?>
+                                        </a>
+                                    </h3>
+                                    
+                                    <p class="text-sm text-gray-600 mb-3"><?php echo esc_html($instructor_name); ?></p>
+                                    
+                                    <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                                        <span><i class="fas fa-book-open mr-1"></i> <?php echo $lesson_count; ?>개 레슨</span>
+                                        <span><i class="fas fa-users mr-1"></i> <?php echo number_format($enrolled_count); ?>명</span>
+                                    </div>
+                                    
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-lg font-bold text-blue-600">
+                                            <?php echo lectus_academy_get_course_price($course_id); ?>
+                                        </span>
+                                        <a href="<?php echo get_permalink($course_id); ?>" class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                                            자세히 보기
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php else : ?>
                         <div class="text-center py-12">
                             <i class="fas fa-heart text-6xl text-gray-300 mb-4"></i>
                             <h3 class="text-xl font-semibold text-gray-900 mb-2"><?php esc_html_e('위시리스트가 비어있습니다', 'lectus-academy'); ?></h3>
@@ -282,6 +348,7 @@ if ($wpdb->get_var("SHOW TABLES LIKE '$certificates_table'") == $certificates_ta
                                 강의 둘러보기
                             </a>
                         </div>
+                        <?php endif; ?>
                     </div>
                     
                     <!-- Certificates Tab -->

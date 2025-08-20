@@ -174,6 +174,10 @@ class Lectus_Class_System {
         // Initialize templates
         Lectus_Templates::init();
         
+        // Initialize wishlist
+        require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-wishlist.php';
+        Lectus_Wishlist::init();
+        
         // Initialize WooCommerce integration
         if (class_exists('WooCommerce')) {
             Lectus_WooCommerce::init();
@@ -445,6 +449,10 @@ class Lectus_Class_System {
             
             // Create user roles and capabilities
             Lectus_Capabilities::create_roles();
+            
+            // Create wishlist table
+            require_once LECTUS_PLUGIN_DIR . 'includes/class-lectus-wishlist.php';
+            Lectus_Wishlist::create_table();
             
             // Flush rewrite rules
             flush_rewrite_rules();

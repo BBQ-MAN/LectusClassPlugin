@@ -133,12 +133,19 @@ function lectus_academy_scripts() {
     );
     
     // Pass data to JavaScript
+    $wishlist_count = 0;
+    if (is_user_logged_in() && class_exists('Lectus_Wishlist')) {
+        $wishlist_count = Lectus_Wishlist::get_wishlist_count(get_current_user_id());
+    }
+    
     wp_localize_script('lectus-academy-script', 'lectusAcademy', array(
         'ajaxurl' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('lectus-academy-nonce'),
+        'nonce' => wp_create_nonce('lectus_academy_nonce'),
         'is_user_logged_in' => is_user_logged_in(),
         'current_user_id' => get_current_user_id(),
+        'wishlist_count' => $wishlist_count,
         'theme_url' => get_template_directory_uri(),
+        'loginUrl' => wp_login_url(),
         'translations' => array(
             'loading' => __('Loading...', 'lectus-academy'),
             'error' => __('An error occurred', 'lectus-academy'),
@@ -594,6 +601,36 @@ function lectus_academy_is_enrolled($course_id, $user_id = null) {
     }
     
     return false;
+}
+
+/**
+ * Helper function to check if course is in wishlist
+ */
+function lectus_academy_is_in_wishlist($course_id, $user_id = null) {
+    if (!$user_id) {
+        $user_id = get_current_user_id();
+    }
+    
+    if (!$user_id || !class_exists('Lectus_Wishlist')) {
+        return false;
+    }
+    
+    return Lectus_Wishlist::is_in_wishlist($user_id, $course_id);
+}
+
+/**
+ * Get user's wishlist count
+ */
+function lectus_academy_get_wishlist_count($user_id = null) {
+    if (!$user_id) {
+        $user_id = get_current_user_id();
+    }
+    
+    if (!$user_id || !class_exists('Lectus_Wishlist')) {
+        return 0;
+    }
+    
+    return Lectus_Wishlist::get_wishlist_count($user_id);
 }
 
 /**
