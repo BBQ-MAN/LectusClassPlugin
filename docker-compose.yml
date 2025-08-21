@@ -1,7 +1,7 @@
-version: '3.8'
 services:
   db:
-    image: mysql:5.7
+    image: mysql:8.0
+    platform: linux/arm64
     volumes:
       - db_data:/var/lib/mysql
     restart: always
@@ -15,6 +15,7 @@ services:
     depends_on:
       - db
     image: wordpress:latest
+    platform: linux/arm64
     ports:
       - "8000:80"
     restart: always
@@ -27,6 +28,24 @@ services:
       - ./lectus-class-system:/var/www/html/wp-content/plugins/lectus-class-system
       - ./lectus-academy-theme:/var/www/html/wp-content/themes/lectus-academy-theme
       - wordpress_data:/var/www/html
+
+  wpcli:
+    depends_on:
+      - db
+      - wordpress
+    image: wordpress:cli
+    platform: linux/arm64
+    user: 33:33  # www-data user
+    command: tail -f /dev/null
+    volumes:
+      - ./lectus-class-system:/var/www/html/wp-content/plugins/lectus-class-system
+      - ./lectus-academy-theme:/var/www/html/wp-content/themes/lectus-academy-theme
+      - wordpress_data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: 'wordpress'
+      WORDPRESS_DB_PASSWORD: 'your_password'
+      WORDPRESS_DB_NAME: 'wordpress'
 
   phpmyadmin:
     depends_on:
