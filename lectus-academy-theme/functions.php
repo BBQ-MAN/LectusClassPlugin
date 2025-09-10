@@ -375,9 +375,9 @@ require get_template_directory() . '/inc/customizer.php';
 require get_template_directory() . '/inc/widgets.php';
 
 /**
- * Load test restoration functionality
+ * Load theme restoration functionality
  */
-require get_template_directory() . '/inc/test-restoration.php';
+require get_template_directory() . '/inc/theme-restoration.php';
 
 /**
  * Load theme setup and activation handler
