@@ -1,0 +1,325 @@
+/**
+ * Lectus Class System - Shortcode Styles
+ * These styles ensure shortcodes work independently of theme
+ */
+
+/* General Shortcode Container */
+.lectus-shortcode {
+    box-sizing: border-box;
+}
+
+.lectus-shortcode * {
+    box-sizing: border-box;
+}
+
+/* Course Grid Styles */
+.lectus-courses-grid,
+.lectus-course-categories {
+    display: grid;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.lectus-courses-grid .course-card,
+.lectus-course-categories .category-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.lectus-courses-grid .course-card:hover,
+.lectus-course-categories .category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Form Styles */
+.lectus-login-form-wrapper,
+.lectus-registration-form,
+.lectus-user-profile,
+.lectus-certificate-verify {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.lectus-login-form-wrapper input[type="text"],
+.lectus-login-form-wrapper input[type="password"],
+.lectus-login-form-wrapper input[type="email"],
+.lectus-registration-form input[type="text"],
+.lectus-registration-form input[type="email"],
+.lectus-registration-form input[type="password"],
+.lectus-search-form input[type="search"],
+.lectus-certificate-verify input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.lectus-login-form-wrapper input[type="submit"],
+.lectus-registration-form button[type="submit"],
+.lectus-search-form button[type="submit"],
+.lectus-certificate-verify button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.lectus-login-form-wrapper input[type="submit"]:hover,
+.lectus-registration-form button[type="submit"]:hover,
+.lectus-search-form button[type="submit"]:hover,
+.lectus-certificate-verify button[type="submit"]:hover {
+    background: #2563eb;
+}
+
+/* Table Styles */
+.lectus-my-courses table,
+.lectus-certificates table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.lectus-my-courses th,
+.lectus-certificates th {
+    background: #f3f4f6;
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.lectus-my-courses td,
+.lectus-certificates td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.lectus-my-courses tr:hover,
+.lectus-certificates tr:hover {
+    background: #f9fafb;
+}
+
+/* Progress Bar Styles */
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar .progress-fill {
+    height: 100%;
+    background: #3b82f6;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-bar span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Status Badge Styles */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge.status-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge.status-expired {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.status-completed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* Button Styles */
+.button,
+.lectus-enroll-btn,
+.lectus-purchase-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-weight: 500;
+}
+
+.button:hover,
+.lectus-enroll-btn:hover,
+.lectus-purchase-btn:hover {
+    background: #2563eb;
+}
+
+.button.button-small {
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+.button.button-secondary {
+    background: #6b7280;
+}
+
+.button.button-secondary:hover {
+    background: #4b5563;
+}
+
+.button.button-disabled,
+.button-disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.button.button-disabled:hover,
+.button-disabled:hover {
+    background: #d1d5db;
+}
+
+/* Verification Result Styles */
+.verification-result {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.verification-result.success {
+    background: #d1fae5;
+    border: 1px solid #86efac;
+}
+
+.verification-result.error {
+    background: #fee2e2;
+    border: 1px solid #fca5a5;
+}
+
+/* Search Form Styles */
+.lectus-search-form {
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.lectus-search-form form {
+    display: flex;
+    gap: 10px;
+}
+
+.lectus-search-form input[type="search"] {
+    flex: 1;
+    padding: 12px 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .lectus-courses-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .lectus-course-categories {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .lectus-packages-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .lectus-courses-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .lectus-course-categories {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .lectus-packages-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .lectus-search-form form {
+        flex-direction: column;
+    }
+    
+    .lectus-user-profile > div:first-child {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Icon Support (FontAwesome fallback) */
+.lectus-shortcode i.fas,
+.lectus-shortcode i.far {
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    line-height: 1;
+}
+
+/* Utility Classes */
+.lectus-text-center {
+    text-align: center;
+}
+
+.lectus-mt-20 {
+    margin-top: 20px;
+}
+
+.lectus-mb-20 {
+    margin-bottom: 20px;
+}
+
+.lectus-p-20 {
+    padding: 20px;
+}
+
+.lectus-rounded {
+    border-radius: 8px;
+}
+
+.lectus-shadow {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}

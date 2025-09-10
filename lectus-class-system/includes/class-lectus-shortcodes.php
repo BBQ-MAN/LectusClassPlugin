@@ -15,6 +15,8 @@ class Lectus_Shortcodes {
         add_shortcode('lectus_course', array(__CLASS__, 'single_course'));
         add_shortcode('lectus_my_courses', array(__CLASS__, 'my_courses'));
         add_shortcode('lectus_course_progress', array(__CLASS__, 'course_progress'));
+        add_shortcode('lectus_featured_courses', array(__CLASS__, 'featured_courses'));
+        add_shortcode('lectus_course_categories', array(__CLASS__, 'course_categories'));
         
         // Package shortcodes
         add_shortcode('lectus_packages', array(__CLASS__, 'packages_list'));
@@ -29,6 +31,14 @@ class Lectus_Shortcodes {
         
         // Student dashboard shortcode
         add_shortcode('lectus_student_dashboard', array(__CLASS__, 'student_dashboard'));
+        
+        // Authentication shortcodes
+        add_shortcode('lectus_login_form', array(__CLASS__, 'login_form'));
+        add_shortcode('lectus_registration_form', array(__CLASS__, 'registration_form'));
+        add_shortcode('lectus_user_profile', array(__CLASS__, 'user_profile'));
+        
+        // Search shortcode
+        add_shortcode('lectus_search_form', array(__CLASS__, 'search_form'));
     }
     
     public static function courses_list($atts) {
@@ -66,147 +76,10 @@ class Lectus_Shortcodes {
             <?php if ($courses->have_posts()): ?>
                 <?php while ($courses->have_posts()): $courses->the_post(); 
                     $course_id = get_the_ID();
-                    $duration = get_post_meta($course_id, '_course_duration', true);
-                    $difficulty = get_post_meta($course_id, '_course_difficulty', true);
-                    $price = get_post_meta($course_id, '_course_price', true);
-                    $enrolled_count = Lectus_Enrollment::get_course_enrollment_count($course_id);
-                    $lessons_count = count(get_posts(array(
-                        'post_type' => 'lesson',
-                        'meta_key' => '_course_id',
-                        'meta_value' => $course_id,
-                        'posts_per_page' => -1
-                    )));
                     
-                    // Get instructor info
-                    $author_id = get_post_field('post_author', $course_id);
-                    $author_name = get_the_author_meta('display_name', $author_id);
-                    $author_avatar = get_avatar_url($author_id, array('size' => 40));
+                    // Use the unified template for course card
+                    include LECTUS_PLUGIN_DIR . 'templates/course-card.php';
                 ?>
-                    <div class="bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group">
-                        <!-- Thumbnail -->
-                        <div class="relative aspect-video overflow-hidden bg-gray-100">
-                            <?php if (has_post_thumbnail()): ?>
-                                <a href="<?php the_permalink(); ?>" class="block">
-                                    <?php the_post_thumbnail('medium', array('class' => 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300')); ?>
-                                </a>
-                            <?php else: ?>
-                                <a href="<?php the_permalink(); ?>" class="block">
-                                    <div class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                        <i class="fas fa-graduation-cap text-white text-4xl opacity-50"></i>
-                                    </div>
-                                </a>
-                            <?php endif; ?>
-                            
-                            <!-- Difficulty Badge -->
-                            <?php if ($difficulty): ?>
-                            <div class="absolute top-3 left-3">
-                                <span class="px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-700">
-                                    <?php echo esc_html($difficulty); ?>
-                                </span>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <!-- Price Badge -->
-                            <div class="absolute top-3 right-3">
-                                <?php if (!$price || $price <= 0): ?>
-                                    <span class="px-3 py-1 bg-green-500 text-white rounded-full text-xs font-bold">
-                                        무료
-                                    </span>
-                                <?php else: ?>
-                                    <span class="px-3 py-1 bg-gray-900/80 backdrop-blur-sm text-white rounded-full text-xs font-bold">
-                                        ₩<?php echo number_format($price); ?>
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        
-                        <!-- Content -->
-                        <div class="p-5">
-                            <!-- Title -->
-                            <h3 class="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                                <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                            </h3>
-                            
-                            <!-- Instructor -->
-                            <div class="flex items-center gap-2 mb-3">
-                                <img src="<?php echo esc_url($author_avatar); ?>" alt="<?php echo esc_attr($author_name); ?>" class="w-6 h-6 rounded-full">
-                                <span class="text-sm text-gray-600"><?php echo esc_html($author_name); ?></span>
-                            </div>
-                            
-                            <!-- Rating (Sample) -->
-                            <div class="flex items-center gap-2 mb-3">
-                                <div class="flex text-yellow-400 text-sm">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star-half-alt"></i>
-                                </div>
-                                <span class="text-sm text-gray-600">4.5</span>
-                                <span class="text-sm text-gray-400">(<?php echo rand(10, 200); ?>)</span>
-                            </div>
-                            
-                            <!-- Meta Info -->
-                            <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                                <span class="flex items-center gap-1">
-                                    <i class="far fa-clock"></i>
-                                    <?php echo $duration ? $duration . '일' : '30일'; ?>
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="far fa-play-circle"></i>
-                                    <?php echo $lessons_count; ?>강
-                                </span>
-                                <span class="flex items-center gap-1">
-                                    <i class="far fa-user"></i>
-                                    <?php echo number_format($enrolled_count); ?>명
-                                </span>
-                            </div>
-                            
-                            <!-- Progress Bar for Enrolled Users -->
-                            <?php if (is_user_logged_in() && Lectus_Enrollment::is_enrolled(get_current_user_id(), $course_id)): 
-                                $progress = Lectus_Progress::get_course_progress(get_current_user_id(), $course_id);
-                            ?>
-                            <div class="mb-4">
-                                <div class="flex justify-between text-xs text-gray-600 mb-1">
-                                    <span>진도율</span>
-                                    <span><?php echo $progress; ?>%</span>
-                                </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: <?php echo $progress; ?>%"></div>
-                                </div>
-                            </div>
-                            <?php endif; ?>
-                            
-                            <!-- Actions -->
-                            <div class="flex gap-2">
-                                <?php
-                                if (is_user_logged_in() && Lectus_Enrollment::is_enrolled(get_current_user_id(), $course_id)) {
-                                    // User is already enrolled - go to next lesson to study
-                                    $continue_url = Lectus_Progress::get_continue_learning_url(get_current_user_id(), $course_id);
-                                    echo '<a href="' . esc_url($continue_url) . '" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center">' . __('학습 계속하기', 'lectus-class-system') . '</a>';
-                                } else {
-                                    // Check if course has WooCommerce product
-                                    if (Lectus_WooCommerce::course_has_product($course_id)) {
-                                        echo '<button class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors lectus-purchase-btn" data-course-id="' . esc_attr($course_id) . '" data-course-type="coursesingle">' . __('수강신청', 'lectus-class-system') . '</button>';
-                                    } elseif (!$price || $price <= 0) {
-                                        // Free course
-                                        if (is_user_logged_in()) {
-                                            echo '<button class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors lectus-enroll-btn" data-course-id="' . esc_attr($course_id) . '">' . __('무료 수강', 'lectus-class-system') . '</button>';
-                                        } else {
-                                            echo '<a href="' . wp_login_url(get_permalink($course_id)) . '" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center">' . __('로그인', 'lectus-class-system') . '</a>';
-                                        }
-                                    } else {
-                                        // Paid course without WooCommerce product
-                                        echo '<span class="flex-1 bg-gray-300 text-gray-500 py-2 px-4 rounded-lg font-medium text-center cursor-not-allowed">' . __('준비 중', 'lectus-class-system') . '</span>';
-                                    }
-                                }
-                                ?>
-                                <button class="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <i class="far fa-heart text-gray-500"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 <?php endwhile; ?>
                 <?php wp_reset_postdata(); ?>
             <?php else: ?>
@@ -565,6 +438,378 @@ class Lectus_Shortcodes {
             echo '<p>' . __('대시보드 템플릿을 찾을 수 없습니다.', 'lectus-class-system') . '</p>';
         }
         
+        return ob_get_clean();
+    }
+    
+    /**
+     * Display featured courses
+     */
+    public static function featured_courses($atts) {
+        $atts = shortcode_atts(array(
+            'limit' => 8,
+            'columns' => 4,
+            'orderby' => 'meta_value_num',
+            'meta_key' => '_course_featured',
+            'order' => 'DESC'
+        ), $atts);
+        
+        $args = array(
+            'post_type' => 'coursesingle',
+            'posts_per_page' => $atts['limit'],
+            'orderby' => $atts['orderby'],
+            'order' => $atts['order'],
+            'meta_query' => array(
+                'relation' => 'OR',
+                array(
+                    'key' => '_course_featured',
+                    'value' => '1',
+                    'compare' => '='
+                ),
+                array(
+                    'key' => '_course_popular',
+                    'value' => '1',
+                    'compare' => '='
+                )
+            )
+        );
+        
+        // If no featured courses, get recent courses
+        $featured = new WP_Query($args);
+        if (!$featured->have_posts()) {
+            $args['meta_query'] = array();
+            $args['orderby'] = 'date';
+            $featured = new WP_Query($args);
+        }
+        
+        ob_start();
+        ?>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-<?php echo $atts['columns']; ?> gap-6">
+            <?php if ($featured->have_posts()): ?>
+                <?php while ($featured->have_posts()): $featured->the_post(); 
+                    $course_id = get_the_ID();
+                    // Use the unified template for course card
+                    include LECTUS_PLUGIN_DIR . 'templates/course-card.php';
+                ?>
+                <?php endwhile; ?>
+                <?php wp_reset_postdata(); ?>
+            <?php else: ?>
+                <div class="col-span-full text-center py-12">
+                    <p class="text-gray-500"><?php _e('강의가 없습니다.', 'lectus-class-system'); ?></p>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Display course categories
+     */
+    public static function course_categories($atts) {
+        $atts = shortcode_atts(array(
+            'show_count' => true,
+            'show_empty' => false,
+            'columns' => 4,
+            'limit' => 0
+        ), $atts);
+        
+        $args = array(
+            'taxonomy' => 'course_category',
+            'hide_empty' => !$atts['show_empty'],
+            'number' => $atts['limit']
+        );
+        
+        $categories = get_terms($args);
+        
+        if (empty($categories) || is_wp_error($categories)) {
+            return '<p>' . __('카테고리가 없습니다.', 'lectus-class-system') . '</p>';
+        }
+        
+        ob_start();
+        ?>
+        <div class="lectus-course-categories" style="display: grid; grid-template-columns: repeat(<?php echo min($atts['columns'], count($categories)); ?>, 1fr); gap: 20px; margin: 20px 0;">
+            <?php foreach ($categories as $category): 
+                $icon_class = 'fas fa-book'; // Default icon
+                $bg_color = '#' . substr(md5($category->name), 0, 6); // Generate color from name
+            ?>
+                <a href="<?php echo get_term_link($category); ?>" class="category-card" style="display: block; padding: 30px 20px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; text-align: center; text-decoration: none; color: inherit; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" 
+                   onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" 
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)';">
+                    <div class="category-icon" style="width: 60px; height: 60px; margin: 0 auto 15px; background: linear-gradient(135deg, <?php echo $bg_color; ?>22, <?php echo $bg_color; ?>44); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="<?php echo $icon_class; ?>" style="font-size: 24px; color: <?php echo $bg_color; ?>;"></i>
+                    </div>
+                    <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #1f2937;"><?php echo esc_html($category->name); ?></h3>
+                    <?php if ($atts['show_count']): ?>
+                        <span style="color: #6b7280; font-size: 14px;"><?php echo sprintf(__('%d개 강의', 'lectus-class-system'), $category->count); ?></span>
+                    <?php endif; ?>
+                    <?php if (!empty($category->description)): ?>
+                        <p style="margin: 10px 0 0; color: #6b7280; font-size: 14px; line-height: 1.5;"><?php echo esc_html($category->description); ?></p>
+                    <?php endif; ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+        
+        <style>
+        @media (max-width: 1024px) {
+            .lectus-course-categories {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        @media (max-width: 640px) {
+            .lectus-course-categories {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        </style>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Display login form
+     */
+    public static function login_form($atts) {
+        if (is_user_logged_in()) {
+            $user = wp_get_current_user();
+            return '<p>' . sprintf(__('안녕하세요, %s님! 이미 로그인되어 있습니다.', 'lectus-class-system'), $user->display_name) . ' <a href="' . wp_logout_url() . '">' . __('로그아웃', 'lectus-class-system') . '</a></p>';
+        }
+        
+        $atts = shortcode_atts(array(
+            'redirect' => '',
+            'form_id' => 'lectus-login-form',
+            'label_username' => __('사용자명 또는 이메일', 'lectus-class-system'),
+            'label_password' => __('비밀번호', 'lectus-class-system'),
+            'label_remember' => __('로그인 상태 유지', 'lectus-class-system'),
+            'label_log_in' => __('로그인', 'lectus-class-system')
+        ), $atts);
+        
+        $args = array(
+            'echo' => false,
+            'redirect' => $atts['redirect'] ?: home_url('/student-dashboard/'),
+            'form_id' => $atts['form_id'],
+            'label_username' => $atts['label_username'],
+            'label_password' => $atts['label_password'],
+            'label_remember' => $atts['label_remember'],
+            'label_log_in' => $atts['label_log_in'],
+            'remember' => true
+        );
+        
+        $form = wp_login_form($args);
+        
+        // Add custom styling
+        $styled_form = '<div class="lectus-login-form-wrapper" style="max-width: 400px; margin: 0 auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">';
+        $styled_form .= '<h2 style="margin: 0 0 25px; text-align: center; color: #1f2937; font-size: 24px;">' . __('로그인', 'lectus-class-system') . '</h2>';
+        $styled_form .= str_replace('class="', 'style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;" class="', $form);
+        $styled_form .= '<p style="text-align: center; margin-top: 20px;">';
+        $styled_form .= '<a href="' . wp_lostpassword_url() . '" style="color: #3b82f6; text-decoration: none;">' . __('비밀번호를 잊으셨나요?', 'lectus-class-system') . '</a>';
+        $styled_form .= ' | ';
+        $styled_form .= '<a href="' . wp_registration_url() . '" style="color: #3b82f6; text-decoration: none;">' . __('회원가입', 'lectus-class-system') . '</a>';
+        $styled_form .= '</p>';
+        $styled_form .= '</div>';
+        
+        // Add CSS for button styling
+        $styled_form .= '<style>
+        #' . $atts['form_id'] . ' input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #' . $atts['form_id'] . ' input[type="submit"]:hover {
+            background: #2563eb;
+        }
+        </style>';
+        
+        return $styled_form;
+    }
+    
+    /**
+     * Display registration form
+     */
+    public static function registration_form($atts) {
+        if (is_user_logged_in()) {
+            return '<p>' . __('이미 로그인되어 있습니다.', 'lectus-class-system') . '</p>';
+        }
+        
+        if (!get_option('users_can_register')) {
+            return '<p>' . __('현재 회원가입이 비활성화되어 있습니다.', 'lectus-class-system') . '</p>';
+        }
+        
+        ob_start();
+        ?>
+        <div class="lectus-registration-form" style="max-width: 500px; margin: 0 auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="margin: 0 0 25px; text-align: center; color: #1f2937; font-size: 24px;"><?php _e('회원가입', 'lectus-class-system'); ?></h2>
+            
+            <form method="post" action="<?php echo site_url('wp-login.php?action=register'); ?>" id="lectus-register-form">
+                <div style="margin-bottom: 20px;">
+                    <label for="user_login" style="display: block; margin-bottom: 5px; color: #374151; font-weight: 500;"><?php _e('사용자명', 'lectus-class-system'); ?> <span style="color: #ef4444;">*</span></label>
+                    <input type="text" name="user_login" id="user_login" required 
+                           style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;" />
+                    <small style="color: #6b7280; font-size: 12px;"><?php _e('영문, 숫자, 언더스코어(_)만 사용 가능합니다.', 'lectus-class-system'); ?></small>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="user_email" style="display: block; margin-bottom: 5px; color: #374151; font-weight: 500;"><?php _e('이메일 주소', 'lectus-class-system'); ?> <span style="color: #ef4444;">*</span></label>
+                    <input type="email" name="user_email" id="user_email" required 
+                           style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;" />
+                    <small style="color: #6b7280; font-size: 12px;"><?php _e('비밀번호 재설정 링크가 이 이메일로 전송됩니다.', 'lectus-class-system'); ?></small>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="first_name" style="display: block; margin-bottom: 5px; color: #374151; font-weight: 500;"><?php _e('이름', 'lectus-class-system'); ?></label>
+                    <input type="text" name="first_name" id="first_name" 
+                           style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;" />
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label for="last_name" style="display: block; margin-bottom: 5px; color: #374151; font-weight: 500;"><?php _e('성', 'lectus-class-system'); ?></label>
+                    <input type="text" name="last_name" id="last_name" 
+                           style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;" />
+                </div>
+                
+                <?php do_action('register_form'); ?>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" name="terms" required style="margin-right: 8px;" />
+                        <span style="color: #374151; font-size: 14px;">
+                            <?php _e('이용약관 및 개인정보처리방침에 동의합니다.', 'lectus-class-system'); ?> <span style="color: #ef4444;">*</span>
+                        </span>
+                    </label>
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.3s;"
+                        onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                    <?php _e('회원가입', 'lectus-class-system'); ?>
+                </button>
+                
+                <?php wp_nonce_field('lectus-register', 'lectus-register-nonce'); ?>
+            </form>
+            
+            <p style="text-align: center; margin-top: 20px; color: #6b7280;">
+                <?php _e('이미 계정이 있으신가요?', 'lectus-class-system'); ?>
+                <a href="<?php echo wp_login_url(); ?>" style="color: #3b82f6; text-decoration: none;"><?php _e('로그인', 'lectus-class-system'); ?></a>
+            </p>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Display user profile
+     */
+    public static function user_profile($atts) {
+        if (!is_user_logged_in()) {
+            return '<p>' . __('로그인이 필요합니다.', 'lectus-class-system') . ' <a href="' . wp_login_url() . '">' . __('로그인', 'lectus-class-system') . '</a></p>';
+        }
+        
+        $user = wp_get_current_user();
+        $user_id = $user->ID;
+        
+        ob_start();
+        ?>
+        <div class="lectus-user-profile" style="max-width: 800px; margin: 0 auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h2 style="margin: 0 0 30px; color: #1f2937; font-size: 24px;"><?php _e('내 프로필', 'lectus-class-system'); ?></h2>
+            
+            <div style="display: flex; gap: 30px; margin-bottom: 30px;">
+                <div style="flex-shrink: 0;">
+                    <?php echo get_avatar($user_id, 120, '', '', array('style' => 'border-radius: 50%; border: 4px solid #e5e7eb;')); ?>
+                </div>
+                <div style="flex-grow: 1;">
+                    <h3 style="margin: 0 0 10px; color: #1f2937; font-size: 20px;"><?php echo esc_html($user->display_name); ?></h3>
+                    <p style="color: #6b7280; margin: 0 0 5px;"><?php echo esc_html($user->user_email); ?></p>
+                    <p style="color: #6b7280; margin: 0;"><?php echo sprintf(__('가입일: %s', 'lectus-class-system'), date_i18n(get_option('date_format'), strtotime($user->user_registered))); ?></p>
+                </div>
+            </div>
+            
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 30px;">
+                <h3 style="margin: 0 0 20px; color: #1f2937; font-size: 18px;"><?php _e('학습 통계', 'lectus-class-system'); ?></h3>
+                
+                <?php
+                $enrolled_courses = Lectus_Enrollment::get_user_enrollments($user_id);
+                $completed_courses = 0;
+                $total_progress = 0;
+                
+                foreach ($enrolled_courses as $enrollment) {
+                    $progress = Lectus_Progress::get_course_progress($user_id, $enrollment->course_id);
+                    $total_progress += $progress;
+                    if ($progress >= 100) {
+                        $completed_courses++;
+                    }
+                }
+                
+                $avg_progress = count($enrolled_courses) > 0 ? round($total_progress / count($enrolled_courses)) : 0;
+                $certificates = Lectus_Certificate::get_user_certificates($user_id);
+                ?>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px;">
+                    <div style="text-align: center; padding: 20px; background: #f3f4f6; border-radius: 8px;">
+                        <div style="font-size: 32px; font-weight: bold; color: #3b82f6; margin-bottom: 5px;"><?php echo count($enrolled_courses); ?></div>
+                        <div style="color: #6b7280; font-size: 14px;"><?php _e('수강 중인 강의', 'lectus-class-system'); ?></div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: #f3f4f6; border-radius: 8px;">
+                        <div style="font-size: 32px; font-weight: bold; color: #10b981; margin-bottom: 5px;"><?php echo $completed_courses; ?></div>
+                        <div style="color: #6b7280; font-size: 14px;"><?php _e('완료한 강의', 'lectus-class-system'); ?></div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: #f3f4f6; border-radius: 8px;">
+                        <div style="font-size: 32px; font-weight: bold; color: #f59e0b; margin-bottom: 5px;"><?php echo $avg_progress; ?>%</div>
+                        <div style="color: #6b7280; font-size: 14px;"><?php _e('평균 진도율', 'lectus-class-system'); ?></div>
+                    </div>
+                    <div style="text-align: center; padding: 20px; background: #f3f4f6; border-radius: 8px;">
+                        <div style="font-size: 32px; font-weight: bold; color: #8b5cf6; margin-bottom: 5px;"><?php echo count($certificates); ?></div>
+                        <div style="color: #6b7280; font-size: 14px;"><?php _e('획득한 수료증', 'lectus-class-system'); ?></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; padding-top: 30px; border-top: 1px solid #e5e7eb; text-align: center;">
+                <a href="<?php echo home_url('/student-dashboard/'); ?>" style="display: inline-block; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 4px; margin-right: 10px;"
+                   onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                    <?php _e('내 강의실', 'lectus-class-system'); ?>
+                </a>
+                <a href="<?php echo wp_logout_url(); ?>" style="display: inline-block; padding: 12px 24px; background: #6b7280; color: white; text-decoration: none; border-radius: 4px;"
+                   onmouseover="this.style.background='#4b5563'" onmouseout="this.style.background='#6b7280'">
+                    <?php _e('로그아웃', 'lectus-class-system'); ?>
+                </a>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Display search form
+     */
+    public static function search_form($atts) {
+        $atts = shortcode_atts(array(
+            'placeholder' => __('강의 검색...', 'lectus-class-system'),
+            'button_text' => __('검색', 'lectus-class-system'),
+            'post_type' => 'coursesingle'
+        ), $atts);
+        
+        ob_start();
+        ?>
+        <div class="lectus-search-form" style="max-width: 600px; margin: 20px auto;">
+            <form method="get" action="<?php echo home_url('/'); ?>" style="display: flex; gap: 10px;">
+                <input type="search" name="s" placeholder="<?php echo esc_attr($atts['placeholder']); ?>" 
+                       value="<?php echo get_search_query(); ?>"
+                       style="flex: 1; padding: 12px 20px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px;" />
+                <input type="hidden" name="post_type" value="<?php echo esc_attr($atts['post_type']); ?>" />
+                <button type="submit" 
+                        style="padding: 12px 30px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: background 0.3s;"
+                        onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                    <i class="fas fa-search" style="margin-right: 5px;"></i>
+                    <?php echo esc_html($atts['button_text']); ?>
+                </button>
+            </form>
+        </div>
+        <?php
         return ob_get_clean();
     }
 }

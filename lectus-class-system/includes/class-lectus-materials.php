@@ -15,7 +15,7 @@ class Lectus_Materials {
      * Initialize the materials system
      */
     public static function init() {
-        // Create database table on init
+        // Create database table on init - Force check on every load to ensure table exists
         self::maybe_create_table();
         
         // AJAX handlers
@@ -153,7 +153,14 @@ class Lectus_Materials {
         wp_nonce_field('lectus_materials_nonce', 'lectus_materials_nonce');
         
         // Get existing materials
-        $materials = self::get_materials($post->ID, $post->post_type === 'lesson' ? $post->ID : null);
+        // For coursesingle, we pass course_id only
+        // For lesson, we pass both course_id and lesson_id
+        if ($post->post_type === 'lesson') {
+            $course_id = get_post_meta($post->ID, '_course_id', true);
+            $materials = self::get_materials($course_id, $post->ID);
+        } else {
+            $materials = self::get_materials($post->ID, null);
+        }
         
         ?>
         <div id="lectus-materials-container">
@@ -206,7 +213,7 @@ class Lectus_Materials {
             <div class="lectus-materials-list">
                 <h4><?php _e('업로드된 자료', 'lectus-class-system'); ?></h4>
                 <?php if ($materials): ?>
-                    <table class="wp-list-table widefat fixed striped">
+                    <table id="lectus-materials-table" class="wp-list-table widefat striped">
                         <thead>
                             <tr>
                                 <th><?php _e('타입', 'lectus-class-system'); ?></th>
@@ -379,7 +386,13 @@ class Lectus_Materials {
                 var formData = new FormData();
                 formData.append('action', 'lectus_upload_material');
                 formData.append('nonce', '<?php echo wp_create_nonce('lectus-materials-nonce'); ?>');
-                formData.append('course_id', '<?php echo $post->ID; ?>');
+                <?php if ($post->post_type === 'lesson'): ?>
+                    formData.append('course_id', '<?php echo get_post_meta($post->ID, '_course_id', true); ?>');
+                    formData.append('lesson_id', '<?php echo $post->ID; ?>');
+                <?php else: ?>
+                    formData.append('course_id', '<?php echo $post->ID; ?>');
+                    formData.append('lesson_id', '');
+                <?php endif; ?>
                 formData.append('post_type', '<?php echo $post->post_type; ?>');
                 formData.append('material_type', materialType);
                 formData.append('title', title);
@@ -440,8 +453,110 @@ class Lectus_Materials {
                     success: function(response) {
                         console.log('Response:', response);
                         if (response.success) {
+                            // Add new material to the table
+                            if (response.data.files && response.data.files.length > 0) {
+                                var newRows = '';
+                                response.data.files.forEach(function(file) {
+                                    var icon = file.material_type === 'link' ? '🔗' : '📎';
+                                    var fileLink = file.material_type === 'link' ? file.external_url : file.file_url;
+                                    var displayLink = fileLink;
+                                    if (fileLink && fileLink.length > 30) {
+                                        displayLink = fileLink.substring(0, 30) + '...';
+                                    }
+                                    var fileSize = file.file_size ? (file.file_size / 1024).toFixed(2) + ' KB' : '-';
+                                    var accessLevel = file.access_level === 'enrolled' ? '수강생만' : 
+                                                      file.access_level === 'public' ? '모든 사용자' : '강사만';
+                                    var today = new Date().toLocaleDateString('ko-KR', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    }).replace(/\. /g, '년 ').replace(/\.$/, '일');
+                                    
+                                    newRows += '<tr>' +
+                                        '<td><span class="material-icon">' + icon + '</span></td>' +
+                                        '<td>' + file.title + '</td>' +
+                                        '<td>' + (fileLink ? '<a href="' + fileLink + '" target="_blank">' + displayLink + '</a>' : '-') + '</td>' +
+                                        '<td>' + fileSize + '</td>' +
+                                        '<td>0회</td>' +
+                                        '<td>' + accessLevel + '</td>' +
+                                        '<td>' + today + '</td>' +
+                                        '<td>' +
+                                            (fileLink ? '<a href="' + fileLink + '" target="_blank" class="button button-small">열기</a> ' : '') +
+                                            '<button class="button button-small delete-material" data-material-id="' + file.id + '">삭제</button>' +
+                                        '</td>' +
+                                    '</tr>';
+                                });
+                                
+                                // Add new rows to the table
+                                var tbody = $('#lectus-materials-table tbody');
+                                if (tbody.length > 0) {
+                                    tbody.append(newRows);
+                                } else {
+                                    // If table doesn't exist (first material), create it
+                                    var noMaterialsMsg = $('.lectus-materials-list p:contains("업로드된 자료가 없습니다")');
+                                    if (noMaterialsMsg.length > 0) {
+                                        var newTable = '<table id="lectus-materials-table" class="wp-list-table widefat fixed striped">' +
+                                            '<thead><tr>' +
+                                            '<th>타입</th>' +
+                                            '<th>제목</th>' +
+                                            '<th>파일/링크</th>' +
+                                            '<th>크기</th>' +
+                                            '<th>다운로드</th>' +
+                                            '<th>접근 권한</th>' +
+                                            '<th>추가 날짜</th>' +
+                                            '<th>작업</th>' +
+                                            '</tr></thead>' +
+                                            '<tbody>' + newRows + '</tbody>' +
+                                            '</table>';
+                                        noMaterialsMsg.replaceWith(newTable);
+                                    } else {
+                                        // Fallback: try to find table by header content
+                                        var table = $('table').filter(function() {
+                                            return $(this).find('th:contains("타입")').length > 0;
+                                        });
+                                        if (table.length > 0) {
+                                            table.find('tbody').append(newRows);
+                                        }
+                                    }
+                                }
+                                
+                                // Reattach delete event handlers to new buttons
+                                $('.delete-material').off('click').on('click', function() {
+                                    if (!confirm('이 자료를 삭제하시겠습니까?')) {
+                                        return;
+                                    }
+                                    
+                                    var materialId = $(this).data('material-id');
+                                    var row = $(this).closest('tr');
+                                    
+                                    $.ajax({
+                                        url: ajaxurl,
+                                        type: 'POST',
+                                        data: {
+                                            action: 'lectus_delete_material',
+                                            nonce: '<?php echo wp_create_nonce('lectus-materials-nonce'); ?>',
+                                            material_id: materialId
+                                        },
+                                        success: function(response) {
+                                            if (response.success) {
+                                                row.fadeOut(400, function() {
+                                                    $(this).remove();
+                                                });
+                                            } else {
+                                                alert('삭제 실패: ' + response.data.message);
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+                            
+                            // Clear input fields
+                            $('#material-title').val('');
+                            $('#material-description').val('');
+                            $('#external-url').val('');
+                            $('#lectus-material-file').val('');
+                            
                             alert(response.data.message || '자료가 추가되었습니다.');
-                            location.reload();
                         } else {
                             console.error('Error details:', response.data);
                             var errorMsg = '실패: ' + response.data.message;
@@ -516,13 +631,14 @@ class Lectus_Materials {
         }
         
         $course_id = intval($_POST['course_id']);
+        $lesson_id = isset($_POST['lesson_id']) && !empty($_POST['lesson_id']) ? intval($_POST['lesson_id']) : null;
         $material_type = isset($_POST['material_type']) ? sanitize_text_field($_POST['material_type']) : '';
         $title = isset($_POST['title']) ? sanitize_text_field($_POST['title']) : '';
         $description = isset($_POST['description']) ? sanitize_textarea_field($_POST['description']) : '';
         $access_level = isset($_POST['access_level']) ? sanitize_text_field($_POST['access_level']) : 'enrolled';
         $post_type = isset($_POST['post_type']) ? sanitize_text_field($_POST['post_type']) : '';
         
-        error_log("Parsed values - Course ID: $course_id, Type: $material_type, Title: $title");
+        error_log("Parsed values - Course ID: $course_id, Lesson ID: $lesson_id, Type: $material_type, Title: $title");
         
         global $wpdb;
         $table = $wpdb->prefix . 'lectus_materials';
@@ -571,7 +687,7 @@ class Lectus_Materials {
                 if (move_uploaded_file($file['tmp_name'], $file_path)) {
                     $data = array(
                         'course_id' => $course_id,
-                        'lesson_id' => $post_type === 'lesson' ? $course_id : null,
+                        'lesson_id' => $lesson_id,
                         'material_type' => 'file',
                         'title' => !empty($title) ? $title : $file_name_only,
                         'description' => $description,
@@ -614,7 +730,7 @@ class Lectus_Materials {
             
             $data = array(
                 'course_id' => $course_id,
-                'lesson_id' => $post_type === 'lesson' ? $course_id : null,
+                'lesson_id' => $lesson_id,
                 'material_type' => 'link',
                 'title' => !empty($title) ? $title : $file_name,
                 'description' => $description,

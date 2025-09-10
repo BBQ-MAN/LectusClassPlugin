@@ -254,13 +254,8 @@ class Lectus_Class_System {
             array('Lectus_Admin_Dashboard', 'render_dashboard')
         );
         
-        add_submenu_page(
-            'lectus-class-system',
-            __('패키지강의', 'lectus-class-system'),
-            __('패키지강의', 'lectus-class-system'),
-            'manage_options',
-            'edit.php?post_type=coursepackage'
-        );
+        // Package courses are now managed as WooCommerce products
+        // Removed coursepackage submenu
         
         add_submenu_page(
             'lectus-class-system',
@@ -422,6 +417,35 @@ class Lectus_Class_System {
             array(),
             LECTUS_VERSION
         );
+        
+        // Load Tailwind CSS for consistent styling
+        // This ensures shortcodes look identical with or without theme
+        if (!wp_style_is('lectus-academy-tailwind', 'enqueued')) {
+            wp_enqueue_style(
+                'lectus-plugin-tailwind',
+                LECTUS_PLUGIN_URL . 'assets/css/tailwind-compiled.css',
+                array(),
+                LECTUS_VERSION
+            );
+        }
+        
+        // Shortcode styles - ensures shortcodes work without theme dependency
+        wp_enqueue_style(
+            'lectus-shortcodes',
+            LECTUS_PLUGIN_URL . 'assets/css/shortcodes.css',
+            array(),
+            LECTUS_VERSION
+        );
+        
+        // Load FontAwesome for icons (if not already loaded)
+        if (!wp_style_is('font-awesome', 'enqueued')) {
+            wp_enqueue_style(
+                'font-awesome',
+                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+                array(),
+                '6.4.0'
+            );
+        }
         
         // Frontend scripts
         wp_enqueue_script(

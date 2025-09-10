@@ -16,6 +16,19 @@ class Lectus_Templates {
     }
     
     public static function template_loader($template) {
+        // Check for student dashboard page
+        if (is_page()) {
+            $page_slug = get_post_field('post_name', get_the_ID());
+            
+            // Check for various possible student dashboard slugs
+            if (in_array($page_slug, array('my-classroom', 'student-dashboard', 'my-courses', '내강의실'))) {
+                $custom_template = self::locate_template('page-student-dashboard.php');
+                if ($custom_template) {
+                    return $custom_template;
+                }
+            }
+        }
+        
         if (is_singular('coursepackage')) {
             $custom_template = self::locate_template('single-coursepackage.php');
             if ($custom_template) {
@@ -72,6 +85,12 @@ class Lectus_Templates {
     
     public static function course_content($content) {
         if (!is_singular('coursesingle')) {
+            return $content;
+        }
+        
+        // Check if we're using a full page template from plugin
+        if (file_exists(LECTUS_PLUGIN_DIR . 'templates/single-coursesingle.php')) {
+            // Plugin template handles everything, don't modify content
             return $content;
         }
         
@@ -247,6 +266,12 @@ class Lectus_Templates {
     
     public static function lesson_content($content) {
         if (!is_singular('lesson')) {
+            return $content;
+        }
+        
+        // Check if we're using a full page template from plugin
+        if (file_exists(LECTUS_PLUGIN_DIR . 'templates/single-lesson.php')) {
+            // Plugin template handles everything, don't modify content
             return $content;
         }
         
