@@ -1,32 +1,49 @@
 services:
   db:
     image: mysql:8.0
-    platform: linux/arm64
+    platform: linux/amd64
     volumes:
       - db_data:/var/lib/mysql
     restart: always
+    ports:
+      - "3366:3306"  # 호스트의 3366 포트를 컨테이너의 3306으로 매핑
     environment:
-      MYSQL_ROOT_PASSWORD: 'your_strong_password' # MySQL root 비밀번호
+      MYSQL_ROOT_PASSWORD: 'your_strong_password'
       MYSQL_DATABASE: 'wordpress'
       MYSQL_USER: 'wordpress'
-      MYSQL_PASSWORD: 'your_password'             # 워드프레스 DB 유저 비밀번호
+      MYSQL_PASSWORD: 'your_password'
+      MYSQL_TCP_PORT: 3366  # MySQL이 3366 포트에서 리스닝하도록 설정
+    command: --port=3366  # MySQL 서버가 3366 포트를 사용하도록 명령
 
   wordpress:
     depends_on:
       - db
     image: wordpress:latest
-    platform: linux/arm64
+    platform: linux/amd64
     ports:
-      - "8000:80"
+      - "8080:80"
     restart: always
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: db:3366
       WORDPRESS_DB_USER: 'wordpress'
       WORDPRESS_DB_PASSWORD: 'your_password'
       WORDPRESS_DB_NAME: 'wordpress'
+      WORDPRESS_CONFIG_EXTRA: |
+        /* Korean language */
+        define('WPLANG', 'ko_KR');
+        /* Upload size settings */
+        @ini_set('upload_max_filesize', '4096M');
+        @ini_set('post_max_size', '4096M');
+        @ini_set('max_execution_time', '600');
+        @ini_set('max_input_time', '600');
+        @ini_set('memory_limit', '512M');
     volumes:
       - ./lectus-class-system:/var/www/html/wp-content/plugins/lectus-class-system
+      #- ./Plugins/PluginName:/var/www/html/wp-content/plugins/PluginName
+      #- ./Themes/ThemeName:/var/www/html/wp-content/themes/ThemeName
       - ./lectus-academy-theme:/var/www/html/wp-content/themes/lectus-academy-theme
+      #- ./UpdraftPlusBackups:/var/www/html/wp-content/updraft
+      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
       - wordpress_data:/var/www/html
 
   wpcli:
@@ -34,28 +51,60 @@ services:
       - db
       - wordpress
     image: wordpress:cli
-    platform: linux/arm64
+    platform: linux/amd64
     user: 33:33  # www-data user
-    command: tail -f /dev/null
     volumes:
       - ./lectus-class-system:/var/www/html/wp-content/plugins/lectus-class-system
+      #- ./Themes/ThemeName:/var/www/html/wp-content/themes/ThemeName
       - ./lectus-academy-theme:/var/www/html/wp-content/themes/lectus-academy-theme
+      #- ./UpdraftPlusBackups:/var/www/html/wp-content/updraft
       - wordpress_data:/var/www/html
     environment:
-      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_HOST: db:3366
       WORDPRESS_DB_USER: 'wordpress'
       WORDPRESS_DB_PASSWORD: 'your_password'
       WORDPRESS_DB_NAME: 'wordpress'
-
+    entrypoint: /bin/sh
+    command: >
+      -c '
+      echo "Waiting for WordPress to be ready..." &&
+      sleep 30 &&
+      if ! wp core is-installed --path=/var/www/html 2>/dev/null; then
+        echo "Installing WordPress..." &&
+        wp core install --path=/var/www/html --url=http://localhost:8080 --title="My WordPress Site" --admin_user=admin --admin_password=admin --admin_email=admin@lectus.kr --skip-email &&
+        echo "Setting language to Korean..." &&
+        wp language core install ko_KR --path=/var/www/html &&
+        wp site switch-language ko_KR --path=/var/www/html &&
+        echo "Creating editor user..." &&
+        wp user create editor editor@lectus.kr --role=editor --user_pass=editor_password --path=/var/www/html &&
+        echo "Deleting default plugins..." &&
+        wp plugin delete hello akismet --path=/var/www/html 2>/dev/null || true &&
+        echo "Activating theme..." &&
+        wp theme activate twentytwentyfour --path=/var/www/html &&
+        echo "Setting timezone..." &&
+        wp option update timezone_string "Asia/Seoul" --path=/var/www/html &&
+        echo "Setting date format..." &&
+        wp option update date_format "Y년 m월 d일" --path=/var/www/html &&
+        wp option update time_format "H:i" --path=/var/www/html &&
+        echo "Setting permalinks..." &&
+        wp rewrite structure "/%postname%/" --path=/var/www/html &&
+        echo "WordPress installation completed!";
+      else
+        echo "WordPress is already installed.";
+      fi &&
+      tail -f /dev/null
+      '
   phpmyadmin:
     depends_on:
       - db
     image: phpmyadmin/phpmyadmin
+    platform: linux/amd64
     restart: always
     ports:
-      - "8081:80"
+      - "8088:80"
     environment:
       PMA_HOST: db
+      PMA_PORT: 3366  # phpMyAdmin도 커스텀 포트 인식
 
 volumes:
   db_data:
